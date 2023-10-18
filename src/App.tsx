@@ -1,13 +1,30 @@
 import "./App.css";
-import {useState} from "react";
-import {highlighter} from "./store/highlighter.store";
+import {useState, useEffect} from "react";
+import {DefaultSidebar} from "./components/Sidebar";
+import {useDispatch, useSelector} from "react-redux";
+import {
+  setEnable,
+  HighlighterState,
+  setCurrentID,
+} from "./store/highlightSlice";
+
 function App() {
-  const [counter, setCounter] = useState(0);
-  highlighter.run();
+  const dispatcher = useDispatch();
+  const enable = useSelector((state: HighlighterState) => state.enable);
+  const id = useSelector((state: HighlighterState) => state.currentID);
+
+  useEffect(() => {
+    dispatcher(setCurrentID("123"));
+  }, [dispatcher]);
+
+  useEffect(() => {
+    console.log("Enable:", enable);
+  }, [enable]);
+
   return (
     <div>
-      <button onClick={() => setCounter(counter + 1)}> increase</button>
-      <h1>{counter}</h1>
+      <DefaultSidebar />
+      <button onClick={() => dispatcher(setEnable(!enable))}>Enable</button>
     </div>
   );
 }
