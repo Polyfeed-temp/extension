@@ -2,16 +2,24 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import {Provider} from "react-redux";
-import store from "./store/highlighterStore";
-import {setHighlighter} from "./store/highlightSlice";
-import {useDispatch} from "react-redux";
-import Highlighter from "web-highlighter";
+import {HighlighterProvider} from "./store/HighlightContext";
+
+// Inject Material Icons stylesheet
+const link = document.createElement("link");
+link.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
+link.rel = "stylesheet";
+document.head.appendChild(link);
+
+// Then inject your React component...
+// ... your code for injecting the React component
+
 const root = document.createElement("div");
 root.id = "react-root";
-console.log("rendring react");
+
 document.body.appendChild(root);
+// const  shado
 document.body.style.margin = "left 250px";
+
 const rootDiv = ReactDOM.createRoot(root);
 root.setAttribute(
   "style",
@@ -25,15 +33,10 @@ root.setAttribute(
   background-color: #f7f7f7;
   border-right: 1px solid #ddd;`
 );
-// const dispatcher = useDispatch();
-// const highlighter = new Highlighter({
-//   exceptSelectors: ["#react-root"],
-// });
-// dispatcher(setHighlighter(highlighter));
 rootDiv.render(
   <React.StrictMode>
-    <Provider store={store}>
+    <HighlighterProvider>
       <App />
-    </Provider>
+    </HighlighterProvider>
   </React.StrictMode>
 );
