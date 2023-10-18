@@ -11,5 +11,9 @@
                 "./js/index.js"
             ]
         }
+    ],
+    "permission": [
+        "storage",
+        "activeTab"
     ]
 }
