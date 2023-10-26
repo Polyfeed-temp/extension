@@ -8,7 +8,17 @@ import React, {
 import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
 import AnnotationService from "../services/localStorage";
-
+import {RenderPop} from "../components/Toolbar";
+import {createRoot} from "react-dom/client";
+import {
+  Popover,
+  PopoverHandler,
+  PopoverContent,
+  Button,
+  Typography,
+} from "@material-tailwind/react";
+import {useState} from "react";
+import {render} from "@testing-library/react";
 interface State {
   highlighterLib: Highlighter | null;
   records: HighlightSource[];
@@ -137,6 +147,12 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   useEffect(() => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
       console.log(data);
+      const id = data.sources[0].id;
+      const _node = state.highlighterLib?.getDoms(id)[0];
+      if (_node) {
+        _node.innerHTML =
+          `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
+      }
       if (data.type === "from-store") {
         return;
       }
@@ -172,6 +188,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   return (
     <HighlighterContext.Provider value={{state, dispatch}}>
       {children}
+      {state.editing ? <RenderPop id={state.editing.id}></RenderPop> : null}
     </HighlighterContext.Provider>
   );
 };
