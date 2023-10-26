@@ -6,8 +6,13 @@ import {HighlighterProvider} from "./store/HighlightContext";
 
 // Inject Material Icons stylesheet
 const link = document.createElement("link");
-link.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
+link.href =
+  "https://unpkg.com/@material-tailwind/html@latest/styles/material-tailwind.css";
+
 link.rel = "stylesheet";
+const tailwind = document.createElement("script");
+tailwind.src =
+  "https://unpkg.com/@material-tailwind/html@latest/scripts/script-name.js";
 document.head.appendChild(link);
 
 // Then inject your React component...
@@ -18,7 +23,7 @@ root.id = "react-root";
 
 document.body.appendChild(root);
 // const  shado
-document.body.style.margin = "left 250px";
+document.body.style.marginLeft = "400px";
 
 const rootDiv = ReactDOM.createRoot(root);
 root.setAttribute(
@@ -26,10 +31,11 @@ root.setAttribute(
   ` position: fixed;
   top: 0;
   left: 0;
-  width: 250px; /* width of your choice */
+  width: calc(100% - 50px); /* take up almost the entire viewport width, but leave a little space */
+  max-width: 350px; /* maximum width it can stretch to */
   height: 100%;
   overflow-y: auto;
-  z-index: 9999; /* to ensure it stays on top of other elements */
+  z-index: 9999;
   background-color: #f7f7f7;
   border-right: 1px solid #ddd;`
 );
