@@ -9,34 +9,30 @@ import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
 import AnnotationService from "../services/localStorage";
 import {RenderPop} from "../components/Toolbar";
-import {createRoot} from "react-dom/client";
-import {
-  Popover,
-  PopoverHandler,
-  PopoverContent,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
-import {useState} from "react";
-import {render} from "@testing-library/react";
+import {Annotation, AnnotationTag, SideBarAction} from "../types";
+
 interface State {
   highlighterLib: Highlighter | null;
-  records: HighlightSource[];
+  records: Annotation[];
   isHighlighting: boolean;
-  editing: HighlightSource | null;
+  editing: {
+    sidebarAction: SideBarAction;
+    annotation: Annotation;
+  } | null;
+  drafting: HighlightSource | null;
 }
 interface InitializeAction {
   type: "INITIALIZE";
-  payload: HighlightSource[]; // Assuming you have a Record type defined somewhere.
+  payload: Annotation[]; // Assuming you have a Record type defined somewhere.
 }
 interface AddRecordAction {
   type: "ADD_RECORD";
-  payload: HighlightSource; // Assuming you have a Record type defined somewhere.
+  payload: Annotation; // Assuming you have a Record type defined somewhere.
 }
 
 interface SetEditingAction {
   type: "SET_EDITING";
-  payload: HighlightSource | null; // Assuming you have a HighlightSource type.
+  payload: {sidebarAction: SideBarAction; annotation: Annotation}; // Assuming you have a HighlightSource type.
 }
 
 interface SetIsHighlightingAction {
@@ -50,18 +46,25 @@ interface DeleteRecordAction {
     id: string; // Or number, based on your ID type.
   };
 }
+interface SetDraftingAction {
+  type: "SET_DRAFTING";
+  payload: HighlightSource;
+}
+
 type Action =
   | AddRecordAction
   | SetEditingAction
   | SetIsHighlightingAction
   | DeleteRecordAction
-  | InitializeAction;
+  | InitializeAction
+  | SetDraftingAction;
 
 const initialState: State = {
   highlighterLib: new Highlighter({exceptSelectors: ["#react-root"]}),
   records: [],
   editing: null,
   isHighlighting: false,
+  drafting: null,
 };
 
 const HighlighterContext = createContext<
@@ -82,10 +85,13 @@ const highlighterReducer = (state: State, action: Action): State => {
 
       console.log(state);
       return {...state, records: action.payload};
+    case "SET_DRAFTING":
+      return {...state, drafting: action.payload};
     case "ADD_RECORD":
       // const annotation = {...action.payload, annotationLabel: "Strength"} as Annotation
       return {...state, records: [...state.records, action.payload]};
     case "SET_EDITING":
+      console.log(action.payload);
       return {...state, editing: action.payload};
     case "SET_IS_HIGHLIGHTING":
       action.payload
@@ -107,7 +113,9 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   const service = new AnnotationService();
   useEffect(() => {
     const fetchAnnotations = async () => {
-      const annotations = await service.getAnnotations();
+      const annotations = await service.getAnnotationsForUrl(
+        window.location.href
+      );
       baseDispatch({type: "INITIALIZE", payload: annotations});
     };
     fetchAnnotations();
@@ -125,12 +133,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           console.log(err);
         }
         break;
-      case "SET_EDITING":
-        baseDispatch({type: "SET_EDITING", payload: action.payload});
-        break;
-      case "SET_IS_HIGHLIGHTING":
-        baseDispatch({type: "SET_IS_HIGHLIGHTING", payload: action.payload});
-        break;
       case "DELETE_RECORD":
         try {
           const {id} = action.payload;
@@ -146,7 +148,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   };
   useEffect(() => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
-      console.log(data);
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
       if (_node) {
@@ -156,16 +157,15 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       if (data.type === "from-store") {
         return;
       }
-      dispatch({type: "ADD_RECORD", payload: data.sources[0]});
-      dispatch({type: "SET_EDITING", payload: data.sources[0]});
+      dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
     };
 
     const handleClick = (data: {id: string}) => {
       const currentSelected = state.records.find(
         (record) => record.id === data.id
-      ) as HighlightSource;
+      ) as Annotation;
 
-      dispatch({type: "SET_EDITING", payload: currentSelected});
+      // dispatch({type: "SET_EDITING", payload: currentSelected});
     };
 
     const handleHover = (data: {id: string}) => {
@@ -188,7 +188,9 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   return (
     <HighlighterContext.Provider value={{state, dispatch}}>
       {children}
-      {state.editing ? <RenderPop id={state.editing.id}></RenderPop> : null}
+      {state.drafting ? (
+        <RenderPop highlighting={state.drafting}></RenderPop>
+      ) : null}
     </HighlighterContext.Provider>
   );
 };
