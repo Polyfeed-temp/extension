@@ -20,27 +20,19 @@ export default function AnnotatedCard({
     text.length > 100 ? text.substring(0, 100) + "..." : text;
 
   return (
-    <Card className="mt-6 w-96 border-4 border-blue-500">
-      <CardBody>
-        <Typography>{truncatedText}</Typography>
+    <Card className="mt-6 max-w-full w-70 border-solid border-4 border-black-500 overflow-hidden box-border">
+      <CardBody className="overflow-y-auto">
+        <Typography className="break-words">{truncatedText}</Typography>
       </CardBody>
       <CardFooter className="pt-0">
         <div className="flex justify-between">
           {text.length > 100 ? (
             <Typography color="blue-gray">Read More</Typography>
           ) : null}
-          <div>
-            <IconButton
-              color="light-blue"
-              size="sm"
-              onClick={onEdit}
-              className="mr-2"
-            >
-              <Button> Edit</Button>
-            </IconButton>
-            <IconButton color="light-blue" size="sm" onClick={onDelete}>
-              <Button> Delete</Button>
-            </IconButton>
+          <div className="flex space-x-2">
+            <Button onClick={onEdit}>Edit</Button>
+
+            <Button onClick={onDelete}>Delete</Button>
           </div>
         </div>
       </CardFooter>
