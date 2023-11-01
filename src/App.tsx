@@ -1,11 +1,12 @@
 import "./App.css";
 import {useState, useEffect} from "react";
-import {DefaultSidebar} from "./components/Sidebar";
+import {DefaultSidebar} from "./components/Sidebar/Sidebar";
+import DraggableWindow from "./components/Sidebar/FloatingSidebar";
 
 function App() {
   return (
     <div>
-      <DefaultSidebar />
+      <DraggableWindow></DraggableWindow>
     </div>
   );
 }
