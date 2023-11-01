@@ -6,6 +6,10 @@ import {
   useHighlighterDispatch,
   useHighlighterState,
 } from "../../store/HighlightContext";
+import {Annotation, AnnotationNotes, AnnotationData} from "../../types";
+import {Notes} from "./Notes";
+import TodoCard from "./TodoCard";
+import {UnitAssignmentSummary} from "./SummaryCard";
 const DraggableWindow = () => {
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [offset, setOffset] = useState({x: 0, y: 0});
@@ -15,6 +19,45 @@ const DraggableWindow = () => {
   const [isVisible, setIsVisible] = useState(false);
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
+  const currentEditing = highlighterState.editing;
+  console.log(highlighterState.records);
+
+  const addNotes = (input: AnnotationNotes) => {
+    highlighterDispatch({
+      type: "ADD_RECORD",
+      payload: {
+        annotation: currentEditing?.annotation,
+        notes: input,
+      } as AnnotationData,
+    });
+  };
+  function renderTabs() {
+    console.log(currentEditing);
+    switch (currentEditing?.sidebarAction) {
+      case "Notes":
+        return (
+          <div>
+            <div>
+              <Notes
+                text={currentEditing.annotation.text}
+                setNote={addNotes}
+              ></Notes>
+
+              <button>Save</button>
+            </div>
+          </div>
+        );
+      case "To-Dos":
+        return (
+          <div>
+            <p>{currentEditing.annotation.text}</p>
+            <TodoCard></TodoCard>
+          </div>
+        );
+      default:
+        return null;
+    }
+  }
 
   const toggleMaximize = () => {
     if (isMaximized) {
@@ -64,7 +107,12 @@ const DraggableWindow = () => {
         isMaximized ? "w-full h-full" : ""
       } ${isMinimized ? "h-[60px] overflow-hidden" : ""}
         `}
-      style={{left: `${position.x}px`, top: `${position.y}px`}}
+      style={{
+        position: "fixed",
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        zIndex: 999,
+      }}
     >
       <div
         id="header"
@@ -79,6 +127,19 @@ const DraggableWindow = () => {
           className="flex gap-3 cursor-pointer"
           onMouseDown={(e) => e.stopPropagation()}
         >
+          <span
+            className={`material-icons ${
+              highlighterState.isHighlighting ? "text-red-500" : ""
+            }`}
+            onClick={() => {
+              highlighterDispatch({
+                type: "SET_IS_HIGHLIGHTING",
+                payload: !highlighterState.isHighlighting,
+              });
+            }}
+          >
+            power_settings_new
+          </span>
           <i
             className="fa-sharp fa-regular fa-window-maximize"
             onClick={toggleMaximize}
@@ -90,23 +151,17 @@ const DraggableWindow = () => {
           <i className="fa-sharp fa-solid fa-xmark" onClick={closeWindow}></i>
         </div>
       </div>
-      <div id="content" className="p-6 text-center">
-        <Button>My Notes</Button>
-        <Button>My Summary</Button>
-        <Button
-          onClick={() => {
-            highlighterDispatch({
-              type: "SET_IS_HIGHLIGHTING",
-              payload: !highlighterState.isHighlighting,
-            });
-          }}
-        >
-          {highlighterState.isHighlighting
-            ? "Disable Annotation"
-            : "Enable Annotation"}
-        </Button>
-        <UnitForm units={mockUser.units}></UnitForm>
-      </div>
+      {!isMinimized ? (
+        <div id="content" className="p-6 text-center">
+          <Button>My Notes</Button>
+          <Button>My Summary</Button>
+          <UnitForm units={mockUser.units}></UnitForm>
+          <UnitAssignmentSummary
+            unit={mockUser.units[0]}
+          ></UnitAssignmentSummary>
+          {renderTabs()}
+        </div>
+      ) : null}
     </div>
   );
 };

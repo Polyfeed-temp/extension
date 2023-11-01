@@ -8,6 +8,7 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
+  IconButton,
 } from "@material-tailwind/react";
 import {createPortal} from "react-dom";
 import {
@@ -16,18 +17,26 @@ import {
 } from "../store/HighlightContext";
 import HighlightSource from "web-highlighter/dist/model/source";
 import {AnnotationTag, SideBarAction, Annotation} from "../types";
+import {annotationTagsIcons} from "./AnnotationIcons";
 
 function ToolbarMenu({
   Label,
   setAnnotationTag,
 }: {
-  Label: string;
+  Label: AnnotationTag;
   setAnnotationTag: (sideBarAction: SideBarAction) => void;
 }) {
+  //hover the index
   return (
     <Menu>
       <MenuHandler>
-        <Button>{Label}</Button>
+        <button>
+          <img
+            src={annotationTagsIcons[Label]}
+            style={{width: 100, height: 50}}
+          />
+          <span>{Label}</span>
+        </button>
       </MenuHandler>
       <MenuList>
         <MenuItem onClick={() => setAnnotationTag("Notes")}>Add Note</MenuItem>
@@ -57,6 +66,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
     "Confused",
     "Other",
   ];
+
   const annotationDispatch = useHighlighterDispatch();
   const setAnnotationTag =
     (tag: AnnotationTag) => (sidebarAction: SideBarAction) => {
