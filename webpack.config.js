@@ -25,6 +25,10 @@ module.exports = {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
       },
+      {
+        test: /\.svg$/,
+        loader: "url-loader",
+      },
     ],
   },
   plugins: [
@@ -39,6 +43,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "build/js"),
     filename: "[name].js",
+    publicPath: "/",
   },
 };
 
