@@ -84,7 +84,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
       return () => {
         dom.removeEventListener("click", onClick);
         setVisible(false);
-        highlighter.remove(highlightingID);
+        // highlighter.remove(highlightingID);
       };
     }
   }, [highlighter, highlightingID]);

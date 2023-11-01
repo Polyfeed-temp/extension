@@ -9,11 +9,16 @@ import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
 import AnnotationService from "../services/localStorage";
 import {RenderPop} from "../components/Toolbar";
-import {Annotation, AnnotationTag, SideBarAction} from "../types";
+import {
+  Annotation,
+  AnnotationTag,
+  SideBarAction,
+  AnnotationData,
+} from "../types";
 
 interface State {
   highlighterLib: Highlighter | null;
-  records: Annotation[];
+  records: AnnotationData[];
   isHighlighting: boolean;
   editing: {
     sidebarAction: SideBarAction;
@@ -23,11 +28,11 @@ interface State {
 }
 interface InitializeAction {
   type: "INITIALIZE";
-  payload: Annotation[]; // Assuming you have a Record type defined somewhere.
+  payload: AnnotationData[]; // Assuming you have a Record type defined somewhere.
 }
 interface AddRecordAction {
   type: "ADD_RECORD";
-  payload: Annotation; // Assuming you have a Record type defined somewhere.
+  payload: AnnotationData; // Assuming you have a Record type defined somewhere.
 }
 
 interface SetEditingAction {
@@ -74,7 +79,7 @@ const HighlighterContext = createContext<
 const highlighterReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "INITIALIZE":
-      action.payload.forEach((annotation) => {
+      action.payload.forEach(({annotation}) => {
         state.highlighterLib?.fromStore(
           annotation.startMeta,
           annotation.endMeta,
@@ -100,7 +105,7 @@ const highlighterReducer = (state: State, action: Action): State => {
       return {...state, isHighlighting: action.payload};
     case "DELETE_RECORD":
       const newRecords = state.records.filter(
-        (record) => record.id !== action.payload.id
+        (record) => record.annotation.id !== action.payload.id
       );
       return {...state, records: newRecords};
     default:
@@ -150,6 +155,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
+      console.log(data);
       if (_node) {
         _node.innerHTML =
           `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
@@ -161,10 +167,9 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     };
 
     const handleClick = (data: {id: string}) => {
-      const currentSelected = state.records.find(
-        (record) => record.id === data.id
-      ) as Annotation;
-
+      // const currentSelected = state.records.find(
+      //   (record) => record.id === data.id
+      // ) as Annotation;
       // dispatch({type: "SET_EDITING", payload: currentSelected});
     };
 
