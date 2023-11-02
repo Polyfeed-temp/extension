@@ -22,9 +22,12 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        exclude: /node_modules/,
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.svg$/,
+        loader: "url-loader",
       },
     ],
   },
@@ -40,6 +43,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "build/js"),
     filename: "[name].js",
+    publicPath: "/",
   },
 };
 

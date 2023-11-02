@@ -1,13 +1,12 @@
 import "./App.css";
-import {useState} from "react";
-import {highlighter} from "./store/highlighter.store";
+import {useState, useEffect} from "react";
+import {DefaultSidebar} from "./components/Sidebar/Sidebar";
+import DraggableWindow from "./components/Sidebar/FloatingSidebar";
+
 function App() {
-  const [counter, setCounter] = useState(0);
-  highlighter.run();
   return (
     <div>
-      <button onClick={() => setCounter(counter + 1)}> increase</button>
-      <h1>{counter}</h1>
+      <DraggableWindow></DraggableWindow>
     </div>
   );
 }

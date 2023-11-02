@@ -1,11 +1,3 @@
-.App {
-    color: white;
-    text-align: center;
-}
-
-.container {
-    width: 15rem;
-    height: 15rem;
-    background-color: green;
-
-}
+@import "tailwindcss/base.css";
+@import "tailwindcss/components.css";
+@import "tailwindcss/utilities.css";
