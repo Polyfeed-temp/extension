@@ -80,6 +80,7 @@ const highlighterReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "INITIALIZE":
       action.payload.forEach(({annotation}) => {
+        console.log(annotation);
         state.highlighterLib?.fromStore(
           annotation.startMeta,
           annotation.endMeta,
@@ -93,8 +94,13 @@ const highlighterReducer = (state: State, action: Action): State => {
     case "SET_DRAFTING":
       return {...state, drafting: action.payload};
     case "ADD_RECORD":
-      // const annotation = {...action.payload, annotationLabel: "Strength"} as Annotation
-      return {...state, records: [...state.records, action.payload]};
+      //after adding record to db, add to state and remove from current editing and drafting
+      return {
+        ...state,
+        editing: null,
+        drafting: null,
+        records: [...state.records, action.payload],
+      };
     case "SET_EDITING":
       console.log(action.payload);
       return {...state, editing: action.payload};
@@ -121,6 +127,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       const annotations = await service.getAnnotationsForUrl(
         window.location.href
       );
+
       baseDispatch({type: "INITIALIZE", payload: annotations});
     };
     fetchAnnotations();
@@ -133,6 +140,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           console.log("adding", sources);
           const annotation = await service.addAnnotations(sources);
           // console.log(annotation);
+
           baseDispatch({type: "ADD_RECORD", payload: action.payload});
         } catch (err) {
           console.log(err);
@@ -160,10 +168,9 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         _node.innerHTML =
           `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
       }
-      if (data.type === "from-store") {
-        return;
+      if (data.type != "from-store") {
+        dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
       }
-      dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
     };
 
     const handleClick = (data: {id: string}) => {
