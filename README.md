@@ -1,21 +1,27 @@
-A simple Hello World Chrome extension using React. 
+## Description
+Polyfeed extension 
 
-# Getting Started with Create React App
+## Installation
+```bash
+$ npm install
+```
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Build the application
 
-## Available Scripts
+```bash
+# build
+$ npm run build 
+```
+```bash
+# development
+$ npm run watch
+```
 
-In the project directory, you can run:
 
-### `npm run build`
-bundle the extension.
+## Install extension on chrome
 
-### `npm run watch`
-bundle the extension with interactive watch mode.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Go to chrome
+2. Three dots (Top right corner) -> More tools -> Extensions
+3. Enable developer mode (toggle button in top right corner)
+4. Load Extension button (Top left)
+5. Choose build folder generated from running the npm commands above
