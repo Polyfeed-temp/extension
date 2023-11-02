@@ -6,10 +6,16 @@ import {
   useHighlighterDispatch,
   useHighlighterState,
 } from "../../store/HighlightContext";
-import {Annotation, AnnotationNotes, AnnotationData} from "../../types";
+import {
+  Annotation,
+  AnnotationNotes,
+  AnnotationData,
+  AnnotationToDo,
+} from "../../types";
 import {Notes} from "./Notes";
 import TodoCard from "./TodoCard";
 import {UnitAssignmentSummary} from "./SummaryCard";
+import AnnotatedCard from "./AnnotatedCard";
 const DraggableWindow = () => {
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [offset, setOffset] = useState({x: 0, y: 0});
@@ -31,6 +37,15 @@ const DraggableWindow = () => {
       } as AnnotationData,
     });
   };
+  const addToDo = (input: AnnotationToDo) => {
+    highlighterDispatch({
+      type: "ADD_RECORD",
+      payload: {
+        annotation: currentEditing?.annotation,
+        todo: input,
+      } as AnnotationData,
+    });
+  };
   function renderTabs() {
     console.log(currentEditing);
     switch (currentEditing?.sidebarAction) {
@@ -42,8 +57,6 @@ const DraggableWindow = () => {
                 text={currentEditing.annotation.text}
                 setNote={addNotes}
               ></Notes>
-
-              <button>Save</button>
             </div>
           </div>
         );
@@ -51,7 +64,7 @@ const DraggableWindow = () => {
         return (
           <div>
             <p>{currentEditing.annotation.text}</p>
-            <TodoCard></TodoCard>
+            <TodoCard setTodo={addToDo}></TodoCard>
           </div>
         );
       default:
@@ -160,6 +173,13 @@ const DraggableWindow = () => {
             unit={mockUser.units[0]}
           ></UnitAssignmentSummary>
           {renderTabs()}
+          {highlighterState.records.map((record: AnnotationData) => (
+            <AnnotatedCard
+              text={record.annotation.text}
+              onEdit={() => {}}
+              onDelete={() => {}}
+            ></AnnotatedCard>
+          ))}
         </div>
       ) : null}
     </div>

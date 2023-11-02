@@ -12,7 +12,13 @@ export interface Annotation {
 export type SideBarAction = "To-Dos" | "Notes"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
-type ToDoActionCategory = "Futher Reading" | "Futher Practice" | "Contact Tutor" | "Refer Learning Resources" | "Explore Online" | "Other"
+export type ToDoActionCategory =
+  | "Further Practice"
+  | "Contact Tutor"
+  | "Ask Classmate"
+  | "Refer Learning Resources"
+  | "Explore Online"
+  | "Other";
 
 export interface AnnotationData {
   assignment?: Assignment;

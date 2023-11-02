@@ -46,16 +46,14 @@ export function DefaultSidebar() {
                 text={currentEditing.annotation.text}
                 setNote={addNotes}
               ></Notes>
-
-              <button>Save</button>
             </div>
           </div>
         );
       case "To-Dos":
         return (
           <div>
-            <p>{currentEditing.annotation.text}</p>
-            <TodoCard></TodoCard>
+            {/* <p>{currentEditing.annotation.text}</p>
+            <TodoCard></TodoCard> */}
           </div>
         );
       default:
