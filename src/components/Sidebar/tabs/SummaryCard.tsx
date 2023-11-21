@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {AnnotationData, AnnotationTag, Unit} from "../../../types";
 import {Card, Typography} from "@material-tailwind/react";
 import {annotationTagsIcons} from "../../AnnotationIcons";
@@ -7,16 +7,27 @@ interface Props {
 }
 
 export function UnitAssignmentSummary({unit}: {unit: Unit}) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
   return (
     <div className="border rounded-lg">
-      <div className="bg-gray font-bold text-xl mb-4 border border-2">
-        {unit.unitCode}
-      </div>
-      {unit.assignments.map((assignment) =>
-        assignment.feedback && assignment.feedback.annotations ? (
-          <SummaryCard annotationData={assignment.feedback.annotations} />
-        ) : null
-      )}
+      <button
+        onClick={toggleDropdown}
+        className="bg-gray-200 font-bold text-xl p-2 w-full text-left"
+      >
+        {isDropdownOpen
+          ? unit.unitCode
+          : "View Annotations for " + unit.unitCode}
+      </button>
+      {isDropdownOpen &&
+        unit.assignments.map((assignment) =>
+          assignment.feedback && assignment.feedback.annotations ? (
+            <SummaryCard annotationData={assignment.feedback.annotations} />
+          ) : null
+        )}
     </div>
   );
 }
