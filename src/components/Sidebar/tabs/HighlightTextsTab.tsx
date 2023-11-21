@@ -9,9 +9,26 @@ import {
   AnnotationNotes,
   AnnotationData,
   AnnotationActionPoint,
+  AnnotationTag,
 } from "../../../types";
 import {useState} from "react";
-
+function getColorForTag(tag: AnnotationTag | undefined) {
+  console.log(tag);
+  switch (tag) {
+    case "Strength":
+      return "#3a70b7";
+    case "Weakness":
+      return "#ef5975";
+    case "Action Item":
+      return "#23bfc6";
+    case "Confused":
+      return "#f79633";
+    case "Other":
+      return "#8960aa";
+    default:
+      return "gray-500";
+  }
+}
 export function HighlightingTab({
   unitCode,
   assignment,
@@ -65,9 +82,6 @@ export function HighlightingTab({
       case "To-Dos":
         return (
           <div>
-            <p className="text-gray-700 font-semibold">
-              {currentEditing.annotation.text}
-            </p>
             <TodoCard
               actionItems={actionItems}
               setActionItems={setActionItems}
@@ -79,9 +93,26 @@ export function HighlightingTab({
     }
   }
 
+  const annotationTagColor = getColorForTag(
+    currentEditing?.annotation.annotationTag
+  );
+
   return (
-    <div>
-      <div>{renderTabs()}</div>
+    <div className="space-y-4">
+      <div className="flex items-start">
+        <blockquote
+          className={`flex-grow border-l-4 pl-4 text-left`}
+          style={{borderColor: `${annotationTagColor}`}}
+        >
+          <p className="text-gray-700 italic">
+            <span className="block text-sm text-gray-500 mb-1">
+              {currentEditing?.annotation.annotationTag}
+            </span>
+            {currentEditing?.annotation.text}
+          </p>
+        </blockquote>
+      </div>
+      <div className="w-full">{renderTabs()}</div>
     </div>
   );
 }

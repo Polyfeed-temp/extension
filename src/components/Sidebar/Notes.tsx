@@ -15,7 +15,6 @@ export function Notes({
 
   return (
     <div className="flex flex-col space-y-4">
-      <p className="text-gray-700 font-semibold">{text}</p>
       <ReactQuill
         theme="snow"
         value={value}
