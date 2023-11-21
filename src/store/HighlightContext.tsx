@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
-import AnnotationService from "../services/localStorage";
+import AnnotationService from "../services/annotation.service";
 import {RenderPop} from "../components/Toolbar";
 import {
   Annotation,
@@ -64,14 +64,6 @@ type Action =
   | InitializeAction
   | SetDraftingAction;
 
-const initialState: State = {
-  highlighterLib: new Highlighter({exceptSelectors: ["#react-root"]}),
-  records: [],
-  editing: null,
-  isHighlighting: false,
-  drafting: null,
-};
-
 const HighlighterContext = createContext<
   {state: State; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -79,18 +71,18 @@ const HighlighterContext = createContext<
 const highlighterReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "INITIALIZE":
-      action.payload.forEach(({annotation}) => {
-        console.log(annotation);
-        state.highlighterLib?.fromStore(
-          annotation.startMeta,
-          annotation.endMeta,
-          annotation.text,
-          annotation.id
-        );
-      });
+      // action.payload.forEach(({annotation}) => {
+      //   console.log(annotation);
+      //   state.highlighterLib?.fromStore(
+      //     annotation.startMeta,
+      //     annotation.endMeta,
+      //     annotation.text,
+      //     annotation.id
+      //   );
+      // });
 
       console.log(state);
-      return {...state, records: action.payload};
+      return state;
     case "SET_DRAFTING":
       return {...state, drafting: action.payload};
     case "ADD_RECORD":
@@ -120,6 +112,18 @@ const highlighterReducer = (state: State, action: Action): State => {
 };
 
 export const HighlighterProvider = ({children}: {children: ReactNode}) => {
+  const root = document.getElementById("docos-stream-view") as HTMLElement;
+  root ? console.log("doco streamview") : console.log("not doco streamview");
+  const initialState: State = {
+    highlighterLib: new Highlighter({
+      $root: root ? root : document.documentElement,
+      exceptSelectors: ["#react-root"],
+    }),
+    records: [],
+    editing: null,
+    isHighlighting: false,
+    drafting: null,
+  };
   const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const service = new AnnotationService();
   useEffect(() => {
@@ -127,6 +131,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       const annotations = await service.getAnnotationsForUrl(
         window.location.href
       );
+      console.log(annotations);
 
       baseDispatch({type: "INITIALIZE", payload: annotations});
     };
@@ -139,7 +144,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           const sources = action.payload;
           console.log("adding", sources);
           const annotation = await service.addAnnotations(sources);
-          // console.log(annotation);
+          console.log(annotation);
 
           baseDispatch({type: "ADD_RECORD", payload: action.payload});
         } catch (err) {
@@ -149,7 +154,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       case "DELETE_RECORD":
         try {
           const {id} = action.payload;
-          await service.removeAnnotation(id);
+          // await service.removeAnnotation(id);
           baseDispatch({type: "DELETE_RECORD", payload: action.payload});
         } catch (err) {
           console.log(err);

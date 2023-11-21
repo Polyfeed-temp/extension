@@ -1,8 +1,9 @@
 import React, {useState} from "react";
-import {AnnotationToDo} from "../../types";
-import {ToDoActionCategory} from "../../types";
+import {AnnotationActionPoint} from "../../types";
+import {ActionPointCategory} from "../../types";
+import {Button} from "@material-tailwind/react";
 
-const ToDoActions: ToDoActionCategory[] = [
+const ToDoActions: ActionPointCategory[] = [
   "Further Practice",
   "Contact Tutor",
   "Ask Classmate",
@@ -11,16 +12,22 @@ const ToDoActions: ToDoActionCategory[] = [
   "Other",
 ];
 
-const TodoCard = ({setTodo}: {setTodo: (input: AnnotationToDo) => void}) => {
+const TodoCard = ({
+  actionItems,
+  setActionItems,
+}: {
+  actionItems: AnnotationActionPoint[];
+  setActionItems: React.Dispatch<React.SetStateAction<AnnotationActionPoint[]>>;
+}) => {
   const [selectedCategory, setSelectedCategory] = useState<
-    ToDoActionCategory | undefined
+    ActionPointCategory | undefined
   >("Ask Classmate");
   const [todoText, setTodoText] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const handleCategoryChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedCategory(event.target.value as ToDoActionCategory);
+    setSelectedCategory(event.target.value as ActionPointCategory);
   };
 
   return (
@@ -69,17 +76,20 @@ const TodoCard = ({setTodo}: {setTodo: (input: AnnotationToDo) => void}) => {
         className="p-2 border rounded-md w-full"
       />
 
-      <button
+      <Button
         onClick={() =>
-          setTodo({
-            todo: todoText,
-            category: selectedCategory! as ToDoActionCategory,
-            dueDate: new Date(dueDate),
-          })
+          setActionItems(
+            actionItems.concat({
+              action: todoText,
+              actionpoint: selectedCategory,
+              deadline: new Date(dueDate),
+            } as AnnotationActionPoint)
+          )
         }
+        className="full-width bg-black"
       >
         Save
-      </button>
+      </Button>
     </div>
   );
 };

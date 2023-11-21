@@ -1,7 +1,8 @@
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import "react-quill/dist/quill.snow.css"; // Ensure this is imported only once
 import {useState} from "react";
 import {AnnotationNotes} from "../../types";
+import {Button} from "@material-tailwind/react";
 
 export function Notes({
   text,
@@ -11,12 +12,10 @@ export function Notes({
   setNote: (note: AnnotationNotes) => void;
 }) {
   const [value, setValue] = useState("");
-  const truncatedText =
-    text.length > 100 ? text.substring(0, 100) + "..." : text;
 
   return (
-    <div>
-      <p>{truncatedText}</p>
+    <div className="flex flex-col space-y-4">
+      <p className="text-gray-700 font-semibold">{text}</p>
       <ReactQuill
         theme="snow"
         value={value}
@@ -25,7 +24,14 @@ export function Notes({
           setValue(content);
         }}
       />
-      <button onClick={() => setNote({content: value})}> Save </button>
+      <hr className="my-4" />
+      <Button
+        fullWidth
+        className="bg-black"
+        onClick={() => setNote({content: value})}
+      >
+        Save
+      </Button>
     </div>
   );
 }
