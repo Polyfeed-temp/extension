@@ -10,12 +10,21 @@ import {
   Annotation,
   AnnotationNotes,
   AnnotationData,
-  AnnotationToDo,
+  AnnotationActionPoint,
 } from "../../types";
-import {Notes} from "./Notes";
-import TodoCard from "./TodoCard";
-import {UnitAssignmentSummary} from "./SummaryCard";
+
+type SidebarTab =
+  | "Summary"
+  | "My Notes"
+  | "Highlight Texts"
+  | "Select Assignment";
+import {UnitAssignmentSummary} from "./tabs/SummaryCard";
 import AnnotatedCard from "./AnnotatedCard";
+import {SelectUnitAssignmentTab} from "./tabs/StartAssignmentTab";
+import {HighlightingTab} from "./tabs/HighlightTextsTab";
+import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
+const Logo = require("../../assets/logo/PolyFeed_BlackText.png")
+  .default as string;
 const DraggableWindow = () => {
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [offset, setOffset] = useState({x: 0, y: 0});
@@ -25,52 +34,9 @@ const DraggableWindow = () => {
   const [isVisible, setIsVisible] = useState(false);
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
-  const currentEditing = highlighterState.editing;
-  console.log(highlighterState.records);
+  const [currentTab, setCurrentTab] = useState("Summary" as SidebarTab);
 
-  const addNotes = (input: AnnotationNotes) => {
-    highlighterDispatch({
-      type: "ADD_RECORD",
-      payload: {
-        annotation: currentEditing?.annotation,
-        notes: input,
-      } as AnnotationData,
-    });
-  };
-  const addToDo = (input: AnnotationToDo) => {
-    highlighterDispatch({
-      type: "ADD_RECORD",
-      payload: {
-        annotation: currentEditing?.annotation,
-        todo: input,
-      } as AnnotationData,
-    });
-  };
-  function renderTabs() {
-    console.log(currentEditing);
-    switch (currentEditing?.sidebarAction) {
-      case "Notes":
-        return (
-          <div>
-            <div>
-              <Notes
-                text={currentEditing.annotation.text}
-                setNote={addNotes}
-              ></Notes>
-            </div>
-          </div>
-        );
-      case "To-Dos":
-        return (
-          <div>
-            <p>{currentEditing.annotation.text}</p>
-            <TodoCard setTodo={addToDo}></TodoCard>
-          </div>
-        );
-      default:
-        return null;
-    }
-  }
+  console.log(highlighterState.records);
 
   const toggleMaximize = () => {
     if (isMaximized) {
@@ -113,10 +79,93 @@ const DraggableWindow = () => {
     setIsMouseDown(false);
   };
 
+  function renderTabs(currentTab: SidebarTab) {
+    const [unitCode, setUnitCode] = useState("");
+    const [assignment, setAssignment] = useState("");
+    switch (currentTab) {
+      case "Summary":
+        return (
+          <>
+            {mockUser.units.map((unit, index) => (
+              <div key={index} className="mb-4">
+                <UnitAssignmentSummary unit={unit}></UnitAssignmentSummary>
+              </div>
+            ))}
+            <hr className="my-4" />
+
+            <div className="mb-4">
+              <Button
+                fullWidth
+                className="bg-black"
+                onClick={() => {
+                  setCurrentTab("Select Assignment");
+                }}
+              >
+                Select Assignment
+              </Button>
+            </div>
+          </>
+        );
+      case "Select Assignment":
+        return (
+          <div className="mb-4">
+            <SelectUnitAssignmentTab
+              units={mockUser.units}
+              switchTabFunc={() => {
+                highlighterDispatch({
+                  type: "SET_IS_HIGHLIGHTING",
+                  payload: !highlighterState.isHighlighting,
+                });
+                setCurrentTab("Highlight Texts");
+              }}
+              setUnitCode={setUnitCode}
+              setAssignment={setAssignment}
+            ></SelectUnitAssignmentTab>
+          </div>
+        );
+      //drop down for summary of feedback the tags
+      //assignemnt drop down add a other option from teacher
+      case "Highlight Texts":
+        return (
+          <div className="mb-4">
+            <HighlightingTab
+              unitCode={unitCode}
+              assignment={assignment}
+            ></HighlightingTab>
+            {highlighterState.records.map((record: AnnotationData, index) => (
+              <div key={index} className="mb-4">
+                <AnnotatedCard
+                  text={record.annotation.text}
+                  onEdit={() => {}}
+                  onDelete={() => {}}
+                ></AnnotatedCard>
+              </div>
+            ))}
+            <hr className="my-4 pb-2" />
+            <RateFeedbackTab></RateFeedbackTab>
+          </div>
+        );
+      case "My Notes":
+        return (
+          <div className="mb-4">
+            {highlighterState.records.map((record: AnnotationData, index) => (
+              <div key={index} className="mb-4">
+                <AnnotatedCard
+                  text={record.annotation.text}
+                  onEdit={() => {}}
+                  onDelete={() => {}}
+                ></AnnotatedCard>
+              </div>
+            ))}
+          </div>
+        );
+    }
+  }
+
   return (
     <div
       id="wrapper"
-      className={`bg-white w-96 h-[420px] rounded-2xl absolute resize overflow-auto ${
+      className={`bg-white w-96 h-[420px] rounded-md border-solid border-2 absolute resize overflow-auto ${
         isMaximized ? "w-full h-full" : ""
       } ${isMinimized ? "h-[60px] overflow-hidden" : ""}
         `}
@@ -134,56 +183,30 @@ const DraggableWindow = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
-        Polyfeed
-        <div
-          id="actions"
-          className="flex gap-3 cursor-pointer"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <span
-            className={`material-icons ${
-              highlighterState.isHighlighting ? "text-red-500" : ""
-            }`}
-            onClick={() => {
-              highlighterDispatch({
-                type: "SET_IS_HIGHLIGHTING",
-                payload: !highlighterState.isHighlighting,
-              });
-            }}
-          >
-            power_settings_new
-          </span>
-          <i
-            className="fa-sharp fa-regular fa-window-maximize"
-            onClick={toggleMaximize}
-          ></i>
-          <span className="material-icons" onClick={toggleMinimize}>
-            minimize
-          </span>
-
-          <i className="fa-sharp fa-solid fa-xmark" onClick={closeWindow}></i>
-        </div>
+        <img src={Logo} className="h-8 md:h-12" />
       </div>
       {!isMinimized ? (
-        <div id="content" className="p-6 text-center">
-          <Button>My Notes</Button>
-          <Button>My Summary</Button>
-          <UnitForm units={mockUser.units}></UnitForm>
-          <UnitAssignmentSummary
-            unit={mockUser.units[0]}
-          ></UnitAssignmentSummary>
-          {renderTabs()}
-          {highlighterState.records.map((record: AnnotationData) => (
-            <AnnotatedCard
-              text={record.annotation.text}
-              onEdit={() => {}}
-              onDelete={() => {}}
-            ></AnnotatedCard>
-          ))}
+        <div id="content" className="p-6 text-center gap-x-4">
+          <div className="mb-4">
+            <Button
+              className="bg-black mr-2"
+              onClick={() => setCurrentTab("My Notes")}
+            >
+              Home
+            </Button>
+            <Button className="bg-black" onClick={redirectToDashBoard}>
+              Summary Page
+            </Button>
+          </div>
+          <hr className="my-4" />
+          {renderTabs(currentTab)}
+          <hr className="my-4" />
         </div>
       ) : null}
     </div>
   );
 };
-
+function redirectToDashBoard() {
+  window.location.href = "http://localhost:3000/";
+}
 export default DraggableWindow;

@@ -1,17 +1,19 @@
 import React from "react";
-import {AnnotationData, AnnotationTag, Unit} from "../../types";
+import {AnnotationData, AnnotationTag, Unit} from "../../../types";
 import {Card, Typography} from "@material-tailwind/react";
-import {annotationTagsIcons} from "../AnnotationIcons";
+import {annotationTagsIcons} from "../../AnnotationIcons";
 interface Props {
   annotationData: AnnotationData[];
 }
 
 export function UnitAssignmentSummary({unit}: {unit: Unit}) {
   return (
-    <div className="border rounded-lg bg-grey">
-      <div className="font-bold text-xl mb-4">{unit.unitCode}</div>
+    <div className="border rounded-lg">
+      <div className="bg-gray font-bold text-xl mb-4 border border-2">
+        {unit.unitCode}
+      </div>
       {unit.assignments.map((assignment) =>
-        assignment.feedback.annotations ? (
+        assignment.feedback && assignment.feedback.annotations ? (
           <SummaryCard annotationData={assignment.feedback.annotations} />
         ) : null
       )}
@@ -29,7 +31,7 @@ const SummaryCard: React.FC<Props> = ({annotationData}) => {
   };
 
   annotationData.forEach(({annotation}) => {
-    annotationTagCount[annotation.AnnotationTag] += 1;
+    annotationTagCount[annotation.annotationTag] += 1;
   });
 
   // Render the grouped data
