@@ -29,11 +29,11 @@ function ToolbarMenu({
   //hover the index
   return (
     <Menu>
-      <MenuHandler>
+      <MenuHandler className="p-1">
         <button>
           <img
             src={annotationTagsIcons[Label]}
-            style={{width: 100, height: 50}}
+            style={{width: 50, height: 25}}
           />
           <span>{Label}</span>
         </button>
@@ -72,7 +72,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
     (tag: AnnotationTag) => (sidebarAction: SideBarAction) => {
       const annotation: Annotation = {
         id: highlightingID,
-        AnnotationTag: tag,
+        annotationTag: tag,
         startMeta: highlighting.startMeta,
         endMeta: highlighting.endMeta,
         text: highlighting.text,
@@ -83,7 +83,36 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
         payload: {sidebarAction: sidebarAction, annotation: annotation},
       });
     };
-
+  const theme = {
+    popover: {
+      defaultProps: {
+        placement: "top",
+        offset: 5,
+        dismiss: {},
+        animate: {
+          unmount: {},
+          mount: {},
+        },
+        className: "",
+      },
+      styles: {
+        base: {
+          bg: "bg-white",
+          p: "p-4",
+          border: "border border-blue-gray-50",
+          borderRadius: "rounded-lg",
+          boxShadow: "shadow-lg shadow-blue-gray-500/10",
+          fontFamily: "font-sans",
+          fontSize: "text-sm",
+          fontWeight: "font-normal",
+          color: "text-blue-gray-500",
+          outline: "focus:outline-none",
+          overflowWrap: "break-words",
+          whiteSpace: "whitespace-normal",
+        },
+      },
+    },
+  };
   useEffect(() => {
     const dom = highlighter?.getDoms(highlightingID)[0];
     const onClick = () => {
@@ -104,7 +133,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
           <PopoverHandler {...triggers}>
             <span></span>
           </PopoverHandler>
-          <PopoverContent {...triggers}>
+          <PopoverContent {...triggers} className="border border-2 p-0 z-100">
             {annotationTags.map((tag) => (
               <ToolbarMenu
                 Label={tag}
