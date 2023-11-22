@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import {HighlighterProvider} from "./store/HighlightContext";
+import UserProvider from "./store/UserContext";
 
 // Inject Material Icons stylesheet
 const link = document.createElement("link");
@@ -31,9 +32,11 @@ function load() {
 
   rootDiv.render(
     <React.StrictMode>
-      <HighlighterProvider>
-        <App />
-      </HighlighterProvider>
+      <UserProvider>
+        <HighlighterProvider>
+          <App />
+        </HighlighterProvider>
+      </UserProvider>
     </React.StrictMode>
   );
 }

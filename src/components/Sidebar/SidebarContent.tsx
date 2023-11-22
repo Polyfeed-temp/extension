@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {Button} from "@material-tailwind/react";
 import {UnitForm} from "../UnitForm";
-import {mockUser} from "../../services/user";
 import {
   useHighlighterDispatch,
   useHighlighterState,
@@ -11,6 +10,7 @@ import {
   AnnotationNotes,
   AnnotationData,
   AnnotationActionPoint,
+  User,
 } from "../../types";
 
 type SidebarTab =
@@ -23,123 +23,125 @@ import AnnotatedCard from "./AnnotatedCard";
 import {SelectUnitAssignmentTab} from "./tabs/StartAssignmentTab";
 import {HighlightingTab} from "./tabs/HighlightTextsTab";
 import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
-const Logo = require("../../assets/logo/PolyFeed_BlackText.png")
-  .default as string;
-const SidebarPanel = () => {
+import {useUserState} from "../../store/UserContext";
+import {mockUser as currentUser} from "../../services/user";
+function RenderTabs({
+  currentUser,
+  currentTab,
+  setCurrentTab,
+}: {
+  currentTab: SidebarTab;
+  currentUser: User;
+  setCurrentTab: (tab: SidebarTab) => void;
+}) {
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
-  const [currentTab, setCurrentTab] = useState("Summary" as SidebarTab);
-
-  function renderTabs(currentTab: SidebarTab) {
-    const [unitCode, setUnitCode] = useState("");
-    const [assignment, setAssignment] = useState("");
-    switch (currentTab) {
-      case "Summary":
-        return (
-          <>
-            {mockUser.units.map((unit, index) => (
-              <div key={index} className="mb-4">
-                <UnitAssignmentSummary unit={unit}></UnitAssignmentSummary>
-              </div>
-            ))}
-            <hr className="my-4" />
-
-            <div className="mb-4">
-              <Button
-                fullWidth
-                className="bg-black"
-                onClick={() => {
-                  setCurrentTab("Select Assignment");
-                }}
-              >
-                Select Assignment
-              </Button>
+  const [unitCode, setUnitCode] = useState("");
+  const [assignment, setAssignment] = useState("");
+  switch (currentTab) {
+    case "Summary":
+    case "My Notes":
+      return (
+        <>
+          {currentUser?.units.map((unit, index) => (
+            <div key={index} className="mb-4">
+              <UnitAssignmentSummary unit={unit}></UnitAssignmentSummary>
             </div>
-          </>
-        );
-      case "Select Assignment":
-        return (
+          ))}
+          <hr className="my-4" />
+
           <div className="mb-4">
-            <SelectUnitAssignmentTab
-              units={mockUser.units}
-              switchTabFunc={() => {
-                highlighterDispatch({
-                  type: "SET_IS_HIGHLIGHTING",
-                  payload: !highlighterState.isHighlighting,
-                });
-                setCurrentTab("Highlight Texts");
+            <Button
+              fullWidth
+              className="bg-black"
+              onClick={() => {
+                setCurrentTab("Select Assignment");
               }}
-              setUnitCode={setUnitCode}
-              setAssignment={setAssignment}
-            ></SelectUnitAssignmentTab>
+            >
+              Select Assignment
+            </Button>
           </div>
-        );
-      //drop down for summary of feedback the tags
-      //assignemnt drop down add a other option from teacher
-      case "Highlight Texts":
-        return (
-          <div className="mb-4">
-            <HighlightingTab
-              unitCode={unitCode}
-              assignment={assignment}
-            ></HighlightingTab>
-            {highlighterState.records.map((record: AnnotationData, index) => (
-              <div key={index} className="mb-4">
-                <AnnotatedCard
-                  text={record.annotation.text}
-                  onEdit={() => {}}
-                  onDelete={() => {}}
-                ></AnnotatedCard>
-              </div>
-            ))}
-            <hr className="my-4 pb-2" />
-            <RateFeedbackTab></RateFeedbackTab>
-          </div>
-        );
-      case "My Notes":
-        return (
-          <div className="mb-4">
-            {highlighterState.records.map((record: AnnotationData, index) => (
-              <div key={index} className="mb-4">
-                <AnnotatedCard
-                  text={record.annotation.text}
-                  onEdit={() => {}}
-                  onDelete={() => {}}
-                ></AnnotatedCard>
-              </div>
-            ))}
-          </div>
-        );
-    }
+        </>
+      );
+    case "Select Assignment":
+      return (
+        <div className="mb-4">
+          <SelectUnitAssignmentTab
+            units={currentUser.units}
+            switchTabFunc={() => {
+              highlighterDispatch({
+                type: "SET_IS_HIGHLIGHTING",
+                payload: !highlighterState.isHighlighting,
+              });
+              setCurrentTab("Highlight Texts");
+            }}
+            setUnitCode={setUnitCode}
+            setAssignment={setAssignment}
+          ></SelectUnitAssignmentTab>
+        </div>
+      );
+    //drop down for summary of feedback the tags
+    //assignemnt drop down add a other option from teacher
+    case "Highlight Texts":
+      return (
+        <div className="mb-4">
+          <HighlightingTab
+            unitCode={unitCode}
+            assignment={assignment}
+          ></HighlightingTab>
+          {highlighterState.records.map((record: AnnotationData, index) => (
+            <div key={index} className="mb-4">
+              <AnnotatedCard
+                text={record.annotation.text}
+                onEdit={() => {}}
+                onDelete={() => {}}
+              ></AnnotatedCard>
+            </div>
+          ))}
+          <hr className="my-4 pb-2" />
+          <RateFeedbackTab></RateFeedbackTab>
+        </div>
+      );
   }
+}
+
+const SidebarPanel = () => {
+  const [currentTab, setCurrentTab] = useState("Summary" as SidebarTab);
+  const user = useUserState();
+
+  const currentUser = user?.user;
 
   return (
-    <div style={{width: "100%", boxSizing: "border-box"}}>
-      <div id="header" className="p-6 border-b border-gray-300 text-xl">
-        <img src={Logo} className="h-8 md:h-12" />
-      </div>
-
-      <div
-        id="content"
-        className="p-6 text-center gap-x-4"
-        style={{width: "100%"}}
-      >
-        <div className="mb-4">
-          <Button
-            className="bg-black mr-2"
-            onClick={() => setCurrentTab("My Notes")}
+    <>
+      {currentUser ? (
+        <div style={{width: "100%", boxSizing: "border-box"}}>
+          <div
+            id="content"
+            className="p-6 text-center gap-x-4"
+            style={{width: "100%"}}
           >
-            Home
-          </Button>
-          <Button className="bg-black" onClick={redirectToDashBoard}>
-            Summary Page
-          </Button>
+            <div className="mb-4">
+              <Button
+                className="bg-black mr-2"
+                onClick={() => setCurrentTab("My Notes")}
+              >
+                Home
+              </Button>
+              <Button className="bg-black" onClick={redirectToDashBoard}>
+                Summary Page
+              </Button>
+            </div>
+            <hr className="my-4" />
+            <RenderTabs
+              currentTab={currentTab}
+              currentUser={currentUser}
+              setCurrentTab={setCurrentTab}
+            ></RenderTabs>
+            <hr className="my-4" />
+          </div>
         </div>
-        <hr className="my-4" />
-        {renderTabs(currentTab)}
-        <hr className="my-4" />
-      </div>
-    </div>
+      ) : null}
+    </>
   );
 };
 function redirectToDashBoard() {

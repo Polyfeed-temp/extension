@@ -1,5 +1,6 @@
 import SidebarPanel from "./SidebarContent";
 import {useState} from "react";
+import {SidebarHeader} from "./SidebarHeader";
 
 const leftChevron = (
   <svg
@@ -58,6 +59,7 @@ export function Sidebar({
       </div>
       {collapsed ? null : (
         <div style={{overflowY: "auto", height: "100%"}}>
+          <SidebarHeader></SidebarHeader>
           <SidebarPanel></SidebarPanel>
         </div>
       )}
