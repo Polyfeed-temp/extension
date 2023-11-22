@@ -12,63 +12,18 @@ const ToDoActions: ActionPointCategory[] = [
   "Other",
 ];
 
-function renderToDoItems(actionItems: AnnotationActionPoint[]) {
-  return (
-    <>
-      {actionItems.map((actionPointItem) => (
-        <div key={actionPointItem.action} className="mb-4">
-          <Checkbox
-            crossOrigin=""
-            label={
-              <div className="flex flex-col items-start">
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="font-normal overflow-hidden overflow-ellipsis whitespace-nowrap"
-                >
-                  {actionPointItem.action}
-                </Typography>
-                <div className="flex justify-between w-full">
-                  <Typography
-                    variant="small"
-                    color="gray"
-                    className="font-normal overflow-hidden overflow-ellipsis whitespace-nowrap"
-                  >
-                    {actionPointItem.actionpoint}
-                  </Typography>
-                  <Typography
-                    variant="small"
-                    color="gray"
-                    className="font-normal"
-                  >
-                    {actionPointItem.deadline.toLocaleDateString()}
-                  </Typography>
-                </div>
-              </div>
-            }
-            containerProps={{
-              className: "-mt-5",
-            }}
-          />
-        </div>
-      ))}
-      <button> Add new to-do list item</button>
-    </>
-  );
-}
-
-const TodoCard = ({
-  actionItems,
-  setActionItems,
+function TodoCard({
+  saveFunc,
 }: {
-  actionItems: AnnotationActionPoint[];
-  setActionItems: React.Dispatch<React.SetStateAction<AnnotationActionPoint[]>>;
-}) => {
+  saveFunc: (actionItems: AnnotationActionPoint[]) => void;
+}) {
+  const [actionItems, setActionItems] = useState<AnnotationActionPoint[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<
     ActionPointCategory | undefined
   >("Ask Classmate");
   const [todoText, setTodoText] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
+  const [addToDo, setAddToDo] = useState<boolean>(true);
   const handleCategoryChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -79,12 +34,52 @@ const TodoCard = ({
     setDueDate("");
     setSelectedCategory(undefined);
   };
+  function renderToDoItems(actionItems: AnnotationActionPoint[]) {
+    return (
+      <>
+        {actionItems.map((actionPointItem, index) => (
+          <div key={index} className="flex items-center mb-4">
+            <Checkbox crossOrigin="" label="" />
+            <div className="flex flex-col ml-2 flex-grow">
+              <Typography
+                variant="small"
+                color="gray"
+                className="font-normal break-words"
+              >
+                {actionPointItem.action}
+              </Typography>
+              <div className="flex justify-between w-full">
+                <Typography
+                  variant="small"
+                  color="gray"
+                  className="font-normal break-words flex-grow mr-2 italic text-left"
+                >
+                  {actionPointItem.actionpoint}
+                </Typography>
+                <Typography
+                  variant="small"
+                  color="gray"
+                  className="font-normal whitespace-nowrap text-left"
+                >
+                  {actionPointItem.deadline.toLocaleDateString()}
+                </Typography>
+              </div>
+            </div>
+          </div>
+        ))}
+        {actionItems.length > 0 ? (
+          <Button fullWidth onClick={() => setAddToDo(!addToDo)}>
+            Add new to-do list item
+          </Button>
+        ) : null}
+      </>
+    );
+  }
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
-      {actionItems.length > 0 ? (
-        renderToDoItems(actionItems)
-      ) : (
+      {renderToDoItems(actionItems)}
+      {addToDo ? (
         <>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             To Do item
@@ -141,15 +136,26 @@ const TodoCard = ({
                 } as AnnotationActionPoint)
               );
               resetForm();
+              setAddToDo(!addToDo);
             }}
             className="full-width bg-black"
           >
             Save To-do item
           </Button>
         </>
-      )}
+      ) : null}
+
+      <Button
+        onClick={() => {
+          saveFunc(actionItems);
+        }}
+        className="full-width bg-black"
+      >
+        {" "}
+        Save
+      </Button>
     </div>
   );
-};
+}
 
 export default TodoCard;

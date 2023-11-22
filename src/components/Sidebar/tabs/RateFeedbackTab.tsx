@@ -13,7 +13,7 @@ export const RateFeedbackTab = () => {
     <div className="border rounded-lg">
       <button
         onClick={toggleDropdown}
-        className="bg-gray-200 font-bold text-xl  p-2 w-full text-left"
+        className="bg-gray-200 font-medium text-xl  p-2 w-full text-left"
       >
         {!isDropdownOpen ? "Rate this feedback" : "This Feedback "}
       </button>

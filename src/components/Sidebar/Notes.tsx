@@ -4,13 +4,7 @@ import {useState} from "react";
 import {AnnotationNotes} from "../../types";
 import {Button} from "@material-tailwind/react";
 
-export function Notes({
-  text,
-  setNote,
-}: {
-  text: string;
-  setNote: (note: AnnotationNotes) => void;
-}) {
+export function Notes({setNote}: {setNote: (input: AnnotationNotes) => void}) {
   const [value, setValue] = useState("");
 
   return (

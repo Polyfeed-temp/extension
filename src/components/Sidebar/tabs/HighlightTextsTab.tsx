@@ -39,7 +39,6 @@ export function HighlightingTab({
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
   const currentEditing = highlighterState.editing;
-  const [actionItems, setActionItems] = useState<AnnotationActionPoint[]>([]);
 
   const addNotes = (input: AnnotationNotes) => {
     highlighterDispatch({
@@ -54,7 +53,7 @@ export function HighlightingTab({
       } as AnnotationData,
     });
   };
-  const addToDo = () => {
+  const addToDo = (actionItems: AnnotationActionPoint[]) => {
     highlighterDispatch({
       type: "ADD_RECORD",
       payload: {
@@ -72,20 +71,14 @@ export function HighlightingTab({
         return (
           <div>
             <div>
-              <Notes
-                text={currentEditing.annotation.text}
-                setNote={addNotes}
-              ></Notes>
+              <Notes setNote={addNotes}></Notes>
             </div>
           </div>
         );
       case "To-Dos":
         return (
           <div>
-            <TodoCard
-              actionItems={actionItems}
-              setActionItems={setActionItems}
-            ></TodoCard>
+            <TodoCard saveFunc={addToDo}></TodoCard>
           </div>
         );
       default:

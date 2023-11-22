@@ -16,7 +16,7 @@ export function UnitAssignmentSummary({unit}: {unit: Unit}) {
     <div className="border rounded-lg">
       <button
         onClick={toggleDropdown}
-        className="bg-gray-200 font-bold text-xl p-2 w-full text-left"
+        className="bg-gray-200 font-medium text-xl p-2 w-full text-left"
       >
         {isDropdownOpen
           ? unit.unitCode
