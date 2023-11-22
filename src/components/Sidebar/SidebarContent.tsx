@@ -25,59 +25,10 @@ import {HighlightingTab} from "./tabs/HighlightTextsTab";
 import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
 const Logo = require("../../assets/logo/PolyFeed_BlackText.png")
   .default as string;
-const DraggableWindow = () => {
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [offset, setOffset] = useState({x: 0, y: 0});
-  const [position, setPosition] = useState({x: 35, y: 120});
-  const [isMaximized, setIsMaximized] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+const SidebarPanel = () => {
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
   const [currentTab, setCurrentTab] = useState("Summary" as SidebarTab);
-
-  console.log(highlighterState.records);
-
-  const toggleMaximize = () => {
-    if (isMaximized) {
-      setIsMaximized(false);
-    } else {
-      setIsMaximized(true);
-      setPosition({x: 0, y: 0});
-    }
-  };
-
-  const toggleMinimize = () => {
-    setIsMinimized(!isMinimized);
-  };
-
-  const closeWindow = () => {
-    setIsVisible(false);
-  };
-
-  const openWindow = () => {
-    setIsVisible(true);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsMouseDown(true);
-    setOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isMouseDown) return;
-    setPosition({
-      x: e.clientX - offset.x,
-      y: e.clientY - offset.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsMouseDown(false);
-  };
 
   function renderTabs(currentTab: SidebarTab) {
     const [unitCode, setUnitCode] = useState("");
@@ -163,50 +114,35 @@ const DraggableWindow = () => {
   }
 
   return (
-    <div
-      id="wrapper"
-      className={`bg-white w-96 h-[420px] rounded-md border-solid border-2 absolute resize overflow-auto ${
-        isMaximized ? "w-full h-full" : ""
-      } ${isMinimized ? "h-[60px] overflow-hidden" : ""}
-        `}
-      style={{
-        position: "fixed",
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        zIndex: 999,
-      }}
-    >
-      <div
-        id="header"
-        className="p-6 border-b border-gray-300 text-xl text-purple-700 flex justify-between cursor-move"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
+    <div style={{width: "100%", boxSizing: "border-box"}}>
+      <div id="header" className="p-6 border-b border-gray-300 text-xl">
         <img src={Logo} className="h-8 md:h-12" />
       </div>
-      {!isMinimized ? (
-        <div id="content" className="p-6 text-center gap-x-4">
-          <div className="mb-4">
-            <Button
-              className="bg-black mr-2"
-              onClick={() => setCurrentTab("My Notes")}
-            >
-              Home
-            </Button>
-            <Button className="bg-black" onClick={redirectToDashBoard}>
-              Summary Page
-            </Button>
-          </div>
-          <hr className="my-4" />
-          {renderTabs(currentTab)}
-          <hr className="my-4" />
+
+      <div
+        id="content"
+        className="p-6 text-center gap-x-4"
+        style={{width: "100%"}}
+      >
+        <div className="mb-4">
+          <Button
+            className="bg-black mr-2"
+            onClick={() => setCurrentTab("My Notes")}
+          >
+            Home
+          </Button>
+          <Button className="bg-black" onClick={redirectToDashBoard}>
+            Summary Page
+          </Button>
         </div>
-      ) : null}
+        <hr className="my-4" />
+        {renderTabs(currentTab)}
+        <hr className="my-4" />
+      </div>
     </div>
   );
 };
 function redirectToDashBoard() {
   window.location.href = "http://localhost:3000/";
 }
-export default DraggableWindow;
+export default SidebarPanel;

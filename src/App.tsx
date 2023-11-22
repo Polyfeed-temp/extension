@@ -1,12 +1,21 @@
-import "./App.css";
-import {useState, useEffect} from "react";
-import {DefaultSidebar} from "./components/Sidebar/Sidebar";
-import DraggableWindow from "./components/Sidebar/FloatingSidebar";
+// import "./App.css";
+import {Sidebar} from "./components/Sidebar/Sidebar";
+import {useState} from "react";
 
 function App() {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    const sidebarWidth = "428px";
+    const nav = document.querySelector("nav") as HTMLElement;
+    document.body.style.marginRight = collapsed ? sidebarWidth : "40px";
+    nav.style.marginRight = collapsed ? sidebarWidth : "40px";
+    setCollapsed(!collapsed);
+  };
   return (
     <div>
-      <DraggableWindow></DraggableWindow>
+      {" "}
+      <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} />
     </div>
   );
 }

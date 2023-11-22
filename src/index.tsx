@@ -19,16 +19,13 @@ const materialIcons = document.createElement("link");
 materialIcons.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
 materialIcons.rel = "stylesheet";
 document.head.appendChild(materialIcons);
-
 // Then inject your React component...
 // ... your code for injecting the React component
 function load() {
-  console.log("loading");
   const root = document.createElement("div");
   root.id = "react-root";
 
   document.body.appendChild(root);
-  // const  shado
 
   const rootDiv = ReactDOM.createRoot(root);
 
