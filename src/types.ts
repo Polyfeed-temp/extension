@@ -60,6 +60,7 @@ export interface Unit {
 }
 
 export interface User {
-  name: string;
+  firstName: string;
+  monashId: string;
   units: Unit[];
 }

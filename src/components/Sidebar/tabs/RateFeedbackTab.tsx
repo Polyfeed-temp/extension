@@ -8,14 +8,47 @@ export const RateFeedbackTab = () => {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+  const chevronIconDown = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-6 h-6"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+      />
+    </svg>
+  );
+  const chevronIconUp = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-6 h-6"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.5 15.75l7.5-7.5 7.5 7.5"
+      />
+    </svg>
+  );
 
   return (
     <div className="border rounded-lg">
       <button
         onClick={toggleDropdown}
-        className="bg-gray-200 font-medium text-xl  p-2 w-full text-left"
+        className="flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left"
       >
-        {!isDropdownOpen ? "Rate this feedback" : "This Feedback "}
+        <span>{!isDropdownOpen ? "Rate this feedback" : "This Feedback "}</span>
+        {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
       {isDropdownOpen &&
         [
