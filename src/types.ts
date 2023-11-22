@@ -6,13 +6,13 @@ export interface Annotation {
   text: string;
   id: string;
   url: string;
-  AnnotationTag: AnnotationTag;
+  annotationTag: AnnotationTag;
 }
 
 export type SideBarAction = "To-Dos" | "Notes"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
-export type ToDoActionCategory =
+export type ActionPointCategory =
   | "Further Practice"
   | "Contact Tutor"
   | "Ask Classmate"
@@ -21,20 +21,22 @@ export type ToDoActionCategory =
   | "Other";
 
 export interface AnnotationData {
-  assignment?: Assignment;
+  unitCode?: string;
+  assignmentName?: string;
   annotation: Annotation;
   notes?: AnnotationNotes
-  todo?: AnnotationToDo
+  todo?: AnnotationActionPoint[]
 }
 
 export interface AnnotationNotes {
   content: string;
 
 }
-export interface AnnotationToDo {
-  todo: string;
-  category: ToDoActionCategory;
-  dueDate: Date;
+export interface AnnotationActionPoint {
+  action: string;
+  actionpoint: ActionPointCategory;
+  deadline: Date;
+  completed: boolean;
 }
 
 export interface Feedback {
@@ -45,7 +47,7 @@ export interface Feedback {
 
 }
 export interface Assignment {
-  feedback: Feedback;
+  feedback?: Feedback;
   assignmentName: string;
   rubric: string;
 

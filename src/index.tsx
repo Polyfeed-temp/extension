@@ -19,22 +19,23 @@ const materialIcons = document.createElement("link");
 materialIcons.href = "https://fonts.googleapis.com/icon?family=Material+Icons";
 materialIcons.rel = "stylesheet";
 document.head.appendChild(materialIcons);
-
 // Then inject your React component...
 // ... your code for injecting the React component
+function load() {
+  const root = document.createElement("div");
+  root.id = "react-root";
 
-const root = document.createElement("div");
-root.id = "react-root";
+  document.body.appendChild(root);
 
-document.body.appendChild(root);
-// const  shado
+  const rootDiv = ReactDOM.createRoot(root);
 
-const rootDiv = ReactDOM.createRoot(root);
+  rootDiv.render(
+    <React.StrictMode>
+      <HighlighterProvider>
+        <App />
+      </HighlighterProvider>
+    </React.StrictMode>
+  );
+}
 
-rootDiv.render(
-  <React.StrictMode>
-    <HighlighterProvider>
-      <App />
-    </HighlighterProvider>
-  </React.StrictMode>
-);
+setTimeout(load, 1000);
