@@ -2,13 +2,19 @@
     "version": "1.0.0",
     "manifest_version": 3,
     "name": "Polyfeed",
+    "icons": {
+        "128": "./public/Polyfeed_Social_Grey.png"
+    },
+    "action": {
+        "default_popup": "./public/popup.html",
+        "default_icon": {
+            "32": "./public/Polyfeed_Social_Grey.png"
+        }
+    },
     "content_scripts": [
         {
             "matches": [
-                "http://lms.monash.edu/mod/assign*",
-                "https://lms.monash.edu/mod/assign*",
-                "https://docs.google.com/*",
-                "https://drive.google.com/*"
+                "<all_urls>"
             ],
             "js": [
                 "./js/index.js"
@@ -16,7 +22,10 @@
             "run_at": "document_end"
         }
     ],
-    "permission": [
+    "background": {
+        "service_worker": "./public/background.js"
+    },
+    "permissions": [
         "storage",
         "activeTab"
     ]

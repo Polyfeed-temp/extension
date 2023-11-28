@@ -59,7 +59,22 @@ export interface Unit {
 
 }
 
+type role = "Student" | "Tutor" | "Admin" | "Chief Examiner"
+
 export interface User {
-  name: string;
+  firstName: string;
+  monashId: string;
+  monashObjectId: string | null
+  authcate: string
+  email: string
+  lastName: string;
+  role: role
+  faculty: string;
   units: Unit[];
+}
+
+export interface UserState {
+  login: boolean;
+  access_token?: string;
+  user?: User;
 }
