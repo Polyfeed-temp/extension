@@ -1,40 +1,43 @@
-import React, {createContext, useReducer, useContext, ReactNode} from "react";
-import {User} from "../types";
-import {mockUser} from "../services/user";
+import React, {
+  createContext,
+  useReducer,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
+import {User, UserState} from "../types";
 
-interface UserState {
-  login: boolean;
-  token?: string;
-  user?: User;
-}
+import UserService from "../services/user.service";
+
+const service = new UserService();
 
 interface UserAction {
   type: "LOGIN" | "LOGOUT";
   payload?: {username: string; password: string};
 }
+interface InitializeAction {
+  type: "INITIALIZE";
+  payload: UserState;
+}
 
+type actions = UserAction | InitializeAction;
 const UserContext = createContext<
   {state: UserState; dispatch: React.Dispatch<UserAction>} | undefined
 >(undefined);
 
-function userReducer(state: UserState, action: UserAction): UserState {
+function userReducer(state: UserState, action: actions): UserState {
   switch (action.type) {
-    case "LOGIN":
-      if (state.login === true) {
-        return state;
-      }
-      console.log(state);
+    case "INITIALIZE":
       return {
-        ...state,
+        ...action.payload,
         login: true,
-        user: mockUser,
       };
     case "LOGOUT":
       return {
         ...state,
         login: false,
         user: {} as User,
-        token: undefined,
+        access_token: undefined,
       };
     default:
       return state;
@@ -47,10 +50,51 @@ function UserProvider({children}: {children: ReactNode}) {
     user: undefined,
   };
 
-  const [state, dispatch] = useReducer(userReducer, initialState);
+  const [state, baseDispatch] = useReducer(userReducer, initialState);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await service.getUser();
+        if (user) {
+          baseDispatch({type: "INITIALIZE", payload: user});
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const serviceDispatch = async (action: actions) => {
+    switch (action.type) {
+      case "LOGIN":
+        if (action.payload) {
+          console.log("From service dispatch");
+          try {
+            const res = await service.login(
+              action.payload.username,
+              action.payload.password
+            );
+            console.log(res);
+            baseDispatch({type: "INITIALIZE", payload: res});
+          } catch (err) {
+            console.log(err);
+          }
+        }
+        break;
+      case "LOGOUT":
+        // service.logout();
+        baseDispatch(action);
+        break;
+
+      default:
+        baseDispatch(action);
+    }
+  };
 
   return (
-    <UserContext.Provider value={{state, dispatch}}>
+    <UserContext.Provider value={{state, dispatch: serviceDispatch}}>
       {children}
     </UserContext.Provider>
   );

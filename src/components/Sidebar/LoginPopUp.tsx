@@ -31,12 +31,18 @@ const LoginPopup = ({
   }
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     console.log("submit form");
 
-    dispatch({type: "LOGIN", payload: {username, password}});
-    onClose();
+    const val = await dispatch({type: "LOGIN", payload: {username, password}});
+    if (userState.login) {
+      onClose();
+    } else {
+      setErrorMessage("Username or password is incorrect");
+    }
   };
 
   return (
@@ -70,7 +76,7 @@ const LoginPopup = ({
               />
             </div>
           </div>
-
+          {errorMessage && <div className="text-red-500">{errorMessage}</div>}
           <div className="items-center px-4 py-3">
             <button
               id="ok-btn"

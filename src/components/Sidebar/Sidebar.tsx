@@ -35,6 +35,7 @@ const rightChevron = (
     />
   </svg>
 );
+//name, email,falculty, password 
 export function Sidebar({
   collapsed,
   toggleSidebar,
@@ -48,12 +49,13 @@ export function Sidebar({
       style={{
         width: collapsed ? "0" : "428px",
         transition: "width 0.3s",
+        zIndex: 100000,
       }}
     >
       <div
         className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 flex items-center justify-center p-2 cursor-pointer bg-white border border-gray-300"
         onClick={toggleSidebar}
-        style={{zIndex: 1001}} // Ensure it's above the sidebar
+        style={{zIndex: 100001}} // Ensure it's above the sidebar
       >
         {collapsed ? leftChevron : rightChevron}
       </div>
