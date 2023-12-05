@@ -43,7 +43,9 @@ function ToolbarMenu({
         <MenuItem onClick={() => setAnnotationTag("To-Dos")}>
           Add to-do list
         </MenuItem>
-        <MenuItem>Explain Further</MenuItem>
+        <MenuItem onClick={() => setAnnotationTag("Explain Further")}>
+          Explain Further
+        </MenuItem>
       </MenuList>
     </Menu>
   );
@@ -76,7 +78,6 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
         startMeta: highlighting.startMeta,
         endMeta: highlighting.endMeta,
         text: highlighting.text,
-        url: window.location.href,
       };
       annotationDispatch({
         type: "SET_EDITING",

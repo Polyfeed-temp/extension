@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {AnnotationData, AnnotationTag, Unit} from "../../../types";
+import {AnnotationData, AnnotationTag, Feedback, Unit} from "../../../types";
 import {Card, Typography} from "@material-tailwind/react";
 import {annotationTagsIcons} from "../../AnnotationIcons";
 interface Props {
@@ -37,9 +37,9 @@ const chevronIconUp = (
     />
   </svg>
 );
-export function UnitAssignmentSummary({unit}: {unit: Unit}) {
+export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  console.log(unit);
+  console.log(feedback);
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -50,28 +50,23 @@ export function UnitAssignmentSummary({unit}: {unit: Unit}) {
         className=" flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left"
       >
         {isDropdownOpen
-          ? unit.unitCode
-          : "View Annotations for " + unit.unitCode}
+          ? feedback.unitCode
+          : "View Annotations for " + feedback.unitCode}
 
         {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
-      {isDropdownOpen &&
-        unit.assignments.map((assignment) =>
-          assignment.feedback && assignment.feedback.annotations ? (
-            <>
-              <div className="border-2 border-solid">
-                {assignment.assignmentName}
-              </div>
+      {isDropdownOpen && feedback.highlights ? (
+        <>
+          <div className="border-2 border-solid">{feedback.assessmentName}</div>
 
-              <SummaryCard annotationData={assignment.feedback.annotations} />
-            </>
-          ) : null
-        )}
+          <SummaryCard annotationData={feedback.highlights} />
+        </>
+      ) : null}
     </div>
   );
 }
 
-const SummaryCard: React.FC<Props> = ({annotationData}) => {
+export const SummaryCard: React.FC<Props> = ({annotationData}) => {
   const annotationTagCount: {[key in AnnotationTag]: number} = {
     Strength: 0,
     Weakness: 0,
@@ -79,6 +74,7 @@ const SummaryCard: React.FC<Props> = ({annotationData}) => {
     Confused: 0,
     Other: 0,
   };
+  console.log(annotationData[0]);
 
   annotationData.forEach(({annotation}) => {
     annotationTagCount[annotation.annotationTag] += 1;

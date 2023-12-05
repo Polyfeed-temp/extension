@@ -5,11 +5,10 @@ export interface Annotation {
   endMeta: DomMeta;
   text: string;
   id: string;
-  url: string;
   annotationTag: AnnotationTag;
 }
 
-export type SideBarAction = "To-Dos" | "Notes"
+export type SideBarAction = "To-Dos" | "Notes" | "Explain Further"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
 export type ActionPointCategory =
@@ -21,11 +20,10 @@ export type ActionPointCategory =
   | "Other";
 
 export interface AnnotationData {
-  unitCode?: string;
-  assignmentName?: string;
   annotation: Annotation;
   notes?: AnnotationNotes
   todo?: AnnotationActionPoint[]
+  gptResponse?: string
 }
 
 export interface AnnotationNotes {
@@ -40,22 +38,30 @@ export interface AnnotationActionPoint {
 }
 
 export interface Feedback {
-  feedback: string;
-  annotations?: AnnotationData[];
+  assessmentID: number
+  assessmentName: string;
+  unitCode: string;
+  mark: number;
+  clarity?: number
+  personalise?: number
+  usability?: number
+  emotion?: number
+  highlights?: AnnotationData[];
   marker: string;
-
-
 }
-export interface Assignment {
-  feedback?: Feedback;
-  assignmentName: string;
-  rubric: string;
-
+export interface Assessment {
+  id: number
+  assessmentName: string;
+  rubric?: string;
 }
+
 
 export interface Unit {
+  id: number
   unitCode: string;
-  assignments: Assignment[];
+  year: number
+  semester: number
+  assessments: Assessment[];
 
 }
 
@@ -70,7 +76,6 @@ export interface User {
   lastName: string;
   role: role
   faculty: string;
-  units: Unit[];
 }
 
 export interface UserState {

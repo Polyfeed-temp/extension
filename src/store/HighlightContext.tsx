@@ -14,10 +14,12 @@ import {
   AnnotationTag,
   SideBarAction,
   AnnotationData,
+  Feedback,
 } from "../types";
 
 interface HighlightState {
   highlighterLib: Highlighter | null;
+  assessmentID?: number;
   records: AnnotationData[];
   isHighlighting: boolean;
   editing: {
@@ -28,16 +30,21 @@ interface HighlightState {
 }
 interface InitializeAction {
   type: "INITIALIZE";
-  payload: AnnotationData[]; // Assuming you have a Record type defined somewhere.
+  payload: Feedback | null;
+}
+
+interface AddFeedbackAction {
+  type: "ADD_FEEDBACK";
+  payload: Feedback;
 }
 interface AddRecordAction {
   type: "ADD_RECORD";
-  payload: AnnotationData; // Assuming you have a Record type defined somewhere.
+  payload: AnnotationData;
 }
 
 interface SetEditingAction {
   type: "SET_EDITING";
-  payload: {sidebarAction: SideBarAction; annotation: Annotation}; // Assuming you have a HighlightSource type.
+  payload: {sidebarAction: SideBarAction; annotation: Annotation};
 }
 
 interface SetIsHighlightingAction {
@@ -62,8 +69,8 @@ type Action =
   | SetIsHighlightingAction
   | DeleteRecordAction
   | InitializeAction
-  | SetDraftingAction;
-
+  | SetDraftingAction
+  | AddFeedbackAction;
 const HighlighterContext = createContext<
   {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -74,18 +81,36 @@ const highlighterReducer = (
 ): HighlightState => {
   switch (action.type) {
     case "INITIALIZE":
-      // action.payload.forEach(({annotation}) => {
-      //   console.log(annotation);
-      //   state.highlighterLib?.fromStore(
-      //     annotation.startMeta,
-      //     annotation.endMeta,
-      //     annotation.text,
-      //     annotation.id
-      //   );
-      // });
+      const root = document.getElementById("docos-stream-view") as HTMLElement;
+      root
+        ? console.log("doco streamview")
+        : console.log("not doco streamview");
+      const lib = new Highlighter({
+        $root: root ? root : document.documentElement,
+        exceptSelectors: ["#react-root"],
+      });
 
-      console.log(state);
-      return state;
+      const initialState: HighlightState = {
+        highlighterLib: lib,
+        records: action.payload?.highlights ? action.payload.highlights : [],
+        editing: null,
+        isHighlighting: false,
+        assessmentID: action.payload?.assessmentID,
+        drafting: null,
+      };
+
+      const feedback = action.payload;
+      const records = feedback?.highlights?.map((highlight) => {
+        lib.fromStore(
+          highlight.annotation.startMeta,
+          highlight.annotation.endMeta,
+          highlight.annotation.id,
+          highlight.annotation.text
+        );
+      });
+      console.log("initialize");
+
+      return {...state, ...initialState};
     case "SET_DRAFTING":
       return {...state, drafting: action.payload};
     case "ADD_RECORD":
@@ -109,47 +134,49 @@ const highlighterReducer = (
         (record) => record.annotation.id !== action.payload.id
       );
       return {...state, records: newRecords};
+    case "ADD_FEEDBACK":
+      return {...state, assessmentID: action.payload.assessmentID};
     default:
       return state;
   }
 };
 
 export const HighlighterProvider = ({children}: {children: ReactNode}) => {
-  const root = document.getElementById("docos-stream-view") as HTMLElement;
-  root ? console.log("doco streamview") : console.log("not doco streamview");
-  const initialState: HighlightState = {
-    highlighterLib: new Highlighter({
-      $root: root ? root : document.documentElement,
-      exceptSelectors: ["#react-root"],
-    }),
+  const [state, baseDispatch] = useReducer(highlighterReducer, {
+    highlighterLib: null,
     records: [],
     editing: null,
     isHighlighting: false,
     drafting: null,
-  };
-  const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
+  });
   const service = new AnnotationService();
-  useEffect(() => {
-    const fetchAnnotations = async () => {
-      const annotations = await service.getAnnotationsForUrl(
-        window.location.href
-      );
-      console.log(annotations);
 
-      baseDispatch({type: "INITIALIZE", payload: annotations});
-    };
-    fetchAnnotations();
-  }, []);
   const dispatch = async (action: Action) => {
     switch (action.type) {
       case "ADD_RECORD":
         try {
           const sources = action.payload;
-          console.log("adding", sources);
-          const annotation = await service.addAnnotations(sources);
-          console.log(annotation);
-
+          if (state.assessmentID) {
+            const annotation = await service.addAnnotations(
+              state.assessmentID,
+              sources
+            );
+          } else {
+          }
           baseDispatch({type: "ADD_RECORD", payload: action.payload});
+        } catch (err) {
+          console.log(err);
+        }
+        break;
+      case "ADD_FEEDBACK":
+        try {
+          const feedback = action.payload;
+          const feedbackVal = await service.createFeedback(feedback);
+          feedbackVal.assessmentID &&
+            baseDispatch({
+              type: "ADD_FEEDBACK",
+              payload: feedbackVal,
+            });
         } catch (err) {
           console.log(err);
         }
@@ -203,7 +230,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       state.highlighterLib?.off(Highlighter.event.CLICK, handleClick);
       state.highlighterLib?.off(Highlighter.event.HOVER, handleHover);
     };
-  }, [state.highlighterLib, state.records]); // the dependencies ensure that the effect runs again if either the highlighterLib or records change
+  }, [state.highlighterLib]);
 
   return (
     <HighlighterContext.Provider value={{state, dispatch}}>
