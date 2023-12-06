@@ -53,6 +53,7 @@ function ToolbarMenu({
 
 export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
   const highlighter = useHighlighterState().highlighterLib;
+  const feedbackId = useHighlighterState().feedbackId || 0;
   const highlightingID = highlighting.id;
   const _id = `__highlight-${highlightingID}`;
   const el = document.getElementById(_id);
@@ -73,6 +74,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
   const setAnnotationTag =
     (tag: AnnotationTag) => (sidebarAction: SideBarAction) => {
       const annotation: Annotation = {
+        feedbackId: feedbackId,
         id: highlightingID,
         annotationTag: tag,
         startMeta: highlighting.startMeta,
