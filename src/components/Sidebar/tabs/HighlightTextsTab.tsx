@@ -10,8 +10,12 @@ import {
   AnnotationData,
   AnnotationActionPoint,
   AnnotationTag,
+  Annotation,
 } from "../../../types";
-import {useState} from "react";
+import {SideBarAction} from "../../../types";
+
+import OpenAIService from "../../../services/openai.service";
+import {useState, useEffect} from "react";
 function getColorForTag(tag: AnnotationTag | undefined) {
   console.log(tag);
   switch (tag) {
@@ -29,27 +33,21 @@ function getColorForTag(tag: AnnotationTag | undefined) {
       return "gray-500";
   }
 }
-export function HighlightingTab({
-  unitCode,
-  assignment,
-}: {
-  unitCode: string;
-  assignment: string;
-}) {
+
+function RenderTabs() {
+  const [explanation, setExplanation] = useState("");
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
   const currentEditing = highlighterState.editing;
 
-  const addNotes = (input: AnnotationNotes) => {
+  const addNotes = (input: String) => {
     highlighterDispatch({
       type: "ADD_RECORD",
       payload: {
-        unitCode: unitCode,
-        assignment: assignment,
         annotation: {
           ...currentEditing?.annotation,
-          notes: input.content.toString(),
-        },
+          notes: input,
+        } as Annotation,
       } as AnnotationData,
     });
   };
@@ -57,39 +55,85 @@ export function HighlightingTab({
     highlighterDispatch({
       type: "ADD_RECORD",
       payload: {
-        unitCode: unitCode,
-        assignment: assignment,
         annotation: currentEditing?.annotation,
-        todo: actionItems,
+        actionItems: actionItems,
       } as AnnotationData,
     });
   };
-  function renderTabs() {
-    console.log(currentEditing);
-    switch (currentEditing?.sidebarAction) {
-      case "Notes":
-        return (
-          <div>
-            <div>
-              <Notes setNote={addNotes}></Notes>
-            </div>
-          </div>
-        );
-      case "To-Dos":
-        return (
-          <div>
-            <TodoCard saveFunc={addToDo}></TodoCard>
-          </div>
-        );
-      default:
-        return null;
+  useEffect(() => {
+    const fetchExplanationData = async () => {
+      console.log("fetchExplanationData");
+      const gptResponse = await fetch(
+        "http://localhost:8000/api/openai/explain",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            content: currentEditing?.annotation.text,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ).then((res) => res.json());
+      console.log("gptResponse", gptResponse);
+
+      setExplanation(gptResponse);
+    };
+    if (currentEditing?.sidebarAction === "Explain Further") {
+      fetchExplanationData();
     }
+  }, [currentEditing?.sidebarAction]);
+  const fetchExplanationData = async () => {
+    const text = currentEditing?.annotation.text;
+    if (!text) {
+      return;
+    }
+    const gptResponse = await new OpenAIService().explainFuther(text);
+    console.log("gptResponse", gptResponse);
+
+    setExplanation(gptResponse);
+  };
+  const handleButtonClick = () => {
+    console.log("handleButtonClick");
+    fetchExplanationData();
+  };
+
+  switch (currentEditing?.sidebarAction) {
+    case "Notes":
+      return (
+        <div>
+          <div>
+            <Notes setNote={addNotes}></Notes>
+          </div>
+        </div>
+      );
+    case "To-Dos":
+      return (
+        <div>
+          <TodoCard saveFunc={addToDo}></TodoCard>
+        </div>
+      );
+    case "Explain Further":
+      return (
+        <div>
+          <p>{explanation}</p>
+          <button onClick={handleButtonClick}> explain futher</button>
+        </div>
+      );
+    default:
+      return null;
   }
+}
+
+export function HighlightingTab() {
+  const highlighterState = useHighlighterState();
+  const currentEditing = highlighterState.editing;
 
   const annotationTagColor = getColorForTag(
     currentEditing?.annotation.annotationTag
   );
 
+  console.log(currentEditing);
   return (
     <div className="space-y-4">
       <div className="flex items-start">
@@ -97,7 +141,7 @@ export function HighlightingTab({
           className={`flex-grow border-l-4 pl-4 text-left`}
           style={{borderColor: `${annotationTagColor}`}}
         >
-          <p className="text-gray-700 italic">
+          <p className="text text-gray-700 italic">
             <span className="block text-sm text-gray-500 mb-1">
               {currentEditing?.annotation.annotationTag}
             </span>
@@ -105,7 +149,9 @@ export function HighlightingTab({
           </p>
         </blockquote>
       </div>
-      <div className="w-full">{renderTabs()}</div>
+      <div className="w-full">
+        <RenderTabs></RenderTabs>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {AnnotationData, AnnotationTag, Feedback, Unit} from "../../../types";
-import {Card, Typography} from "@material-tailwind/react";
+import {Card, Button} from "@material-tailwind/react";
 import {annotationTagsIcons} from "../../AnnotationIcons";
 interface Props {
   annotationData: AnnotationData[];
@@ -51,17 +51,39 @@ export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
       >
         {isDropdownOpen
           ? feedback.unitCode
-          : "View Annotations for " + feedback.unitCode}
+          : "Highlight Summary for " + feedback.unitCode}
 
         {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
       {isDropdownOpen && feedback.highlights ? (
         <>
-          <div className="border-2 border-solid">{feedback.assessmentName}</div>
+          <div className="border-2 border-solid">
+            Assessment {feedback.assessmentName}
+          </div>
 
           <SummaryCard annotationData={feedback.highlights} />
+          <Button
+            fullWidth
+            className="bg-black"
+            onClick={() => (window.location.href = feedback.url)}
+          >
+            {" "}
+            Go to Feedback
+          </Button>
         </>
       ) : null}
+    </div>
+  );
+}
+
+export function currentFeedbackSummary(feedback: Feedback) {
+  return (
+    <div className="border rounded-lg">
+      <div className="flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left">
+        {feedback.unitCode}
+      </div>
+      <div className="border-2 border-solid">{feedback.assessmentName}</div>
+      {/* <SummaryCard annotationData={feedback.highlights} /> */}
     </div>
   );
 }

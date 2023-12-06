@@ -4,6 +4,7 @@ import SearchableSelect from "../SearchableSelect";
 import UnitService from "../../../services/unit.service";
 import {Assessment, Unit, Feedback} from "../../../types";
 import {useHighlighterDispatch} from "../../../store/HighlightContext";
+import {useUserState} from "../../../store/UserContext";
 
 export function SelectUnitAssignmentTab({
   switchTabFunc,
@@ -15,9 +16,10 @@ export function SelectUnitAssignmentTab({
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assessment | null>(null);
   const [mark, setMark] = useState<number | null>(null);
-  const [marker, setMarker] = useState<string | null>("");
+  // const [marker, setMarker] = useState<string | null>("");
   const unitService = new UnitService();
   const highlightterDispatch = useHighlighterDispatch();
+  const user = useUserState().user;
 
   useEffect(() => {
     const getAllUnits = () =>
@@ -43,9 +45,9 @@ export function SelectUnitAssignmentTab({
     setMark(isNaN(value) ? null : value);
   };
 
-  const handleMarkerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMarker(event.target.value);
-  };
+  // const handleMarkerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setMarker(event.target.value);
+  // };
 
   return (
     <div className="flex flex-col h-full">
@@ -96,14 +98,14 @@ export function SelectUnitAssignmentTab({
             className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             placeholder="Enter marks"
           />
-          <input
+          {/* <input
             id="markers"
             name="markers"
             value={marker || ""}
             onChange={handleMarkerChange}
             className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             placeholder="Marker"
-          />
+          /> */}
         </div>
       )}
 
@@ -114,11 +116,13 @@ export function SelectUnitAssignmentTab({
             className="bg-black"
             onClick={() => {
               const feedback: Feedback = {
-                assessmentID: selectedAssignment.id,
+                assessmentId: selectedAssignment.id,
                 assessmentName: selectedAssignment.assessmentName,
                 unitCode: selectedUnit.unitCode,
                 mark: mark || 0,
-                marker: marker || "",
+                studentEmail: user?.email || "",
+                // marker: marker || "",
+                url: window.location.href,
               };
               console.log(feedback);
               highlightterDispatch({type: "ADD_FEEDBACK", payload: feedback});
