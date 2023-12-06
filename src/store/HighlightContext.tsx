@@ -19,7 +19,7 @@ import {
 
 interface HighlightState {
   highlighterLib: Highlighter | null;
-  assessmentID?: number;
+  feedbackId?: number;
   records: AnnotationData[];
   isHighlighting: boolean;
   editing: {
@@ -95,7 +95,7 @@ const highlighterReducer = (
         records: action.payload?.highlights ? action.payload.highlights : [],
         editing: null,
         isHighlighting: false,
-        assessmentID: action.payload?.assessmentID,
+        feedbackId: action.payload?.id,
         drafting: null,
       };
 
@@ -135,7 +135,7 @@ const highlighterReducer = (
       );
       return {...state, records: newRecords};
     case "ADD_FEEDBACK":
-      return {...state, assessmentID: action.payload.assessmentID};
+      return {...state, feedbackId: action.payload.id};
     default:
       return state;
   }
@@ -156,11 +156,9 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       case "ADD_RECORD":
         try {
           const sources = action.payload;
-          if (state.assessmentID) {
-            const annotation = await service.addAnnotations(
-              state.assessmentID,
-              sources
-            );
+          console.log(action.payload);
+          if (state.feedbackId) {
+            const annotation = await service.addAnnotations(sources);
           } else {
           }
           baseDispatch({type: "ADD_RECORD", payload: action.payload});
@@ -172,7 +170,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         try {
           const feedback = action.payload;
           const feedbackVal = await service.createFeedback(feedback);
-          feedbackVal.assessmentID &&
+          feedbackVal.assessmentId &&
             baseDispatch({
               type: "ADD_FEEDBACK",
               payload: feedbackVal,
