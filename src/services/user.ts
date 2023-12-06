@@ -25,19 +25,7 @@ const annotation: Annotation[] = [{
         "textOffset": 890
     }, "text": " and edge-to-leaf labels correctly updated: 0.25/0.25",
     "id": "cd7343b1-2a20-4ec2-b2a0-9d92eaf35a67", url: "https://lms.monash.edu/mod/assign/view.php?id=12092526", annotationTag: "Weakness"
-},
-{
-    "startMeta": {
-        "parentTagName": "DIV",
-        "parentIndex": 78,
-        "textOffset": 837
-    }, "endMeta": {
-        "parentTagName": "DIV",
-        "parentIndex": 78,
-        "textOffset": 890
-    }, "text": " and edge-to-leaf labels correctly updated: 0.25/0.25",
-    "id": "cd7343b1-2a20-4ec2-b2a0-9d92eaf35a67", url: "https://lms.monash.edu/mod/assign/view.php?id=12092526", annotationTag: "Confused"
-},]
+}]
 const feedback: Feedback = { feedback: "Good", marker: "Bob", annotations: [{ annotation: annotation[0] }, { annotation: annotation[1] }] }
 const feedback1: Feedback = { feedback: "Good", marker: "Bob", annotations: [{ annotation: annotation[0] }, { annotation: annotation[2] }, { annotation: annotation[2] }, { annotation: annotation[2] }] }
 
