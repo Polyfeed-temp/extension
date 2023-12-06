@@ -5,10 +5,41 @@ import {annotationTagsIcons} from "../../AnnotationIcons";
 interface Props {
   annotationData: AnnotationData[];
 }
-
+const chevronIconDown = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-6 h-6"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+    />
+  </svg>
+);
+const chevronIconUp = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-6 h-6"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4.5 15.75l7.5-7.5 7.5 7.5"
+    />
+  </svg>
+);
 export function UnitAssignmentSummary({unit}: {unit: Unit}) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  console.log(unit);
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -16,16 +47,24 @@ export function UnitAssignmentSummary({unit}: {unit: Unit}) {
     <div className="border rounded-lg">
       <button
         onClick={toggleDropdown}
-        className="bg-gray-200 font-medium text-xl p-2 w-full text-left"
+        className=" flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left"
       >
         {isDropdownOpen
           ? unit.unitCode
           : "View Annotations for " + unit.unitCode}
+
+        {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
       {isDropdownOpen &&
         unit.assignments.map((assignment) =>
           assignment.feedback && assignment.feedback.annotations ? (
-            <SummaryCard annotationData={assignment.feedback.annotations} />
+            <>
+              <div className="border-2 border-solid">
+                {assignment.assignmentName}
+              </div>
+
+              <SummaryCard annotationData={assignment.feedback.annotations} />
+            </>
           ) : null
         )}
     </div>

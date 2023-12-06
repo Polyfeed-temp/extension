@@ -16,7 +16,7 @@ import {
   AnnotationData,
 } from "../types";
 
-interface State {
+interface HighlightState {
   highlighterLib: Highlighter | null;
   records: AnnotationData[];
   isHighlighting: boolean;
@@ -65,10 +65,13 @@ type Action =
   | SetDraftingAction;
 
 const HighlighterContext = createContext<
-  {state: State; dispatch: React.Dispatch<Action>} | undefined
+  {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
 
-const highlighterReducer = (state: State, action: Action): State => {
+const highlighterReducer = (
+  state: HighlightState,
+  action: Action
+): HighlightState => {
   switch (action.type) {
     case "INITIALIZE":
       // action.payload.forEach(({annotation}) => {
@@ -114,7 +117,7 @@ const highlighterReducer = (state: State, action: Action): State => {
 export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   const root = document.getElementById("docos-stream-view") as HTMLElement;
   root ? console.log("doco streamview") : console.log("not doco streamview");
-  const initialState: State = {
+  const initialState: HighlightState = {
     highlighterLib: new Highlighter({
       $root: root ? root : document.documentElement,
       exceptSelectors: ["#react-root"],

@@ -3,7 +3,7 @@ import {Sidebar} from "./components/Sidebar/Sidebar";
 import {useState} from "react";
 
 function App() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const toggleSidebar = () => {
     const sidebarWidth = "428px";
