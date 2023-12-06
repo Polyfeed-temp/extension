@@ -1,11 +1,14 @@
 import HighlightSource from 'web-highlighter/dist/model/source';
 import { DomMeta } from '../node_modules/web-highlighter/dist/types';
 export interface Annotation {
+  feedbackId: number;
   startMeta: DomMeta;
   endMeta: DomMeta;
   text: string;
   id: string;
   annotationTag: AnnotationTag;
+  notes?: string
+  gptResponse?: string
 }
 
 export type SideBarAction = "To-Dos" | "Notes" | "Explain Further"
@@ -14,16 +17,15 @@ export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused"
 export type ActionPointCategory =
   | "Further Practice"
   | "Contact Tutor"
-  | "Ask Classmate"
+  | "Ask Classmates"
   | "Refer Learning Resources"
   | "Explore Online"
   | "Other";
 
 export interface AnnotationData {
   annotation: Annotation;
-  notes?: AnnotationNotes
-  todo?: AnnotationActionPoint[]
-  gptResponse?: string
+  // notes?: AnnotationNotes
+  actionItems?: AnnotationActionPoint[]
 }
 
 export interface AnnotationNotes {
@@ -32,13 +34,14 @@ export interface AnnotationNotes {
 }
 export interface AnnotationActionPoint {
   action: string;
-  actionpoint: ActionPointCategory;
+  category: ActionPointCategory;
   deadline: Date;
   completed: boolean;
 }
 
 export interface Feedback {
-  assessmentID: number
+  id?: number
+  assessmentId: number
   assessmentName: string;
   unitCode: string;
   mark: number;
@@ -47,7 +50,9 @@ export interface Feedback {
   usability?: number
   emotion?: number
   highlights?: AnnotationData[];
-  marker: string;
+  marker?: string;
+  url: string
+  studentEmail: string
 }
 export interface Assessment {
   id: number
@@ -57,7 +62,7 @@ export interface Assessment {
 
 
 export interface Unit {
-  id: number
+  unitId: string
   unitCode: string;
   year: number
   semester: number

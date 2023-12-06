@@ -1,6 +1,6 @@
 import axios, { TOKEN_KEY } from "./api.service"
 import { getChromeLocalStorage, setChromeLocalStorage } from "./localStorage";
-import { UserState, User } from "../types";
+import { UserState, User, Unit } from "../types";
 const USER_KEY = "user";
 class UserService {
 
@@ -36,7 +36,19 @@ class UserService {
 
         const response = await axios.get("/api/login/verifyToken")
         const user = response.data as User
+
         return { user: user, access_token: token } as UserState
+    }
+
+    public async getUserUnitHighlights() {
+        const response = await axios.get("/api/user/student/highlights")
+        const units = response.data as Unit[]
+        return units
+    }
+
+    public async logout() {
+        await setChromeLocalStorage({ key: TOKEN_KEY, value: null });
+        await setChromeLocalStorage({ key: USER_KEY, value: null });
     }
 }
 export default UserService;
