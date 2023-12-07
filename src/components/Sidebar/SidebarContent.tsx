@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button} from "@material-tailwind/react";
 import {UnitForm} from "../UnitForm";
 import {
@@ -9,8 +9,7 @@ import {
   Annotation,
   AnnotationNotes,
   AnnotationData,
-  AnnotationActionPoint,
-  User,
+  Feedback,
 } from "../../types";
 
 type SidebarTab =
@@ -18,48 +17,80 @@ type SidebarTab =
   | "My Notes"
   | "Highlight Texts"
   | "Select Assignment";
-import {UnitAssignmentSummary} from "./tabs/SummaryCard";
+import {SummaryCard, UnitAssignmentSummary} from "./tabs/SummaryCard";
 import AnnotatedCard from "./AnnotatedCard";
 import {SelectUnitAssignmentTab} from "./tabs/StartAssignmentTab";
 import {HighlightingTab} from "./tabs/HighlightTextsTab";
 import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
 import {useUserState} from "../../store/UserContext";
-import {mockUser as currentUser} from "../../services/user";
+import AnnotationService from "../../services/annotation.service";
+import config from "../../config.json";
+
 function RenderTabs({
-  currentUser,
   currentTab,
   setCurrentTab,
+  feedback,
+  setFeedback,
+  feedbacks,
 }: {
   currentTab: SidebarTab;
-  currentUser: User;
   setCurrentTab: (tab: SidebarTab) => void;
+  feedback: Feedback | null;
+  setFeedback: (feedback: Feedback) => void;
+  feedbacks: Feedback[];
 }) {
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
-  const [unitCode, setUnitCode] = useState("");
-  const [assignment, setAssignment] = useState("");
+
   switch (currentTab) {
     case "Summary":
+      return (
+        <>
+          {feedbacks.map((feedback, index) => (
+            <UnitAssignmentSummary
+              feedback={feedback}
+              key={index}
+            ></UnitAssignmentSummary>
+          ))}
+        </>
+      );
     case "My Notes":
       return (
         <>
-          {currentUser?.units.map((unit, index) => (
-            <div key={index} className="mb-4">
-              <UnitAssignmentSummary unit={unit}></UnitAssignmentSummary>
-            </div>
-          ))}
           <hr className="my-4" />
 
           <div className="mb-4">
-            <Button
-              fullWidth
-              className="bg-black"
-              onClick={() => {
-                setCurrentTab("Select Assignment");
-              }}
-            >
-              Select Assignment
-            </Button>
+            {!feedback ? (
+              <Button
+                fullWidth
+                className="bg-black"
+                onClick={() => {
+                  setCurrentTab("Select Assignment");
+                }}
+              >
+                Start Highlight
+              </Button>
+            ) : (
+              <>
+                {feedback.highlights && (
+                  <SummaryCard annotationData={feedback.highlights} />
+                )}
+
+                <Button
+                  fullWidth
+                  className="bg-black"
+                  onClick={() => {
+                    setCurrentTab("Highlight Texts");
+                    highlighterDispatch({
+                      type: "SET_IS_HIGHLIGHTING",
+                      payload: true,
+                    });
+                  }}
+                >
+                  Continue Highlighting
+                </Button>
+              </>
+            )}
           </div>
         </>
       );
@@ -67,16 +98,14 @@ function RenderTabs({
       return (
         <div className="mb-4">
           <SelectUnitAssignmentTab
-            units={currentUser.units}
+            // units={currentUser.units}
             switchTabFunc={() => {
               highlighterDispatch({
                 type: "SET_IS_HIGHLIGHTING",
-                payload: !highlighterState.isHighlighting,
+                payload: true,
               });
               setCurrentTab("Highlight Texts");
             }}
-            setUnitCode={setUnitCode}
-            setAssignment={setAssignment}
           ></SelectUnitAssignmentTab>
         </div>
       );
@@ -85,10 +114,10 @@ function RenderTabs({
     case "Highlight Texts":
       return (
         <div className="mb-4">
-          <HighlightingTab
-            unitCode={unitCode}
-            assignment={assignment}
-          ></HighlightingTab>
+          {feedback && (
+            <UnitAssignmentSummary feedback={feedback}></UnitAssignmentSummary>
+          )}
+          <HighlightingTab></HighlightingTab>
           {highlighterState.records.map((record: AnnotationData, index) => (
             <div key={index} className="mb-4">
               <AnnotatedCard
@@ -100,51 +129,104 @@ function RenderTabs({
           ))}
           <hr className="my-4 pb-2" />
           <RateFeedbackTab></RateFeedbackTab>
+          <Button> Save highlights</Button>
         </div>
       );
   }
 }
 
 const SidebarPanel = () => {
-  const [currentTab, setCurrentTab] = useState("Summary" as SidebarTab);
-  const user = useUserState();
+  const [currentTab, setCurrentTab] = useState("My Notes" as SidebarTab);
+  const [currentFeedback, setCurrentFeedback] = useState<Feedback | null>(null);
+  const [feedbacks, setAllFeedbacks] = useState<Feedback[]>([]);
 
-  const currentUser = user?.user;
+  const [loading, setLoading] = useState(true);
+  const annotationService = new AnnotationService();
+  const highlighterDispatch = useHighlighterDispatch();
+  const userState = useUserState();
+
+  useEffect(() => {
+    const fetchAnnotations = async () => {
+      const feedback = await annotationService.getCurrentPageFeedback();
+      console.log(feedback);
+      if (feedback) {
+        setCurrentFeedback(feedback);
+      }
+      highlighterDispatch({type: "INITIALIZE", payload: feedback});
+      setLoading(false);
+    };
+    const fetchFeedbacks = async () => {
+      const feedbacks = await annotationService.getAllFeedack();
+      console.log(feedbacks);
+      setAllFeedbacks(feedbacks);
+    };
+    if (userState.login) {
+      fetchAnnotations();
+      fetchFeedbacks();
+    }
+  }, [userState.login]);
 
   return (
     <>
-      {currentUser ? (
+      {userState.login && (
         <div style={{width: "100%", boxSizing: "border-box"}}>
-          <div
-            id="content"
-            className="p-6 text-center gap-x-4"
-            style={{width: "100%"}}
-          >
-            <div className="mb-4">
+          <div id="content" className="p-6 text-center gap-x-4 relative">
+            <div className="flex">
               <Button
-                className="bg-black mr-2"
+                className={`${
+                  currentTab === "My Notes"
+                    ? "bg-black text-white"
+                    : "bg-gray text-black"
+                } flex-1`}
                 onClick={() => setCurrentTab("My Notes")}
               >
-                Home
+                My Notes
               </Button>
-              <Button className="bg-black" onClick={redirectToDashBoard}>
-                Summary Page
+              <Button
+                className={`${
+                  currentTab === "Summary"
+                    ? "bg-black text-white"
+                    : "bg-gray text-black"
+                } flex-1 ml-2`}
+                onClick={() => {
+                  setCurrentTab("Summary");
+                  highlighterDispatch({
+                    type: "SET_IS_HIGHLIGHTING",
+                    payload: false,
+                  });
+                }}
+              >
+                Summary
+              </Button>
+              <Button
+                className="bg-gray text-black flex-1 ml-2"
+                onClick={() => {
+                  window.location.href = config.dashboard;
+                }}
+              >
+                {" "}
+                Dashboard
               </Button>
             </div>
             <hr className="my-4" />
-            <RenderTabs
-              currentTab={currentTab}
-              currentUser={currentUser}
-              setCurrentTab={setCurrentTab}
-            ></RenderTabs>
+            {loading ? (
+              <div className="center animate-spin rounded-full border-t-4 border-black border-opacity-25 border-b-4 border-black-500 border-opacity-25 h-12 w-12"></div>
+            ) : (
+              <RenderTabs
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                feedback={currentFeedback}
+                setFeedback={setCurrentFeedback}
+                feedbacks={feedbacks}
+              ></RenderTabs>
+            )}
+
             <hr className="my-4" />
           </div>
         </div>
-      ) : null}
+      )}
     </>
   );
 };
-function redirectToDashBoard() {
-  window.location.href = "http://localhost:3000/";
-}
+
 export default SidebarPanel;

@@ -1,50 +1,73 @@
-import {Unit} from "../../../types";
-import {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {Button} from "@material-tailwind/react";
+import SearchableSelect from "../SearchableSelect";
+import UnitService from "../../../services/unit.service";
+import {Assessment, Unit, Feedback} from "../../../types";
+import {useHighlighterDispatch} from "../../../store/HighlightContext";
+import {useUserState} from "../../../store/UserContext";
 
 export function SelectUnitAssignmentTab({
-  units,
   switchTabFunc,
-  setUnitCode,
-  setAssignment,
 }: {
-  units: Unit[];
   switchTabFunc: () => void;
-  setUnitCode: (unitCode: string) => void;
-  setAssignment: (assignment: string) => void;
 }) {
+  const [units, setUnits] = useState<Unit[]>([]);
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
-  const [selectedAssignment, setSelectedAssignment] = useState<string>("");
+  const [selectedAssignment, setSelectedAssignment] =
+    useState<Assessment | null>(null);
+  const [mark, setMark] = useState<number | null>(null);
+  // const [marker, setMarker] = useState<string | null>("");
+  const unitService = new UnitService();
+  const highlightterDispatch = useHighlighterDispatch();
+  const user = useUserState().user;
 
-  const handleUnitChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = units.find((unit) => unit.unitCode === event.target.value);
-    selected ? setSelectedUnit(selected) : null;
-  };
+  useEffect(() => {
+    const getAllUnits = () =>
+      unitService.getAllUnits().then((res) => {
+        setUnits(res);
+      });
+
+    getAllUnits();
+  }, []);
+
   const handleAssignmentChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedAssignment(event.target.value);
+    const selectedAssignmentId = parseInt(event.target.value);
+    const selectedAssignment = selectedUnit?.assessments.find(
+      (assignment) => assignment.id === selectedAssignmentId
+    );
+    setSelectedAssignment(selectedAssignment || null);
   };
+
+  const handleMarksChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(event.target.value);
+    setMark(isNaN(value) ? null : value);
+  };
+
+  // const handleMarkerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setMarker(event.target.value);
+  // };
 
   return (
     <div className="flex flex-col h-full">
       <div className="relative mt-2 rounded-md shadow-sm">
-        <select
-          id="unit"
-          name="unit"
-          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          onChange={handleUnitChange}
-        >
-          <option value="">Select a unit</option>
-          {units.map((unit, index) => (
-            <option key={index} value={unit.unitCode}>
-              {unit.unitCode}
-            </option>
-          ))}
-        </select>
+        <SearchableSelect
+          options={units}
+          displayFunction={(option) =>
+            `${option.unitCode} - Year: ${option.year}, Semester: ${option.semester}`
+          }
+          filterFunction={(option, searchTerm) =>
+            `${option.unitCode} ${option.year} S${option.semester}`
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
+          }
+          onSelectFunction={(selectedUnit: Unit) =>
+            setSelectedUnit(selectedUnit)
+          }
+        ></SearchableSelect>
       </div>
 
-      {/* Assignment Dropdown - Conditional Rendering */}
       {selectedUnit && (
         <div className="relative mt-2 rounded-md shadow-sm">
           <select
@@ -54,52 +77,64 @@ export function SelectUnitAssignmentTab({
             onChange={handleAssignmentChange}
           >
             <option value="">Select an assignment</option>
-            {selectedUnit.assignments.map((assignment, index) => (
-              <option key={index} value={assignment.assignmentName}>
-                {assignment.assignmentName}
+            {selectedUnit.assessments.map((assignment) => (
+              <option key={assignment.id} value={assignment.id}>
+                {assignment.assessmentName}
               </option>
             ))}
           </select>
         </div>
       )}
 
-      {
-        // Marks Input - Conditional Rendering
-        selectedAssignment && (
-          <div className="relative mt-2 rounded-md shadow-sm">
-            <input
-              min="0"
-              type="number"
-              id="marks"
-              name="marks"
-              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              placeholder="Enter marks"
-            />
-          </div>
-        )
-      }
+      {selectedUnit && selectedAssignment && (
+        <div className="relative mt-2 rounded-md shadow-sm">
+          <input
+            min="0"
+            type="number"
+            id="marks"
+            name="marks"
+            value={mark || ""}
+            onChange={handleMarksChange}
+            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            placeholder="Enter marks"
+          />
+          {/* <input
+            id="markers"
+            name="markers"
+            value={marker || ""}
+            onChange={handleMarkerChange}
+            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            placeholder="Marker"
+          /> */}
+        </div>
+      )}
 
-      {
-        // Save Button - Conditional Rendering
-        selectedUnit && selectedAssignment && (
-          <div className="relative mt-2 rounded-md shadow-sm">
-            <Button
-              fullWidth
-              className="bg-black"
-              onClick={() => {
-                setUnitCode(selectedUnit.unitCode);
-                setAssignment(selectedAssignment);
-                switchTabFunc();
-              }}
-            >
-              Start highlighting
-            </Button>
-          </div>
-        )
-      }
+      {selectedUnit && selectedAssignment && (
+        <div className="relative mt-2 rounded-md shadow-sm">
+          <Button
+            fullWidth
+            className="bg-black"
+            onClick={() => {
+              const feedback: Feedback = {
+                assessmentId: selectedAssignment.id,
+                assessmentName: selectedAssignment.assessmentName,
+                unitCode: selectedUnit.unitCode,
+                mark: mark || 0,
+                studentEmail: user?.email || "",
+                // marker: marker || "",
+                url: window.location.href,
+              };
+              console.log(feedback);
+              highlightterDispatch({type: "ADD_FEEDBACK", payload: feedback});
+              switchTabFunc();
+            }}
+          >
+            Start highlighting
+          </Button>
+        </div>
+      )}
 
-      {/* Footer */}
-      <div className="mt-auto text-sm">
+      <div className="mt-10 text-sm">
         <h5>
           Start highlighting the feedback you received to create your own
           learning plan.

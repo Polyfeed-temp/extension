@@ -1,31 +1,31 @@
 import HighlightSource from 'web-highlighter/dist/model/source';
 import { DomMeta } from '../node_modules/web-highlighter/dist/types';
 export interface Annotation {
+  feedbackId: number;
   startMeta: DomMeta;
   endMeta: DomMeta;
   text: string;
   id: string;
-  url: string;
   annotationTag: AnnotationTag;
+  notes?: string
+  gptResponse?: string
 }
 
-export type SideBarAction = "To-Dos" | "Notes"
+export type SideBarAction = "To-Dos" | "Notes" | "Explain Further"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
 export type ActionPointCategory =
   | "Further Practice"
   | "Contact Tutor"
-  | "Ask Classmate"
+  | "Ask Classmates"
   | "Refer Learning Resources"
   | "Explore Online"
   | "Other";
 
 export interface AnnotationData {
-  unitCode?: string;
-  assignmentName?: string;
   annotation: Annotation;
-  notes?: AnnotationNotes
-  todo?: AnnotationActionPoint[]
+  // notes?: AnnotationNotes
+  actionItems?: AnnotationActionPoint[]
 }
 
 export interface AnnotationNotes {
@@ -34,28 +34,39 @@ export interface AnnotationNotes {
 }
 export interface AnnotationActionPoint {
   action: string;
-  actionpoint: ActionPointCategory;
+  category: ActionPointCategory;
   deadline: Date;
   completed: boolean;
 }
 
 export interface Feedback {
-  feedback: string;
-  annotations?: AnnotationData[];
-  marker: string;
-
-
+  id?: number
+  assessmentId: number
+  assessmentName: string;
+  unitCode: string;
+  mark: number;
+  clarity?: number
+  personalise?: number
+  usability?: number
+  emotion?: number
+  highlights?: AnnotationData[];
+  marker?: string;
+  url: string
+  studentEmail: string
 }
-export interface Assignment {
-  feedback?: Feedback;
-  assignmentName: string;
-  rubric: string;
-
+export interface Assessment {
+  id: number
+  assessmentName: string;
+  rubric?: string;
 }
+
 
 export interface Unit {
+  unitId: string
   unitCode: string;
-  assignments: Assignment[];
+  year: number
+  semester: number
+  assessments: Assessment[];
 
 }
 
@@ -70,7 +81,6 @@ export interface User {
   lastName: string;
   role: role
   faculty: string;
-  units: Unit[];
 }
 
 export interface UserState {

@@ -6,7 +6,7 @@ import {Button, Checkbox, Typography} from "@material-tailwind/react";
 const ToDoActions: ActionPointCategory[] = [
   "Further Practice",
   "Contact Tutor",
-  "Ask Classmate",
+  "Ask Classmates",
   "Refer Learning Resources",
   "Explore Online",
   "Other",
@@ -20,7 +20,7 @@ function TodoCard({
   const [actionItems, setActionItems] = useState<AnnotationActionPoint[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<
     ActionPointCategory | undefined
-  >("Ask Classmate");
+  >("Explore Online");
   const [todoText, setTodoText] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const [addToDo, setAddToDo] = useState<boolean>(true);
@@ -54,7 +54,7 @@ function TodoCard({
                   color="gray"
                   className="font-normal break-words flex-grow mr-2 italic text-left"
                 >
-                  {actionPointItem.actionpoint}
+                  {actionPointItem.category}
                 </Typography>
                 <Typography
                   variant="small"
@@ -131,7 +131,7 @@ function TodoCard({
               setActionItems(
                 actionItems.concat({
                   action: todoText,
-                  actionpoint: selectedCategory,
+                  category: selectedCategory,
                   deadline: new Date(dueDate),
                 } as AnnotationActionPoint)
               );

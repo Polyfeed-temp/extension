@@ -52,11 +52,11 @@ export const RateFeedbackTab = () => {
       </button>
       {isDropdownOpen &&
         [
-          "Easy to understand",
-          "Relates to my work",
-          "Helps me to critically evaluate my work",
-          "Can be used even after this unit",
-          "Made me feel positive",
+          "is easy to understand",
+          "relates to my work",
+          "helps me to critically evaluate my work",
+          "can be used even after this unit",
+          "makes me feel positive",
         ].map((feedback, index) => (
           <div
             key={index}
