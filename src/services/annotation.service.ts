@@ -42,8 +42,9 @@ class AnnotationService {
     }
 
     public async getAllFeedack(): Promise<Feedback[]> {
-        // const response = await axios.get("/api/feedback/")
-        // return response.data as Feedback[]
+        const response = await axios.get("/api/feedback/all")
+        console.log(response.data)
+        return response.data as Feedback[]
         const feedback: Feedback = {
             "id": 549,
             "url": "https://lms.monash.edu/mod/assign/view.php?id=12092529#",

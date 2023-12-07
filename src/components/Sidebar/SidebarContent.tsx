@@ -24,6 +24,8 @@ import {HighlightingTab} from "./tabs/HighlightTextsTab";
 import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
 import {useUserState} from "../../store/UserContext";
 import AnnotationService from "../../services/annotation.service";
+import config from "../../config.json";
+
 function RenderTabs({
   currentTab,
   setCurrentTab,
@@ -195,6 +197,15 @@ const SidebarPanel = () => {
                 }}
               >
                 Summary
+              </Button>
+              <Button
+                className="bg-gray text-black flex-1 ml-2"
+                onClick={() => {
+                  window.location.href = config.dashboard;
+                }}
+              >
+                {" "}
+                Dashboard
               </Button>
             </div>
             <hr className="my-4" />
