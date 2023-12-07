@@ -77,7 +77,7 @@ function RenderTabs() {
       ).then((res) => res.json());
       console.log("gptResponse", gptResponse);
 
-      setExplanation(gptResponse);
+      setExplanation(gptResponse.content);
     };
     if (currentEditing?.sidebarAction === "Explain Further") {
       fetchExplanationData();
@@ -116,8 +116,13 @@ function RenderTabs() {
     case "Explain Further":
       return (
         <div>
-          <p>{explanation}</p>
-          <button onClick={handleButtonClick}> explain futher</button>
+          <p>
+            {explanation == "" ? (
+              <div className="center animate-spin rounded-full border-t-4 border-black border-opacity-25 border-b-4 border-black-500 border-opacity-25 h-12 w-12"></div>
+            ) : (
+              explanation
+            )}
+          </p>
         </div>
       );
     default:
