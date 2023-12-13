@@ -4,6 +4,7 @@ import React, {
   useContext,
   useReducer,
   useEffect,
+  useState,
 } from "react";
 import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
@@ -16,6 +17,8 @@ import {
   AnnotationData,
   Feedback,
 } from "../types";
+import {createPortal} from "react-dom";
+import Tippy from "@tippyjs/react";
 
 interface HighlightState {
   highlighterLib: Highlighter | null;
@@ -62,6 +65,10 @@ interface SetDraftingAction {
   type: "SET_DRAFTING";
   payload: HighlightSource;
 }
+interface SelectHighlightAction {
+  type: "SELECT_HIGHLIGHT";
+  payload: string;
+}
 
 type Action =
   | AddRecordAction
@@ -70,7 +77,8 @@ type Action =
   | DeleteRecordAction
   | InitializeAction
   | SetDraftingAction
-  | AddFeedbackAction;
+  | AddFeedbackAction
+  | SelectHighlightAction;
 const HighlighterContext = createContext<
   {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -133,9 +141,22 @@ const highlighterReducer = (
       const newRecords = state.records.filter(
         (record) => record.annotation.id !== action.payload.id
       );
+      state.highlighterLib?.remove(action.payload.id);
       return {...state, records: newRecords};
     case "ADD_FEEDBACK":
       return {...state, feedbackId: action.payload.id};
+    case "SELECT_HIGHLIGHT":
+      const highlight = state.records.find(
+        (record) => record.annotation.id === action.payload
+      );
+      if (!highlight) {
+        return state;
+      }
+      return {
+        ...state,
+        editing: {sidebarAction: "Notes", annotation: highlight.annotation},
+      };
+
     default:
       return state;
   }
@@ -149,6 +170,11 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     isHighlighting: false,
     drafting: null,
   });
+  const [selectedHighlightElement, setSelectedHighlightElement] =
+    useState<HTMLElement | null>(null);
+  const [selectedHighlighId, setSelectedHighlightId] = useState<string | null>(
+    null
+  );
   const service = new AnnotationService();
 
   const dispatch = async (action: Action) => {
@@ -192,8 +218,17 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         baseDispatch(action);
     }
   };
+
   useEffect(() => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
+      //give indicator to user if there is still another draft
+      // console.log("Code is being executed");
+      // console.log("state.drafting:", state);
+
+      // if (state.drafting || state.editing) {
+      //   alert("You have another draft or editing");
+      //   return;
+      // }
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
       console.log(data);
@@ -205,30 +240,62 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
       }
     };
-
     const handleClick = (data: {id: string}) => {
       // const currentSelected = state.records.find(
       //   (record) => record.id === data.id
       // ) as Annotation;
-      // dispatch({type: "SET_EDITING", payload: currentSelected});
+
+      const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
+      selectedArea ? setSelectedHighlightElement(selectedArea) : null;
+      setSelectedHighlightId(data.id);
+      dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
     };
 
     const handleHover = (data: {id: string}) => {
       const id = data.id;
       state.highlighterLib?.addClass("hover", id);
     };
-
+    const handleHoverOut = (data: {id: string}) => {
+      const id = data.id;
+      state.highlighterLib?.removeClass("hover", id);
+    };
     state.highlighterLib?.on(Highlighter.event.CREATE, handleCreate);
     state.highlighterLib?.on(Highlighter.event.CLICK, handleClick);
+    state.highlighterLib?.on(Highlighter.event.HOVER_OUT, handleHoverOut);
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
     // Cleanup function to remove the listeners
     return () => {
       state.highlighterLib?.off(Highlighter.event.CREATE, handleCreate);
       state.highlighterLib?.off(Highlighter.event.CLICK, handleClick);
-      state.highlighterLib?.off(Highlighter.event.HOVER, handleHover);
+      state.highlighterLib?.off(Highlighter.event.HOVER_OUT, handleHoverOut);
     };
   }, [state.highlighterLib]);
+
+  useEffect(() => {
+    const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
+      //give indicator to user if there is still another draft
+      // console.log("Code is being executed");
+      // console.log("state.drafting:", state);
+
+      // if (state.drafting || state.editing) {
+      //   alert("You have another draft or editing");
+      //   state.highlighterLib?.remove(data.sources[0].id);
+      //   return;
+      // }
+      const id = data.sources[0].id;
+      const _node = state.highlighterLib?.getDoms(id)[0];
+      console.log(data);
+      if (_node) {
+        _node.innerHTML =
+          `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
+      }
+      if (data.type != "from-store") {
+        dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
+      }
+    };
+    state.highlighterLib?.on(Highlighter.event.CREATE, handleCreate);
+  }, [state.drafting, state.editing]);
 
   return (
     <HighlighterContext.Provider value={{state, dispatch}}>
@@ -236,6 +303,24 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       {state.drafting ? (
         <RenderPop highlighting={state.drafting}></RenderPop>
       ) : null}
+      {selectedHighlightElement && selectedHighlighId && (
+        <Tippy
+          interactive={true}
+          render={(attrs) => (
+            <button
+              onClick={() => {
+                state.highlighterLib?.remove(selectedHighlighId);
+                setSelectedHighlightElement(null);
+                setSelectedHighlightId(null);
+              }}
+            >
+              Delete
+            </button>
+          )}
+          visible={true}
+          reference={selectedHighlightElement}
+        ></Tippy>
+      )}
     </HighlighterContext.Provider>
   );
 };
