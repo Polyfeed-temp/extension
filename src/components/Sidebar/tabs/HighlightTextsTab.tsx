@@ -13,6 +13,7 @@ import {
   Annotation,
 } from "../../../types";
 import {SideBarAction} from "../../../types";
+import "./highlighter.css";
 
 import OpenAIService from "../../../services/openai.service";
 import {useState, useEffect} from "react";
@@ -137,6 +138,13 @@ export function HighlightingTab() {
   const annotationTagColor = getColorForTag(
     currentEditing?.annotation.annotationTag
   );
+  useEffect(() => {
+    console.log("color change");
+    highlighterState.highlighterLib?.addClass(
+      currentEditing?.annotation.annotationTag as string,
+      currentEditing?.annotation.id
+    );
+  }, [currentEditing]);
 
   console.log(currentEditing);
   return (
