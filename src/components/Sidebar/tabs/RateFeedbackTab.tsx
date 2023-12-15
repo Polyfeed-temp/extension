@@ -1,7 +1,7 @@
 import {emoticons, emoticonsInversed} from "../../AnnotationIcons";
 
 import React, {useEffect, useState} from "react";
-
+import AnnotationService from "../../../services/annotation.service";
 export const RateFeedbackTab = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [feedbackClarity, setFeedbackClarity] = useState(0);
@@ -102,6 +102,7 @@ export const RateFeedbackTab = () => {
         feedbackEmotion,
       };
       console.log(feedback);
+      // new AnnotationService().rateFeedback(id, feedback);
       setIsSubmitted(true);
       setTimeout(() => setIsSubmitted(false), 3000);
     }
@@ -129,7 +130,7 @@ export const RateFeedbackTab = () => {
         rateFeedbackStatements.map((feedback, index) => (
           <div
             key={index}
-            className="flex justify-between items-center mb-2 p-2"
+            className="flex justify-between items-center mb-2 p-2 text-left"
           >
             <span className="flex-1">{feedback}</span>
             <div className="flex items-center">
@@ -141,9 +142,10 @@ export const RateFeedbackTab = () => {
                 >
                   <img
                     src={
-                      rating[index] === colorToRating(color)
-                        ? emoticonsInversed[color]
-                        : icon
+                      rating[index] === colorToRating(color) ||
+                      rating[index] === 0
+                        ? icon
+                        : emoticonsInversed[color]
                     }
                     alt={color}
                     style={{width: 40, height: 40}}
