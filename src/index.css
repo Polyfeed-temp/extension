@@ -1,0 +1,47 @@
+.Strength {
+  background-color: #3a70b7 !important;
+}
+
+.Weakness {
+  background-color: #ef5975 !important;
+}
+
+.ActionItem {
+  background-color: #23bfc6 !important;
+}
+
+.Confused {
+  background-color: #f79633 !important;
+}
+
+.Other {
+  background-color: #8960aa !important;
+}
+
+.default {
+  background-color: yellow !important;
+}
+
+.highlight-hover {
+  background-color: coral !important;
+}
+
+.border-Strength {
+  border-color: #3a70b7 !important;
+}
+
+.border-Weakness {
+  border-color: #ef5975 !important;
+}
+
+.border-ActionItem {
+  border-color: #23bfc6 !important;
+}
+
+.border-Confused {
+  border-color: #f79633 !important;
+}
+
+.border-Other {
+  border-color: #8960aa !important;
+}

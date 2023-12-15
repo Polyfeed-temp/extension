@@ -27,7 +27,7 @@ export default function AnnotatedCard({
           className={`border-${annotationData.annotation.annotationTag} flex-grow border-l-4 pl-4 text-left`}
         >
           <p className="text text-gray-700 italic">
-            <span className="block text-sm text-gray-500 mb-1">
+            <span className="block text-xl text-gray-500 mb-1">
               {annotationData.annotation.annotationTag}
             </span>
             {annotationData.annotation.text}

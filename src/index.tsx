@@ -29,7 +29,6 @@ function load() {
   document.body.appendChild(root);
 
   const rootDiv = ReactDOM.createRoot(root);
-
   rootDiv.render(
     <React.StrictMode>
       <UserProvider>
@@ -42,3 +41,8 @@ function load() {
 }
 
 setTimeout(load, 1000);
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//   if (request.message === "triggerContentScript") {
+//     load();
+//   }
+// });

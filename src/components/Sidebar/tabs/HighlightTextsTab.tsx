@@ -13,7 +13,6 @@ import {
   Annotation,
 } from "../../../types";
 import {SideBarAction} from "../../../types";
-import "./highlighter.css";
 
 import OpenAIService from "../../../services/openai.service";
 import {useState, useEffect} from "react";
@@ -155,7 +154,7 @@ export function HighlightingTab() {
           style={{borderColor: `${annotationTagColor}`}}
         >
           <p className="text text-gray-700 italic">
-            <span className="block text-sm text-gray-500 mb-1">
+            <span className="block text-xl text-gray-500 mb-1">
               {currentEditing?.annotation.annotationTag}
             </span>
             {currentEditing?.annotation.text}
