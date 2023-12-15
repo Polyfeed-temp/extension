@@ -70,19 +70,25 @@ export function SelectUnitAssignmentTab({
 
       {selectedUnit && (
         <div className="relative mt-2 rounded-md shadow-sm">
-          <select
-            id="assignment"
-            name="assignment"
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            onChange={handleAssignmentChange}
-          >
-            <option value="">Select an assignment</option>
-            {selectedUnit.assessments.map((assignment) => (
-              <option key={assignment.id} value={assignment.id}>
-                {assignment.assessmentName}
-              </option>
-            ))}
-          </select>
+          {selectedUnit.assessments ? (
+            <select
+              id="assignment"
+              name="assignment"
+              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              onChange={handleAssignmentChange}
+            >
+              <option value="">Select an assignment</option>
+              {selectedUnit.assessments.map((assignment) => (
+                <option key={assignment.id} value={assignment.id}>
+                  {assignment.assessmentName}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="flex justify-center items-center h-10">
+              <span className="font-medium">No assignments found</span>
+            </div>
+          )}
         </div>
       )}
 
