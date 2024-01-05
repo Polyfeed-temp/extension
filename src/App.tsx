@@ -1,6 +1,8 @@
 // import "./App.css";
 import {Sidebar} from "./components/Sidebar/Sidebar";
 import {useState} from "react";
+import {ToastContainer, toast} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [collapsed, setCollapsed] = useState(true);
@@ -24,8 +26,12 @@ function App() {
   };
   return (
     <div>
-      {" "}
       <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} />
+      <ToastContainer
+        position="bottom-right"
+        theme="dark"
+        style={{zIndex: 999999}}
+      />
     </div>
   );
 }

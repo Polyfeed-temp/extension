@@ -31,6 +31,12 @@ function load() {
   materialIcons.rel = "stylesheet";
   shadowRoot.appendChild(materialIcons);
 
+  const toastify = document.createElement("link");
+  toastify.href =
+    "https://cdn.jsdelivr.net/npm/react-toastify@9.1.3/dist/ReactToastify.min.css";
+  toastify.rel = "stylesheet";
+  shadowRoot.appendChild(toastify);
+
   // Appending a div to shadow root for React to mount to
   const reactRootDiv = document.createElement("div");
   shadowRoot.appendChild(reactRootDiv);
@@ -39,7 +45,7 @@ function load() {
 
   const style = document.createElement("style");
   style.textContent = `
-  
+
 @layer components {
   button {
     @apply bg-gray-500 text-white hover:bg-black;
