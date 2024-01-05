@@ -16,6 +16,7 @@ import {SideBarAction} from "../../../types";
 
 import OpenAIService from "../../../services/openai.service";
 import {useState, useEffect} from "react";
+import {toast} from "react-toastify";
 function getColorForTag(tag: AnnotationTag | undefined) {
   console.log(tag);
   switch (tag) {
@@ -29,6 +30,22 @@ function getColorForTag(tag: AnnotationTag | undefined) {
       return "#f79633";
     case "Other":
       return "#8960aa";
+    default:
+      return "gray-500";
+  }
+}
+function getClassForTag(tag: AnnotationTag | undefined) {
+  switch (tag) {
+    case "Strength":
+      return "Strength";
+    case "Weakness":
+      return "Weakness";
+    case "Action Item":
+      return "ActionItem";
+    case "Confused":
+      return "Confused";
+    case "Other":
+      return "Other";
     default:
       return "gray-500";
   }
@@ -88,7 +105,13 @@ function RenderTabs() {
     if (!text) {
       return;
     }
-    const gptResponse = await new OpenAIService().explainFuther(text);
+    const gptStatus = new OpenAIService().explainFuther(text);
+    toast.promise(gptStatus, {
+      pending: "Generating explanation...",
+      success: "Explanation generated!",
+      error: "Failed to generate explanation",
+    });
+    const gptResponse = await gptStatus;
     console.log("gptResponse", gptResponse);
 
     setExplanation(gptResponse);
@@ -103,7 +126,10 @@ function RenderTabs() {
       return (
         <div>
           <div>
-            <Notes setNote={addNotes}></Notes>
+            <Notes
+              setNote={addNotes}
+              notes={currentEditing.annotation.notes || ""}
+            ></Notes>
           </div>
         </div>
       );
@@ -140,7 +166,7 @@ export function HighlightingTab() {
   useEffect(() => {
     console.log("color change");
     highlighterState.highlighterLib?.addClass(
-      currentEditing?.annotation.annotationTag as string,
+      getClassForTag(currentEditing?.annotation.annotationTag),
       currentEditing?.annotation.id
     );
   }, [currentEditing]);
