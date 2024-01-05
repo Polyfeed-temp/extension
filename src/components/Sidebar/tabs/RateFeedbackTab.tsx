@@ -1,16 +1,24 @@
 import {emoticons, emoticonsInversed} from "../../AnnotationIcons";
-
-import React, {useEffect, useState} from "react";
+import {toast} from "react-toastify";
+import React, {useRef, useEffect, useState} from "react";
 import AnnotationService from "../../../services/annotation.service";
-export const RateFeedbackTab = () => {
+import {FeedbackRating} from "../../../types";
+export const RateFeedbackTab = ({
+  feedbackId,
+  rating,
+}: {
+  feedbackId: number;
+  rating: FeedbackRating;
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [feedbackClarity, setFeedbackClarity] = useState(0);
-  const [feedbackPersonalised, setFeedbackPersonalised] = useState(0);
+  const [feedbackClarity, setFeedbackClarity] = useState(rating.clarity);
+  const [feedbackPersonalised, setFeedbackPersonalised] = useState(
+    rating.personalise
+  );
   const [feedbackEvaluativeJudgement, setFeedbackEvaluativeJudgement] =
-    useState(0);
-  const [feedbackUsability, setFeedbackUsability] = useState(0);
-  const [feedbackEmotion, setFeedbackEmotion] = useState(0);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+    useState(rating.evaluativeJudgement);
+  const [feedbackUsability, setFeedbackUsability] = useState(rating.usability);
+  const [feedbackEmotion, setFeedbackEmotion] = useState(rating.emotion);
 
   const rateFeedbackStatements = [
     "is easy to understand",
@@ -26,7 +34,7 @@ export const RateFeedbackTab = () => {
     setFeedbackUsability,
     setFeedbackEmotion,
   ];
-  const rating = [
+  const ratingArray = [
     feedbackClarity,
     feedbackPersonalised,
     feedbackEvaluativeJudgement,
@@ -95,20 +103,31 @@ export const RateFeedbackTab = () => {
       feedbackEmotion
     ) {
       const feedback = {
-        feedbackClarity,
-        feedbackPersonalised,
-        feedbackEvaluativeJudgement,
-        feedbackUsability,
-        feedbackEmotion,
+        clarity: feedbackClarity,
+        personalise: feedbackPersonalised,
+        evaluativeJudgement: feedbackEvaluativeJudgement,
+        usability: feedbackUsability,
+        emotion: feedbackEmotion,
       };
       console.log(feedback);
-      // new AnnotationService().rateFeedback(id, feedback);
-      setIsSubmitted(true);
-      setTimeout(() => setIsSubmitted(false), 3000);
+      const submission = new AnnotationService().rateFeedback(
+        feedbackId,
+        feedback
+      );
+      toast.promise(submission, {
+        pending: "Submitting Rating...",
+        success: "Submitted Rating!",
+        error: "Submission failed, please try again.",
+      });
     }
   };
-
+  const firstRender = useRef(true);
   useEffect(() => {
+    //do not submitt after first render
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     handleSubmit();
   }, [
     feedbackClarity,
@@ -142,8 +161,8 @@ export const RateFeedbackTab = () => {
                 >
                   <img
                     src={
-                      rating[index] === colorToRating(color) ||
-                      rating[index] === 0
+                      ratingArray[index] === colorToRating(color) ||
+                      ratingArray[index] === 0
                         ? icon
                         : emoticonsInversed[color]
                     }
@@ -155,21 +174,6 @@ export const RateFeedbackTab = () => {
             </div>
           </div>
         ))}
-      {isSubmitted && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            backgroundColor: "black",
-            color: "white",
-            padding: "10px",
-            borderRadius: "5px",
-          }}
-        >
-          Your feedback rating has been submitted. Thank you!
-        </div>
-      )}
     </div>
   );
 };

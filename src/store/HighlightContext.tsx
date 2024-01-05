@@ -17,9 +17,8 @@ import {
   AnnotationData,
   Feedback,
 } from "../types";
-import {createPortal} from "react-dom";
 import Tippy from "@tippyjs/react";
-
+import {toast} from "react-toastify";
 interface HighlightState {
   highlighterLib: Highlighter | null;
   feedbackId?: number;
@@ -57,9 +56,7 @@ interface SetIsHighlightingAction {
 
 interface DeleteRecordAction {
   type: "DELETE_RECORD";
-  payload: {
-    id: string; // Or number, based on your ID type.
-  };
+  payload: string;
 }
 interface SetDraftingAction {
   type: "SET_DRAFTING";
@@ -139,9 +136,9 @@ const highlighterReducer = (
       return {...state, isHighlighting: action.payload};
     case "DELETE_RECORD":
       const newRecords = state.records.filter(
-        (record) => record.annotation.id !== action.payload.id
+        (record) => record.annotation.id !== action.payload
       );
-      state.highlighterLib?.remove(action.payload.id);
+      state.highlighterLib?.remove(action.payload);
       return {...state, records: newRecords};
     case "ADD_FEEDBACK":
       return {...state, feedbackId: action.payload.id};
@@ -184,10 +181,20 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           const sources = action.payload;
           console.log(action.payload);
           if (state.feedbackId) {
-            const annotation = await service.addAnnotations(sources);
+            const creationStatus = service.addAnnotations(sources);
+            toast.promise(creationStatus, {
+              pending: "Saving...",
+              success: "Saved",
+              error: "Error saving please try again",
+            });
+            const res = await creationStatus;
+            if (res.status !== 200) {
+              return;
+            }
+            baseDispatch({type: "ADD_RECORD", payload: action.payload});
           } else {
+            toast.error("Please select valid assignment");
           }
-          baseDispatch({type: "ADD_RECORD", payload: action.payload});
         } catch (err) {
           console.log(err);
         }
@@ -207,8 +214,16 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         break;
       case "DELETE_RECORD":
         try {
-          const {id} = action.payload;
-          // await service.removeAnnotation(id);
+          const status = service.deleteAnnotation(action.payload);
+          toast.promise(status, {
+            pending: "Deleting...",
+            success: "Deleted Highlight",
+            error: "Error deleting please try again",
+          });
+          const res = await status;
+          if (res.status !== 200) {
+            return;
+          }
           baseDispatch({type: "DELETE_RECORD", payload: action.payload});
         } catch (err) {
           console.log(err);

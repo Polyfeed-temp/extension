@@ -1,4 +1,4 @@
-import { AnnotationData, Feedback } from "../types";
+import { AnnotationData, Feedback, FeedbackRating } from "../types";
 import axios from "./api.service";
 
 
@@ -23,18 +23,24 @@ class AnnotationService {
         }
     }
 
-    public addAnnotations(highlight: AnnotationData): void {
+    public addAnnotations(highlight: AnnotationData) {
 
         console.log(highlight)
         console.log("adding annotation")
-        axios.post("/api/highlight/", highlight, {
+        return axios.post("/api/highlight/", highlight, {
             headers: {
                 'Content-Type': 'application/json'
             }
 
         })
 
+
     }
+
+    public async deleteAnnotation(annotationId: string) {
+        return axios.delete("/api/highlight/" + annotationId)
+    }
+
     public async createFeedback(feedback: Feedback): Promise<Feedback> {
         console.log("create feedback", feedback)
         const response = await axios.post("/api/feedback/", feedback)
@@ -149,6 +155,10 @@ class AnnotationService {
             unitCode: "FIT2081"
         }
         return [feedback]
+    }
+
+    public async rateFeedback(feedbackId: number, rating: FeedbackRating) {
+        return axios.post(`/api/feedback/rate/${feedbackId}`, rating)
     }
 
 
