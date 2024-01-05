@@ -1,17 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Button} from "@material-tailwind/react";
-import {UnitForm} from "../UnitForm";
 import {
   useHighlighterDispatch,
   useHighlighterState,
 } from "../../store/HighlightContext";
-import {
-  Annotation,
-  AnnotationNotes,
-  AnnotationData,
-  Feedback,
-} from "../../types";
-
+import {AnnotationData, Feedback} from "../../types";
 type SidebarTab =
   | "Summary"
   | "My Notes"
@@ -25,18 +18,18 @@ import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
 import {useUserState} from "../../store/UserContext";
 import AnnotationService from "../../services/annotation.service";
 import config from "../../config.json";
+import {ExplainFutherToggle} from "./ExplainFutherInput";
 
 function RenderTabs({
   currentTab,
   setCurrentTab,
   feedback,
-  setFeedback,
+
   feedbacks,
 }: {
   currentTab: SidebarTab;
   setCurrentTab: (tab: SidebarTab) => void;
   feedback: Feedback | null;
-  setFeedback: (feedback: Feedback) => void;
   feedbacks: Feedback[];
 }) {
   const highlighterDispatch = useHighlighterDispatch();
@@ -45,14 +38,14 @@ function RenderTabs({
   switch (currentTab) {
     case "Summary":
       return (
-        <>
+        <div className="flex flex-col gap-y-5">
           {feedbacks.map((feedback, index) => (
             <UnitAssignmentSummary
               feedback={feedback}
               key={index}
             ></UnitAssignmentSummary>
           ))}
-        </>
+        </div>
       );
     case "My Notes":
       return (
@@ -72,8 +65,8 @@ function RenderTabs({
               </Button>
             ) : (
               <>
-                {feedback.highlights && (
-                  <SummaryCard annotationData={feedback.highlights} />
+                {highlighterState.records && (
+                  <SummaryCard annotationData={highlighterState.records} />
                 )}
 
                 <Button
@@ -115,21 +108,45 @@ function RenderTabs({
       return (
         <div className="mb-4">
           {feedback && (
-            <UnitAssignmentSummary feedback={feedback}></UnitAssignmentSummary>
+            <UnitAssignmentSummary
+              feedback={{...feedback, highlights: highlighterState.records}}
+            ></UnitAssignmentSummary>
           )}
           <HighlightingTab></HighlightingTab>
+          <ExplainFutherToggle></ExplainFutherToggle>
           {highlighterState.records.map((record: AnnotationData, index) => (
             <div key={index} className="mb-4">
               <AnnotatedCard
-                text={record.annotation.text}
-                onEdit={() => {}}
-                onDelete={() => {}}
+                annotationData={record}
+                onEdit={() => {
+                  highlighterDispatch({
+                    type: "SET_EDITING",
+                    payload: {
+                      sidebarAction: "Notes",
+                      annotation: record.annotation,
+                    },
+                  });
+                }}
+                onDelete={() => {
+                  highlighterDispatch({
+                    type: "DELETE_RECORD",
+                    payload: record.annotation.id,
+                  });
+                }}
               ></AnnotatedCard>
             </div>
           ))}
           <hr className="my-4 pb-2" />
-          <RateFeedbackTab></RateFeedbackTab>
-          <Button> Save highlights</Button>
+          <RateFeedbackTab
+            feedbackId={feedback?.id || 0}
+            rating={{
+              clarity: feedback?.clarity || 0,
+              personalise: feedback?.personalise || 0,
+              evaluativeJudgement: feedback?.evaluativeJudgement || 0,
+              usability: feedback?.usability || 0,
+              emotion: feedback?.emotion || 0,
+            }}
+          ></RateFeedbackTab>
         </div>
       );
   }
@@ -143,6 +160,7 @@ const SidebarPanel = () => {
   const [loading, setLoading] = useState(true);
   const annotationService = new AnnotationService();
   const highlighterDispatch = useHighlighterDispatch();
+  const highlighterState = useHighlighterState();
   const userState = useUserState();
 
   useEffect(() => {
@@ -216,7 +234,6 @@ const SidebarPanel = () => {
                 currentTab={currentTab}
                 setCurrentTab={setCurrentTab}
                 feedback={currentFeedback}
-                setFeedback={setCurrentFeedback}
                 feedbacks={feedbacks}
               ></RenderTabs>
             )}
