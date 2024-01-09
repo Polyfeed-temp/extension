@@ -16,6 +16,7 @@ import {
   SideBarAction,
   AnnotationData,
   Feedback,
+  getClassForTag,
 } from "../types";
 import Tippy from "@tippyjs/react";
 import {toast} from "react-toastify";
@@ -104,15 +105,6 @@ const highlighterReducer = (
         drafting: null,
       };
 
-      const feedback = action.payload;
-      const records = feedback?.highlights?.map((highlight) => {
-        lib.fromStore(
-          highlight.annotation.startMeta,
-          highlight.annotation.endMeta,
-          highlight.annotation.id,
-          highlight.annotation.text
-        );
-      });
       console.log("initialize");
 
       return {...state, ...initialState};
@@ -279,6 +271,19 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     state.highlighterLib?.on(Highlighter.event.HOVER_OUT, handleHoverOut);
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
+    const records = state.records.map((highlight) => {
+      state.highlighterLib?.fromStore(
+        highlight.annotation.startMeta,
+        highlight.annotation.endMeta,
+
+        highlight.annotation.text,
+        highlight.annotation.id
+      );
+      state.highlighterLib?.addClass(
+        getClassForTag(highlight.annotation.annotationTag),
+        highlight.annotation.id
+      );
+    });
     // Cleanup function to remove the listeners
     return () => {
       state.highlighterLib?.off(Highlighter.event.CREATE, handleCreate);
@@ -286,31 +291,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       state.highlighterLib?.off(Highlighter.event.HOVER_OUT, handleHoverOut);
     };
   }, [state.highlighterLib]);
-
-  useEffect(() => {
-    const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
-      //give indicator to user if there is still another draft
-      // console.log("Code is being executed");
-      // console.log("state.drafting:", state);
-
-      // if (state.drafting || state.editing) {
-      //   alert("You have another draft or editing");
-      //   state.highlighterLib?.remove(data.sources[0].id);
-      //   return;
-      // }
-      const id = data.sources[0].id;
-      const _node = state.highlighterLib?.getDoms(id)[0];
-      console.log(data);
-      if (_node) {
-        _node.innerHTML =
-          `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
-      }
-      if (data.type != "from-store") {
-        dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
-      }
-    };
-    state.highlighterLib?.on(Highlighter.event.CREATE, handleCreate);
-  }, [state.drafting, state.editing]);
 
   return (
     <HighlighterContext.Provider value={{state, dispatch}}>
