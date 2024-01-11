@@ -43,9 +43,6 @@ function ToolbarMenu({
         <MenuItem onClick={() => setAnnotationTag("To-Dos")}>
           Add to-do list
         </MenuItem>
-        <MenuItem onClick={() => setAnnotationTag("Explain Further")}>
-          Explain Further
-        </MenuItem>
       </MenuList>
     </Menu>
   );
@@ -143,6 +140,13 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
                 setAnnotationTag={setAnnotationTag(tag)}
               ></ToolbarMenu>
             ))}
+
+            <button
+              onClick={() => setAnnotationTag("Other")("Explain Further")}
+              className="p-1"
+            >
+              <span>Ask Chat GPT</span>
+            </button>
           </PopoverContent>
         </Popover>,
         el
