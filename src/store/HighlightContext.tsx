@@ -30,6 +30,7 @@ interface HighlightState {
     annotation: Annotation;
   } | null;
   drafting: HighlightSource | null;
+  unlabledHighlights: HighlightSource[];
 }
 interface InitializeAction {
   type: "INITIALIZE";
@@ -68,6 +69,11 @@ interface SelectHighlightAction {
   payload: string;
 }
 
+interface UpdateHighlight {
+  type: "UPDATE_HIGHLIGHT_NOTES";
+  payload: {id: string; notes: string};
+}
+
 type Action =
   | AddRecordAction
   | SetEditingAction
@@ -76,7 +82,8 @@ type Action =
   | InitializeAction
   | SetDraftingAction
   | AddFeedbackAction
-  | SelectHighlightAction;
+  | SelectHighlightAction
+  | UpdateHighlight;
 const HighlighterContext = createContext<
   {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -103,13 +110,18 @@ const highlighterReducer = (
         isHighlighting: false,
         feedbackId: action.payload?.id,
         drafting: null,
+        unlabledHighlights: [],
       };
 
       console.log("initialize");
 
       return {...state, ...initialState};
     case "SET_DRAFTING":
-      return {...state, drafting: action.payload};
+      return {
+        ...state,
+        drafting: action.payload,
+        unlabledHighlights: [...state.unlabledHighlights, action.payload],
+      };
     case "ADD_RECORD":
       //after adding record to db, add to state and remove from current editing and drafting
       return {
@@ -119,7 +131,6 @@ const highlighterReducer = (
         records: [...state.records, action.payload],
       };
     case "SET_EDITING":
-      console.log(action.payload);
       return {...state, editing: action.payload};
     case "SET_IS_HIGHLIGHTING":
       action.payload
@@ -138,12 +149,19 @@ const highlighterReducer = (
       const highlight = state.records.find(
         (record) => record.annotation.id === action.payload
       );
+
       if (!highlight) {
-        return state;
+        return {
+          ...state,
+          drafting:
+            state.unlabledHighlights.find(
+              (highlight) => highlight.id === action.payload
+            ) || null,
+        };
       }
       return {
         ...state,
-        editing: {sidebarAction: "Notes", annotation: highlight.annotation},
+        editing: {sidebarAction: "Editing", annotation: highlight.annotation},
       };
 
     default:
@@ -152,13 +170,16 @@ const highlighterReducer = (
 };
 
 export const HighlighterProvider = ({children}: {children: ReactNode}) => {
-  const [state, baseDispatch] = useReducer(highlighterReducer, {
+  const initialState: HighlightState = {
     highlighterLib: null,
     records: [],
     editing: null,
     isHighlighting: false,
     drafting: null,
-  });
+    unlabledHighlights: [],
+  };
+
+  const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const [selectedHighlightElement, setSelectedHighlightElement] =
     useState<HTMLElement | null>(null);
   const [selectedHighlighId, setSelectedHighlightId] = useState<string | null>(
@@ -171,7 +192,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       case "ADD_RECORD":
         try {
           const sources = action.payload;
-          console.log(action.payload);
           if (state.feedbackId) {
             const creationStatus = service.addAnnotations(sources);
             toast.promise(creationStatus, {
@@ -221,6 +241,25 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           console.log(err);
         }
         break;
+      case "UPDATE_HIGHLIGHT_NOTES":
+        try {
+          const status = service.updateHighlightNotes(
+            action.payload.id,
+            action.payload.notes
+          );
+          toast.promise(status, {
+            pending: "Updating...",
+            success: "Updated Highlight",
+            error: "Error updating please try again",
+          });
+          const res = await status;
+          if (res.status !== 200) {
+            return;
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        break;
       default:
         baseDispatch(action);
     }
@@ -228,14 +267,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
 
   useEffect(() => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
-      //give indicator to user if there is still another draft
-      // console.log("Code is being executed");
-      // console.log("state.drafting:", state);
-
-      // if (state.drafting || state.editing) {
-      //   alert("You have another draft or editing");
-      //   return;
-      // }
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
       console.log(data);
@@ -298,37 +329,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       {state.drafting ? (
         <RenderPop highlighting={state.drafting}></RenderPop>
       ) : null}
-      {selectedHighlightElement && selectedHighlighId && (
-        <Tippy
-          interactive={true}
-          render={(attrs) => (
-            <button
-              onClick={() => {
-                state.highlighterLib?.remove(selectedHighlighId);
-                setSelectedHighlightElement(null);
-                setSelectedHighlightId(null);
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                />
-              </svg>
-            </button>
-          )}
-          visible={true}
-          reference={selectedHighlightElement}
-        ></Tippy>
-      )}
     </HighlighterContext.Provider>
   );
 };
