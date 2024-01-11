@@ -14,10 +14,14 @@ const ToDoActions: ActionPointCategory[] = [
 
 function TodoCard({
   saveFunc,
+  todoitems,
 }: {
   saveFunc: (actionItems: AnnotationActionPoint[]) => void;
+  todoitems?: AnnotationActionPoint[];
 }) {
-  const [actionItems, setActionItems] = useState<AnnotationActionPoint[]>([]);
+  const [actionItems, setActionItems] = useState<AnnotationActionPoint[]>(
+    todoitems ? todoitems : []
+  );
   const [selectedCategory, setSelectedCategory] = useState<
     ActionPointCategory | undefined
   >("Explore Online");
@@ -34,12 +38,11 @@ function TodoCard({
     setDueDate("");
     setSelectedCategory(undefined);
   };
-  function renderToDoItems(actionItems: AnnotationActionPoint[]) {
+  function ToDoItems({actionItems}: {actionItems: AnnotationActionPoint[]}) {
     return (
       <>
         {actionItems.map((actionPointItem, index) => (
           <div key={index} className="flex items-center mb-4">
-            <Checkbox crossOrigin="" label="" />
             <div className="flex flex-col ml-2 flex-grow">
               <Typography
                 variant="small"
@@ -61,7 +64,7 @@ function TodoCard({
                   color="gray"
                   className="font-normal whitespace-nowrap text-left"
                 >
-                  {actionPointItem.deadline.toLocaleDateString()}
+                  {new Date(actionPointItem.deadline).toLocaleDateString()}
                 </Typography>
               </div>
             </div>
@@ -78,7 +81,7 @@ function TodoCard({
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
-      {renderToDoItems(actionItems)}
+      <ToDoItems actionItems={actionItems} />
       {addToDo ? (
         <>
           <label className="block text-sm font-medium text-gray-700 mb-2">

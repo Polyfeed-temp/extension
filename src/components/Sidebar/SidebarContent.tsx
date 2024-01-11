@@ -10,6 +10,7 @@ type SidebarTab =
   | "My Notes"
   | "Highlight Texts"
   | "Select Assignment";
+
 import {SummaryCard, UnitAssignmentSummary} from "./tabs/SummaryCard";
 import AnnotatedCard from "./AnnotatedCard";
 import {SelectUnitAssignmentTab} from "./tabs/StartAssignmentTab";
@@ -122,7 +123,7 @@ function RenderTabs({
                   highlighterDispatch({
                     type: "SET_EDITING",
                     payload: {
-                      sidebarAction: "Notes",
+                      sidebarAction: "Editing",
                       annotation: record.annotation,
                     },
                   });

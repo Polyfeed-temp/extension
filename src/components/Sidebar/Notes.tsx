@@ -1,5 +1,5 @@
 import {useState} from "react";
-
+import {Button} from "@material-tailwind/react";
 export function Notes({
   setNote,
   notes,
@@ -7,6 +7,7 @@ export function Notes({
   setNote: (input: string) => void;
   notes: string;
 }) {
+  console.log(notes);
   const [value, setValue] = useState(notes);
 
   return (
@@ -14,12 +15,13 @@ export function Notes({
       <textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        defaultValue={"Enter your notes here"}
-      >
-        Enter your notes here
-      </textarea>
+        placeholder="Enter your notes here"
+      ></textarea>
       <hr className="my-4" />
-      <button onClick={() => setNote(value)}> Save note </button>
+      <Button fullWidth className="bg-black" onClick={() => setNote(value)}>
+        {" "}
+        Save note{" "}
+      </Button>
     </div>
   );
 }
