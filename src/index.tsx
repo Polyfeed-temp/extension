@@ -19,10 +19,10 @@ function load() {
   shadowRoot.appendChild(link);
 
   // Injecting Tailwind script into the shadow root
-  const tailwind = document.createElement("script");
-  tailwind.src =
+  const materialScript = document.createElement("script");
+  materialScript.src =
     "https://unpkg.com/@material-tailwind/html@latest/scripts/script-name.js";
-  shadowRoot.appendChild(tailwind);
+  shadowRoot.appendChild(materialScript);
 
   // Injecting Material Icons into the shadow root
   const materialIcons = document.createElement("link");
@@ -30,6 +30,10 @@ function load() {
     "https://fonts.googleapis.com/icon?family=Material+Icons";
   materialIcons.rel = "stylesheet";
   shadowRoot.appendChild(materialIcons);
+
+  const tailwind = document.createElement("script");
+  tailwind.src = "https://cdn.tailwindcss.com";
+  shadowRoot.appendChild(tailwind);
 
   const toastify = document.createElement("link");
   toastify.href =
@@ -42,25 +46,21 @@ function load() {
   shadowRoot.appendChild(reactRootDiv);
 
   const root = ReactDOM.createRoot(reactRootDiv);
+  const tailwindStyle = document.createElement("style");
 
-  const style = document.createElement("style");
-  style.textContent = `
-
+  // Add Tailwind CSS utility class
+  tailwindStyle.innerHTML = `
 @layer components {
   button {
     @apply bg-gray-500 text-white hover:bg-black;
   }
 }
+`;
 
-.toast-notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: black;
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-}
+  // Append the style element to the head of the document
+  document.head.appendChild(tailwindStyle);
+  const style = document.createElement("style");
+  style.textContent = `
 .border-Strength {
   border-color: #3a70b7 !important;
 }
