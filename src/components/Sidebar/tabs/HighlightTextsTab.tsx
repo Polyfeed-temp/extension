@@ -13,33 +13,22 @@ import {
   Annotation,
 } from "../../../types";
 import {SideBarAction} from "../../../types";
-
+import {getColorForTag, getClassForTag} from "../../../types";
 import OpenAIService from "../../../services/openai.service";
 import {useState, useEffect} from "react";
-function getColorForTag(tag: AnnotationTag | undefined) {
-  console.log(tag);
-  switch (tag) {
-    case "Strength":
-      return "#3a70b7";
-    case "Weakness":
-      return "#ef5975";
-    case "Action Item":
-      return "#23bfc6";
-    case "Confused":
-      return "#f79633";
-    case "Other":
-      return "#8960aa";
-    default:
-      return "gray-500";
-  }
-}
-
+import {toast} from "react-toastify";
+import {input} from "@material-tailwind/react";
+import AnnotationService from "../../../services/annotation.service";
+import {ExplainFutherToggle} from "../ExplainFutherInput";
 function RenderTabs() {
   const [explanation, setExplanation] = useState("");
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
   const currentEditing = highlighterState.editing;
-
+  const editing = highlighterState.records.find(
+    (annotation) => annotation.annotation.id === currentEditing?.annotation.id
+  );
+  console.log("editing", editing);
   const addNotes = (input: String) => {
     highlighterDispatch({
       type: "ADD_RECORD",
@@ -60,35 +49,18 @@ function RenderTabs() {
       } as AnnotationData,
     });
   };
-  useEffect(() => {
-    const fetchExplanationData = async () => {
-      console.log("fetchExplanationData");
-      const gptResponse = await fetch(
-        "http://localhost:8000/api/openai/explain",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            content: currentEditing?.annotation.text,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      ).then((res) => res.json());
-      console.log("gptResponse", gptResponse);
-
-      setExplanation(gptResponse.content);
-    };
-    if (currentEditing?.sidebarAction === "Explain Further") {
-      fetchExplanationData();
-    }
-  }, [currentEditing?.sidebarAction]);
   const fetchExplanationData = async () => {
     const text = currentEditing?.annotation.text;
     if (!text) {
       return;
     }
-    const gptResponse = await new OpenAIService().explainFuther(text);
+    const gptStatus = new OpenAIService().explainFuther(text);
+    toast.promise(gptStatus, {
+      pending: "Generating explanation...",
+      success: "Explanation generated!",
+      error: "Failed to generate explanation",
+    });
+    const gptResponse = await gptStatus;
     console.log("gptResponse", gptResponse);
 
     setExplanation(gptResponse);
@@ -103,25 +75,38 @@ function RenderTabs() {
       return (
         <div>
           <div>
-            <Notes setNote={addNotes}></Notes>
+            <Notes
+              setNote={addNotes}
+              notes={currentEditing.annotation.notes || ""}
+            ></Notes>
           </div>
         </div>
       );
     case "To-Dos":
-      return (
-        <div>
-          <TodoCard saveFunc={addToDo}></TodoCard>
-        </div>
-      );
-    case "Explain Further":
+      return <div>{<TodoCard saveFunc={addToDo}></TodoCard>}</div>;
+    case "Editing":
       return (
         <div>
           <p>
-            {explanation == "" ? (
-              <div className="center animate-spin rounded-full border-t-4 border-black border-opacity-25 border-b-4 border-black-500 border-opacity-25 h-12 w-12"></div>
-            ) : (
-              explanation
-            )}
+            <Notes
+              setNote={(input) =>
+                highlighterDispatch({
+                  type: "UPDATE_HIGHLIGHT_NOTES",
+                  payload: {id: currentEditing.annotation.id, notes: input},
+                })
+              }
+              notes={currentEditing.annotation.notes || ""}
+            ></Notes>
+
+            <TodoCard
+              saveFunc={addToDo}
+              todoitems={
+                highlighterState.records.find(
+                  (annotation) =>
+                    annotation.annotation.id === currentEditing?.annotation.id
+                )?.actionItems
+              }
+            ></TodoCard>
           </p>
         </div>
       );
@@ -137,22 +122,30 @@ export function HighlightingTab() {
   const annotationTagColor = getColorForTag(
     currentEditing?.annotation.annotationTag
   );
+  useEffect(() => {
+    highlighterState.highlighterLib?.addClass(
+      getClassForTag(currentEditing?.annotation.annotationTag),
+      currentEditing?.annotation.id
+    );
+  }, [currentEditing]);
 
-  console.log(currentEditing);
   return (
     <div className="space-y-4">
       <div className="flex items-start">
-        <blockquote
-          className={`flex-grow border-l-4 pl-4 text-left`}
-          style={{borderColor: `${annotationTagColor}`}}
-        >
-          <p className="text text-gray-700 italic">
-            <span className="block text-sm text-gray-500 mb-1">
-              {currentEditing?.annotation.annotationTag}
-            </span>
-            {currentEditing?.annotation.text}
-          </p>
-        </blockquote>
+        {currentEditing &&
+        currentEditing.sidebarAction !== "Explain Further" ? (
+          <blockquote
+            className={`flex-grow border-l-4 pl-4 text-left`}
+            style={{borderColor: `${annotationTagColor}`}}
+          >
+            <p className="text text-gray-700 italic">
+              <span className="block text-xl text-gray-500 mb-1">
+                {currentEditing.annotation.annotationTag}
+              </span>
+              {currentEditing.annotation.text}
+            </p>
+          </blockquote>
+        ) : null}
       </div>
       <div className="w-full">
         <RenderTabs></RenderTabs>

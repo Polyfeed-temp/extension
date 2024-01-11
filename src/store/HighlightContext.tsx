@@ -4,6 +4,7 @@ import React, {
   useContext,
   useReducer,
   useEffect,
+  useState,
 } from "react";
 import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
@@ -15,8 +16,10 @@ import {
   SideBarAction,
   AnnotationData,
   Feedback,
+  getClassForTag,
 } from "../types";
-
+import Tippy from "@tippyjs/react";
+import {toast} from "react-toastify";
 interface HighlightState {
   highlighterLib: Highlighter | null;
   feedbackId?: number;
@@ -27,6 +30,7 @@ interface HighlightState {
     annotation: Annotation;
   } | null;
   drafting: HighlightSource | null;
+  unlabledHighlights: HighlightSource[];
 }
 interface InitializeAction {
   type: "INITIALIZE";
@@ -54,13 +58,20 @@ interface SetIsHighlightingAction {
 
 interface DeleteRecordAction {
   type: "DELETE_RECORD";
-  payload: {
-    id: string; // Or number, based on your ID type.
-  };
+  payload: string;
 }
 interface SetDraftingAction {
   type: "SET_DRAFTING";
   payload: HighlightSource;
+}
+interface SelectHighlightAction {
+  type: "SELECT_HIGHLIGHT";
+  payload: string;
+}
+
+interface UpdateHighlight {
+  type: "UPDATE_HIGHLIGHT_NOTES";
+  payload: {id: string; notes: string};
 }
 
 type Action =
@@ -70,7 +81,9 @@ type Action =
   | DeleteRecordAction
   | InitializeAction
   | SetDraftingAction
-  | AddFeedbackAction;
+  | AddFeedbackAction
+  | SelectHighlightAction
+  | UpdateHighlight;
 const HighlighterContext = createContext<
   {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -97,22 +110,18 @@ const highlighterReducer = (
         isHighlighting: false,
         feedbackId: action.payload?.id,
         drafting: null,
+        unlabledHighlights: [],
       };
 
-      const feedback = action.payload;
-      const records = feedback?.highlights?.map((highlight) => {
-        lib.fromStore(
-          highlight.annotation.startMeta,
-          highlight.annotation.endMeta,
-          highlight.annotation.id,
-          highlight.annotation.text
-        );
-      });
       console.log("initialize");
 
       return {...state, ...initialState};
     case "SET_DRAFTING":
-      return {...state, drafting: action.payload};
+      return {
+        ...state,
+        drafting: action.payload,
+        unlabledHighlights: [...state.unlabledHighlights, action.payload],
+      };
     case "ADD_RECORD":
       //after adding record to db, add to state and remove from current editing and drafting
       return {
@@ -122,7 +131,6 @@ const highlighterReducer = (
         records: [...state.records, action.payload],
       };
     case "SET_EDITING":
-      console.log(action.payload);
       return {...state, editing: action.payload};
     case "SET_IS_HIGHLIGHTING":
       action.payload
@@ -131,24 +139,52 @@ const highlighterReducer = (
       return {...state, isHighlighting: action.payload};
     case "DELETE_RECORD":
       const newRecords = state.records.filter(
-        (record) => record.annotation.id !== action.payload.id
+        (record) => record.annotation.id !== action.payload
       );
+      state.highlighterLib?.remove(action.payload);
       return {...state, records: newRecords};
     case "ADD_FEEDBACK":
       return {...state, feedbackId: action.payload.id};
+    case "SELECT_HIGHLIGHT":
+      const highlight = state.records.find(
+        (record) => record.annotation.id === action.payload
+      );
+
+      if (!highlight) {
+        return {
+          ...state,
+          drafting:
+            state.unlabledHighlights.find(
+              (highlight) => highlight.id === action.payload
+            ) || null,
+        };
+      }
+      return {
+        ...state,
+        editing: {sidebarAction: "Editing", annotation: highlight.annotation},
+      };
+
     default:
       return state;
   }
 };
 
 export const HighlighterProvider = ({children}: {children: ReactNode}) => {
-  const [state, baseDispatch] = useReducer(highlighterReducer, {
+  const initialState: HighlightState = {
     highlighterLib: null,
     records: [],
     editing: null,
     isHighlighting: false,
     drafting: null,
-  });
+    unlabledHighlights: [],
+  };
+
+  const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
+  const [selectedHighlightElement, setSelectedHighlightElement] =
+    useState<HTMLElement | null>(null);
+  const [selectedHighlighId, setSelectedHighlightId] = useState<string | null>(
+    null
+  );
   const service = new AnnotationService();
 
   const dispatch = async (action: Action) => {
@@ -156,12 +192,21 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       case "ADD_RECORD":
         try {
           const sources = action.payload;
-          console.log(action.payload);
           if (state.feedbackId) {
-            const annotation = await service.addAnnotations(sources);
+            const creationStatus = service.addAnnotations(sources);
+            toast.promise(creationStatus, {
+              pending: "Saving...",
+              success: "Saved",
+              error: "Error saving please try again",
+            });
+            const res = await creationStatus;
+            if (res.status !== 200) {
+              return;
+            }
+            baseDispatch({type: "ADD_RECORD", payload: action.payload});
           } else {
+            toast.error("Please select valid assignment");
           }
-          baseDispatch({type: "ADD_RECORD", payload: action.payload});
         } catch (err) {
           console.log(err);
         }
@@ -181,9 +226,36 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         break;
       case "DELETE_RECORD":
         try {
-          const {id} = action.payload;
-          // await service.removeAnnotation(id);
+          const status = service.deleteAnnotation(action.payload);
+          toast.promise(status, {
+            pending: "Deleting...",
+            success: "Deleted Highlight",
+            error: "Error deleting please try again",
+          });
+          const res = await status;
+          if (res.status !== 200) {
+            return;
+          }
           baseDispatch({type: "DELETE_RECORD", payload: action.payload});
+        } catch (err) {
+          console.log(err);
+        }
+        break;
+      case "UPDATE_HIGHLIGHT_NOTES":
+        try {
+          const status = service.updateHighlightNotes(
+            action.payload.id,
+            action.payload.notes
+          );
+          toast.promise(status, {
+            pending: "Updating...",
+            success: "Updated Highlight",
+            error: "Error updating please try again",
+          });
+          const res = await status;
+          if (res.status !== 200) {
+            return;
+          }
         } catch (err) {
           console.log(err);
         }
@@ -192,6 +264,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         baseDispatch(action);
     }
   };
+
   useEffect(() => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
       const id = data.sources[0].id;
@@ -205,28 +278,48 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
         dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
       }
     };
-
     const handleClick = (data: {id: string}) => {
       // const currentSelected = state.records.find(
       //   (record) => record.id === data.id
       // ) as Annotation;
-      // dispatch({type: "SET_EDITING", payload: currentSelected});
+
+      const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
+      selectedArea ? setSelectedHighlightElement(selectedArea) : null;
+      setSelectedHighlightId(data.id);
+      dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
     };
 
     const handleHover = (data: {id: string}) => {
       const id = data.id;
-      state.highlighterLib?.addClass("hover", id);
+      state.highlighterLib?.addClass("highlight-hover", id);
     };
-
+    const handleHoverOut = (data: {id: string}) => {
+      const id = data.id;
+      state.highlighterLib?.removeClass("highlight-hover", id);
+    };
     state.highlighterLib?.on(Highlighter.event.CREATE, handleCreate);
     state.highlighterLib?.on(Highlighter.event.CLICK, handleClick);
+    state.highlighterLib?.on(Highlighter.event.HOVER_OUT, handleHoverOut);
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
+    const records = state.records.map((highlight) => {
+      state.highlighterLib?.fromStore(
+        highlight.annotation.startMeta,
+        highlight.annotation.endMeta,
+
+        highlight.annotation.text,
+        highlight.annotation.id
+      );
+      state.highlighterLib?.addClass(
+        getClassForTag(highlight.annotation.annotationTag),
+        highlight.annotation.id
+      );
+    });
     // Cleanup function to remove the listeners
     return () => {
       state.highlighterLib?.off(Highlighter.event.CREATE, handleCreate);
       state.highlighterLib?.off(Highlighter.event.CLICK, handleClick);
-      state.highlighterLib?.off(Highlighter.event.HOVER, handleHover);
+      state.highlighterLib?.off(Highlighter.event.HOVER_OUT, handleHoverOut);
     };
   }, [state.highlighterLib]);
 

@@ -54,12 +54,23 @@ const yellow = require("../assets/emoticons/Yellow.svg").default as string;
 const red = require("../assets/emoticons/Red.svg").default as string;
 const orange = require("../assets/emoticons/Orange.svg").default as string;
 
+const greenGrey = require("../assets/emoticons/Grey_Green.svg").default as string;
+const yellowGrey = require("../assets/emoticons/Grey_Yellow.svg").default as string;
+const redGrey = require("../assets/emoticons/Grey_Red.svg").default as string;
+const orangeGrey = require("../assets/emoticons/Grey_Orange.svg").default as string;
+
+
 export const emoticons: { [key: string]: string } = {
-
-
     red: red,
     orange: orange,
 
     yellow: yellow,
     green: green,
+};
+
+export const emoticonsInversed: { [key: string]: string } = {
+    red: redGrey,
+    orange: orangeGrey,
+    yellow: yellowGrey,
+    green: greenGrey,
 };

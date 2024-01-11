@@ -1,10 +1,64 @@
-import {emoticons} from "../../AnnotationIcons";
-
-import React, {useState} from "react";
-
-export const RateFeedbackTab = () => {
+import {emoticons, emoticonsInversed} from "../../AnnotationIcons";
+import {toast} from "react-toastify";
+import React, {useRef, useEffect, useState} from "react";
+import AnnotationService from "../../../services/annotation.service";
+import {FeedbackRating} from "../../../types";
+export const RateFeedbackTab = ({
+  feedbackId,
+  rating,
+}: {
+  feedbackId: number;
+  rating: FeedbackRating;
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [feedbackClarity, setFeedbackClarity] = useState(rating.clarity);
+  const [feedbackPersonalised, setFeedbackPersonalised] = useState(
+    rating.personalise
+  );
+  const [feedbackEvaluativeJudgement, setFeedbackEvaluativeJudgement] =
+    useState(rating.evaluativeJudgement);
+  const [feedbackUsability, setFeedbackUsability] = useState(rating.usability);
+  const [feedbackEmotion, setFeedbackEmotion] = useState(rating.emotion);
 
+  const rateFeedbackStatements = [
+    "is easy to understand",
+    "relates to my work",
+    "helps me to critically evaluate my work",
+    "can be used even after this unit",
+    "makes me feel positive",
+  ];
+  const rateFeedbackStatmentsFunction = [
+    setFeedbackClarity,
+    setFeedbackPersonalised,
+    setFeedbackEvaluativeJudgement,
+    setFeedbackUsability,
+    setFeedbackEmotion,
+  ];
+  const ratingArray = [
+    feedbackClarity,
+    feedbackPersonalised,
+    feedbackEvaluativeJudgement,
+    feedbackUsability,
+    feedbackEmotion,
+  ];
+  const colorToRating = (color: string) => {
+    switch (color) {
+      case "red":
+        return 1;
+      case "orange":
+        return 2;
+      case "yellow":
+        return 3;
+      case "green":
+        return 4;
+      default:
+        return 10;
+    }
+  };
+  const handleEmoticonClick = (ratingIndex: number, color: string) => {
+    const rating = colorToRating(color);
+    rateFeedbackStatmentsFunction[ratingIndex](rating);
+  };
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -40,7 +94,48 @@ export const RateFeedbackTab = () => {
       />
     </svg>
   );
-
+  const handleSubmit = () => {
+    if (
+      feedbackClarity &&
+      feedbackPersonalised &&
+      feedbackEvaluativeJudgement &&
+      feedbackUsability &&
+      feedbackEmotion
+    ) {
+      const feedback = {
+        clarity: feedbackClarity,
+        personalise: feedbackPersonalised,
+        evaluativeJudgement: feedbackEvaluativeJudgement,
+        usability: feedbackUsability,
+        emotion: feedbackEmotion,
+      };
+      console.log(feedback);
+      const submission = new AnnotationService().rateFeedback(
+        feedbackId,
+        feedback
+      );
+      toast.promise(submission, {
+        pending: "Submitting Rating...",
+        success: "Submitted Rating!",
+        error: "Submission failed, please try again.",
+      });
+    }
+  };
+  const firstRender = useRef(true);
+  useEffect(() => {
+    //do not submitt after first render
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    handleSubmit();
+  }, [
+    feedbackClarity,
+    feedbackPersonalised,
+    feedbackEvaluativeJudgement,
+    feedbackUsability,
+    feedbackEmotion,
+  ]);
   return (
     <div className="border rounded-lg">
       <button
@@ -51,24 +146,27 @@ export const RateFeedbackTab = () => {
         {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
       {isDropdownOpen &&
-        [
-          "is easy to understand",
-          "relates to my work",
-          "helps me to critically evaluate my work",
-          "can be used even after this unit",
-          "makes me feel positive",
-        ].map((feedback, index) => (
+        rateFeedbackStatements.map((feedback, index) => (
           <div
             key={index}
-            className="flex justify-between items-center mb-2 p-2"
+            className="flex justify-between items-center mb-2 p-2 text-left"
           >
             <span className="flex-1">{feedback}</span>
             <div className="flex items-center">
-              {Object.entries(emoticons).map(([category, counter]) => (
-                <button key={category} className="ml-2 bg-blue-500">
+              {Object.entries(emoticons).map(([color, icon]) => (
+                <button
+                  key={color}
+                  className="ml-2"
+                  onClick={() => handleEmoticonClick(index, color)}
+                >
                   <img
-                    src={counter}
-                    alt={category}
+                    src={
+                      ratingArray[index] === colorToRating(color) ||
+                      ratingArray[index] === 0
+                        ? icon
+                        : emoticonsInversed[color]
+                    }
+                    alt={color}
                     style={{width: 40, height: 40}}
                   />
                 </button>

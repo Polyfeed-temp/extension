@@ -1,7 +1,8 @@
 import SidebarPanel from "./SidebarContent";
 import {useState} from "react";
 import {SidebarHeader} from "./SidebarHeader";
-
+const Logo = require("../../assets/logo/PolyFeed_Social_White.png")
+  .default as string;
 const leftChevron = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +36,7 @@ const rightChevron = (
     />
   </svg>
 );
-//name, email,falculty, password 
+//name, email,falculty, password
 export function Sidebar({
   collapsed,
   toggleSidebar,
@@ -58,6 +59,7 @@ export function Sidebar({
         style={{zIndex: 100001}} // Ensure it's above the sidebar
       >
         {collapsed ? leftChevron : rightChevron}
+        <img src={Logo} className="h-8 md:h-12" alt="Logo" />
       </div>
       {collapsed ? null : (
         <div style={{overflowY: "auto", height: "100%"}}>

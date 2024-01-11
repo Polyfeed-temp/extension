@@ -11,7 +11,7 @@ export interface Annotation {
   gptResponse?: string
 }
 
-export type SideBarAction = "To-Dos" | "Notes" | "Explain Further"
+export type SideBarAction = "To-Dos" | "Notes" | "Explain Further" | "Editing"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
 export type ActionPointCategory =
@@ -47,6 +47,7 @@ export interface Feedback {
   mark: number;
   clarity?: number
   personalise?: number
+  evaluativeJudgement?: number,
   usability?: number
   emotion?: number
   highlights?: AnnotationData[];
@@ -54,6 +55,13 @@ export interface Feedback {
   url: string
   studentEmail: string
 }
+export interface FeedbackRating {
+  clarity: number,
+  personalise: number,
+  evaluativeJudgement: number,
+  usability: number,
+  emotion: number,
+};
 export interface Assessment {
   id: number
   assessmentName: string;
@@ -87,4 +95,38 @@ export interface UserState {
   login: boolean;
   access_token?: string;
   user?: User;
+}
+
+export function getColorForTag(tag: AnnotationTag | undefined) {
+  console.log(tag);
+  switch (tag) {
+    case "Strength":
+      return "#3a70b7";
+    case "Weakness":
+      return "#ef5975";
+    case "Action Item":
+      return "#23bfc6";
+    case "Confused":
+      return "#f79633";
+    case "Other":
+      return "#8960aa";
+    default:
+      return "gray-500";
+  }
+}
+export function getClassForTag(tag: AnnotationTag | undefined) {
+  switch (tag) {
+    case "Strength":
+      return "Strength";
+    case "Weakness":
+      return "Weakness";
+    case "Action Item":
+      return "ActionItem";
+    case "Confused":
+      return "Confused";
+    case "Other":
+      return "Other";
+    default:
+      return "gray-500";
+  }
 }
