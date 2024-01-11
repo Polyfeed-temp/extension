@@ -7,6 +7,7 @@ import {
   Button,
 } from "@material-tailwind/react";
 import {AnnotationData} from "../../types";
+import {getClassForTag} from "../../types";
 interface AnnotationCardProps {
   annotationData: AnnotationData;
   onEdit: () => void;
@@ -24,7 +25,9 @@ export default function AnnotatedCard({
     <Card className="mt-6 max-w-full w-70 border-solid border-4 border-black-500 overflow-hidden box-border">
       <CardBody className="overflow-y-auto">
         <blockquote
-          className={`border-${annotationData.annotation.annotationTag} flex-grow border-l-4 pl-4 text-left`}
+          className={`border-${getClassForTag(
+            annotationData.annotation.annotationTag
+          )} flex-grow border-l-4 pl-4 text-left`}
         >
           <p className="text text-gray-700 italic">
             <span className="block text-xl text-gray-500 mb-1">
