@@ -47,6 +47,10 @@ class AnnotationService {
         return response.data as Feedback
     }
 
+    public async updateHighlightNotes(highlightId: string, notes: string) {
+        return axios.patch(`/api/highlight/${highlightId}/notes`, { notes: notes })
+
+    }
     public async getAllFeedack(): Promise<Feedback[]> {
         const response = await axios.get("/api/feedback/all")
         console.log(response.data)
