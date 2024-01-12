@@ -11,6 +11,7 @@ export interface Annotation {
   gptResponse?: string
 }
 
+
 export type SideBarAction = "To-Dos" | "Notes" | "Explain Further" | "Editing"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
@@ -78,16 +79,18 @@ export interface Unit {
 
 }
 
-type role = "Student" | "Tutor" | "Admin" | "Chief Examiner"
+export type Role = "Student" | "Tutor" | "Admin" | "Chief Examiner"
+
+export type Faculty = "Information Technology" | "Engineering" | "Arts" | "Business and Economics" | "Science" | "Medicine, Nursing and Health Sciences" | "Education" | "Law" | "Pharmacy" | "Art, Design and Architecture" | "Pharmacy and Pharmaceutical Sciences"
 
 export interface User {
   firstName: string;
-  monashId: string;
+  monashId?: string;
   monashObjectId: string | null
   authcate: string
   email: string
   lastName: string;
-  role: role
+  role: Role
   faculty: string;
 }
 
