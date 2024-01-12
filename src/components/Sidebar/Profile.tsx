@@ -2,6 +2,7 @@ import {useUserState, useUserDispatch} from "../../store/UserContext";
 import {useState} from "react";
 export function ProfileMenu() {
   const user = useUserState();
+
   const userDispatch = useUserDispatch();
   const initial =
     user.user?.firstName.substring(0, 1) +
@@ -12,6 +13,7 @@ export function ProfileMenu() {
   const toggleMenu = () => {
     setMenuOpen(!isMenuOpen);
   };
+
   return (
     <div className="relative inline-block text-left">
       <div>
@@ -27,35 +29,18 @@ export function ProfileMenu() {
       {/* Dropdown menu */}
       {isMenuOpen && (
         <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-          <div
-            className="py-1"
+          <button
+            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="options-menu"
+            onClick={() => {
+              toggleMenu();
+              userDispatch({type: "LOGOUT"});
+            }}
           >
-            {/* Other profile options */}
-            {/* <a
-              href="#"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Your Profile
-            </a> */}
-            {/* Other profile options */}
-
-            {/* Logout option */}
-            <button
-              onClick={() => {
-                toggleMenu(); // Close the menu when Logout is clicked
-                userDispatch({type: "LOGOUT"});
-              }}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-            >
-              Logout
-            </button>
-            {/* Logout option */}
-          </div>
+            Logout
+          </button>
         </div>
       )}
     </div>
