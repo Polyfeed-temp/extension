@@ -7,9 +7,7 @@ import React, {
 } from "react";
 import {User, UserState, Unit} from "../types";
 
-import UserService from "../services/user.service";
-
-const service = new UserService();
+import {login, logout, getUser} from "../services/user.service";
 
 interface UserAction {
   type: "LOGIN";
@@ -60,7 +58,7 @@ function UserProvider({children}: {children: ReactNode}) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const user = await service.getUser();
+        const user = await getUser();
         if (user) {
           baseDispatch({type: "INITIALIZE", payload: user});
         }
@@ -73,25 +71,8 @@ function UserProvider({children}: {children: ReactNode}) {
 
   const serviceDispatch = async (action: actions) => {
     switch (action.type) {
-      case "LOGIN":
-        if (action.payload) {
-          console.log("From service dispatch");
-          try {
-            const res = await service.login(
-              action.payload.username,
-              action.payload.password
-            );
-            console.log(res);
-
-            baseDispatch({type: "INITIALIZE", payload: res});
-          } catch (err) {
-            console.log(err);
-          }
-        }
-
-        break;
       case "LOGOUT":
-        service.logout();
+        logout();
         baseDispatch(action);
         break;
 

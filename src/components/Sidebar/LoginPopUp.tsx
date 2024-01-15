@@ -1,22 +1,8 @@
 import React, {useState} from "react";
 import {useUserState, useUserDispatch} from "../../store/UserContext";
-const xMarkIcon = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-);
-
+import {xMarkIcon} from "../AnnotationIcons";
+import {toast} from "react-toastify";
+import {login} from "../../services/user.service";
 const LoginPopup = ({
   isOpen,
   onClose,
@@ -35,12 +21,20 @@ const LoginPopup = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("submit form");
+    const status = login(username, password);
+    const val = toast.promise(status, {
+      pending: "Logging in...",
+      success: "Logged in successfully",
+      error: "Login failed",
+    });
 
-    const val = await dispatch({type: "LOGIN", payload: {username, password}});
-    if (userState.login) {
-      onClose();
-    } else {
+    try {
+      const user = await status;
+      if (user) {
+        dispatch({type: "INITIALIZE", payload: user});
+        onClose();
+      }
+    } catch (err) {
       setErrorMessage("Username or password is incorrect");
     }
   };
@@ -65,7 +59,7 @@ const LoginPopup = ({
                 className="mb-3 px-3 py-2 border rounded-md w-full"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
+                placeholder="Email "
               />
               <input
                 type="password"

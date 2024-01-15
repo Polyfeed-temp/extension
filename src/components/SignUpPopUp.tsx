@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {User, Role, Faculty} from "../types";
-import UserService from "../services/user.service";
+import {register} from "../services/user.service";
 import {toast} from "react-toastify";
 const xMarkIcon = (
   <svg
@@ -55,7 +55,7 @@ const SignUpPopup = ({
       role: formData.role as Role,
     };
 
-    const status = new UserService().register(user);
+    const status = register(user);
 
     toast.promise(status, {
       pending: "Registering user...",
