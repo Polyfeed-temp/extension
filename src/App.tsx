@@ -1,10 +1,14 @@
 import {Sidebar} from "./components/Sidebar/Sidebar";
-import {useState} from "react";
+import {useState, createContext, useContext} from "react";
 import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {useSidebar} from "./hooks/useSidebar";
 
 function App() {
-  const [collapsed, setCollapsed] = useState(true);
+  const {collapsed, setCollapsed, location, setLocation} = useSidebar();
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
   const sidebarWidth = "428px";
   const nav = document.querySelector("nav") as HTMLElement;
   const docs = document.querySelector("#docs-chrome") as HTMLElement;
@@ -20,9 +24,6 @@ function App() {
   }
   document.body.style.marginRight = collapsed ? "40px" : sidebarWidth;
 
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
   return (
     <div>
       <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} />

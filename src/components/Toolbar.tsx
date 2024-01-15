@@ -18,6 +18,7 @@ import {
 import HighlightSource from "web-highlighter/dist/model/source";
 import {AnnotationTag, SideBarAction, Annotation} from "../types";
 import {annotationTagsIcons} from "./AnnotationIcons";
+import {useSidebar} from "../hooks/useSidebar";
 
 function ToolbarMenu({
   Label,
@@ -50,11 +51,12 @@ function ToolbarMenu({
 
 export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
   const highlighter = useHighlighterState().highlighterLib;
-  const feedbackId = useHighlighterState().feedbackId || 0;
+  const feedbackId = useHighlighterState().feedbackInfo?.id || 0;
   const highlightingID = highlighting.id;
   const _id = `__highlight-${highlightingID}`;
   const el = document.getElementById(_id);
   const [visible, setVisible] = useState(true);
+  const {setCollapsed} = useSidebar();
   const triggers = {
     onmouseenter: () => setVisible(true),
     onmouseleave: () => setVisible(false),
@@ -78,6 +80,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
         endMeta: highlighting.endMeta,
         text: highlighting.text,
       };
+      setCollapsed(false);
       annotationDispatch({
         type: "SET_EDITING",
         payload: {sidebarAction: sidebarAction, annotation: annotation},

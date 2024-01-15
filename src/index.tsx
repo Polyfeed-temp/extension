@@ -4,6 +4,7 @@ import App from "./App";
 import "./index.css";
 import {HighlighterProvider} from "./store/HighlightContext";
 import UserProvider from "./store/UserContext";
+import {SidebarProvider} from "./hooks/useSidebar";
 
 function load() {
   const host = document.createElement("div");
@@ -18,11 +19,11 @@ function load() {
   link.rel = "stylesheet";
   shadowRoot.appendChild(link);
 
-  // Injecting Tailwind script into the shadow root
-  const materialScript = document.createElement("script");
-  materialScript.src =
-    "https://unpkg.com/@material-tailwind/html@latest/scripts/script-name.js";
-  shadowRoot.appendChild(materialScript);
+  // // Injecting Tailwind script into the shadow root
+  // const materialScript = document.createElement("script");
+  // materialScript.src =
+  //   "https://unpkg.com/@material-tailwind/html@latest/scripts/script-name.js";
+  // shadowRoot.appendChild(materialScript);
 
   // Injecting Material Icons into the shadow root
   const materialIcons = document.createElement("link");
@@ -31,9 +32,9 @@ function load() {
   materialIcons.rel = "stylesheet";
   shadowRoot.appendChild(materialIcons);
 
-  const tailwind = document.createElement("script");
-  tailwind.src = "https://cdn.tailwindcss.com";
-  shadowRoot.appendChild(tailwind);
+  // const tailwind = document.createElement("script");
+  // tailwind.src = "https://cdn.tailwindcss.com";
+  // shadowRoot.appendChild(tailwind);
 
   const toastify = document.createElement("link");
   toastify.href =
@@ -80,6 +81,33 @@ function load() {
 .border-Other {
   border-color: #8960aa !important;
 }
+li {
+    display: block;      /* Stretch to the full width of its parent */
+    width: 100%;         /* Ensure it covers full width */
+    padding: 3px 10px;   /* Example padding, adjust as needed */
+    cursor: pointer;     /* Change cursor on hover */
+}
+
+li:hover {
+    background-color: #f3f3f3; /* Change background on hover */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+Button:hover {
+  background-color: #1a202c;
+}
+
 
 `;
   shadowRoot.appendChild(style);
@@ -87,9 +115,11 @@ function load() {
   root.render(
     <React.StrictMode>
       <UserProvider>
-        <HighlighterProvider>
-          <App />
-        </HighlighterProvider>
+        <SidebarProvider>
+          <HighlighterProvider>
+            <App />
+          </HighlighterProvider>
+        </SidebarProvider>
       </UserProvider>
     </React.StrictMode>
   );
