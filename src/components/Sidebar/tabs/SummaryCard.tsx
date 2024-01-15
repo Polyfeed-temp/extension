@@ -1,42 +1,23 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {AnnotationData, AnnotationTag, Feedback, Unit} from "../../../types";
-import {Card, Button} from "@material-tailwind/react";
-import {annotationTagsIcons} from "../../AnnotationIcons";
+import {IconButton, Button} from "@material-tailwind/react";
+import {
+  annotationTagsIcons,
+  chevronIconDown,
+  chevronIconUp,
+  EditIcon,
+} from "../../AnnotationIcons";
+
+import {
+  useHighlighterDispatch,
+  useHighlighterState,
+} from "../../../store/HighlightContext";
+import SearchableSelect from "../SearchableSelect";
+import {getAllUnits} from "../../../services/unit.service";
 interface Props {
   annotationData: AnnotationData[];
 }
-const chevronIconDown = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-    />
-  </svg>
-);
-const chevronIconUp = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4.5 15.75l7.5-7.5 7.5 7.5"
-    />
-  </svg>
-);
+
 export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   console.log(feedback);
@@ -76,18 +57,6 @@ export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
   );
 }
 
-export function currentFeedbackSummary(feedback: Feedback) {
-  return (
-    <div className="border rounded-lg">
-      <div className="flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left">
-        {feedback.unitCode}
-      </div>
-      <div className="border-2 border-solid">{feedback.assessmentName}</div>
-      {/* <SummaryCard annotationData={feedback.highlights} /> */}
-    </div>
-  );
-}
-
 export const SummaryCard: React.FC<Props> = ({annotationData}) => {
   const annotationTagCount: {[key in AnnotationTag]: number} = {
     Strength: 0,
@@ -95,6 +64,7 @@ export const SummaryCard: React.FC<Props> = ({annotationData}) => {
     "Action Item": 0,
     Confused: 0,
     Other: 0,
+    ChatGPT: 0,
   };
   console.log(annotationData[0]);
 

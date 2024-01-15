@@ -1,4 +1,4 @@
-import { AnnotationData, Feedback, FeedbackRating } from "../types";
+import { AnnotationData, Feedback, FeedbackRating, AnnotationActionPoint } from "../types";
 import axios from "./api.service";
 
 
@@ -47,8 +47,18 @@ class AnnotationService {
         return response.data as Feedback
     }
 
+    public async updateFeedbackAssessment(feedbackId: number, assessmentId: number) {
+        return axios.patch(`/api/feedback/assessment/${feedbackId}/${assessmentId}`);
+    }
     public async updateHighlightNotes(highlightId: string, notes: string) {
-        return axios.patch(`/api/highlight/${highlightId}/notes`, { notes: notes })
+        return axios.patch(`api/highlight/${highlightId}/notes`, null, {
+            params: { notes },
+            headers: {
+
+                'Content-Type': 'application/json'
+            }
+        });
+
 
     }
     public async getAllFeedack(): Promise<Feedback[]> {
@@ -165,7 +175,20 @@ class AnnotationService {
         return axios.post(`/api/feedback/rate/${feedbackId}`, rating)
     }
 
+    public async deleteAllHighlights(feedbackId: number) {
+        return axios.delete(`/api/feedback/all/${feedbackId}`)
 
+
+    }
+
+    public async deleteFeedback(feedbackId: number) {
+        return axios.delete(`/api/feedback/${feedbackId}`)
+    }
+
+    public async addActionItem(highlightId: string, actionItem: AnnotationActionPoint) {
+        return axios.post(`/api/action /${highlightId}/action`, actionItem)
+
+    }
 
 }
 

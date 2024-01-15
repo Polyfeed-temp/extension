@@ -17,12 +17,14 @@ import {
   AnnotationData,
   Feedback,
   getClassForTag,
+  AnnotationActionPoint,
 } from "../types";
 import Tippy from "@tippyjs/react";
 import {toast} from "react-toastify";
+import {useSidebar} from "../hooks/useSidebar";
 interface HighlightState {
   highlighterLib: Highlighter | null;
-  feedbackId?: number;
+  feedbackInfo: Feedback | null;
   records: AnnotationData[];
   isHighlighting: boolean;
   editing: {
@@ -73,6 +75,16 @@ interface UpdateHighlight {
   type: "UPDATE_HIGHLIGHT_NOTES";
   payload: {id: string; notes: string};
 }
+interface DeleteAllHighlights {
+  type: "DELETE_ALL_HIGHLIGHTS";
+}
+interface DeleteFeedback {
+  type: "DELETE_FEEDBACK";
+}
+interface AddActionItem {
+  type: "ADD_ACTION_ITEM";
+  payload: {id: string; actionItem: AnnotationActionPoint};
+}
 
 type Action =
   | AddRecordAction
@@ -83,7 +95,10 @@ type Action =
   | SetDraftingAction
   | AddFeedbackAction
   | SelectHighlightAction
-  | UpdateHighlight;
+  | UpdateHighlight
+  | DeleteAllHighlights
+  | DeleteFeedback
+  | AddActionItem;
 const HighlighterContext = createContext<
   {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -108,11 +123,13 @@ const highlighterReducer = (
         records: action.payload?.highlights ? action.payload.highlights : [],
         editing: null,
         isHighlighting: false,
-        feedbackId: action.payload?.id,
+        feedbackInfo: action.payload,
         drafting: null,
         unlabledHighlights: [],
       };
-
+      if (action.payload) {
+        useSidebar().setCollapsed(false);
+      }
       console.log("initialize");
 
       return {...state, ...initialState};
@@ -144,7 +161,7 @@ const highlighterReducer = (
       state.highlighterLib?.remove(action.payload);
       return {...state, records: newRecords};
     case "ADD_FEEDBACK":
-      return {...state, feedbackId: action.payload.id};
+      return {...state, feedbackInfo: action.payload};
     case "SELECT_HIGHLIGHT":
       const highlight = state.records.find(
         (record) => record.annotation.id === action.payload
@@ -163,7 +180,28 @@ const highlighterReducer = (
         ...state,
         editing: {sidebarAction: "Editing", annotation: highlight.annotation},
       };
-
+    case "DELETE_ALL_HIGHLIGHTS":
+      return {...state, records: []};
+    case "DELETE_FEEDBACK":
+      return {...state, feedbackInfo: null, records: []};
+    case "ADD_ACTION_ITEM":
+      const record = state.records.find(
+        (record) => record.annotation.id === action.payload.id
+      );
+      if (record) {
+        record.actionItems ??= [];
+        record.actionItems.push(action.payload.actionItem);
+      }
+      console.log(state.records);
+      return {...state};
+    case "UPDATE_HIGHLIGHT_NOTES":
+      const recordToUpdate = state.records.find(
+        (record) => record.annotation.id === action.payload.id
+      );
+      if (recordToUpdate) {
+        recordToUpdate.annotation.notes = action.payload.notes;
+      }
+      return {...state, editing: null, drafting: null};
     default:
       return state;
   }
@@ -177,8 +215,9 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     isHighlighting: false,
     drafting: null,
     unlabledHighlights: [],
+    feedbackInfo: null,
   };
-
+  const {setCollapsed} = useSidebar();
   const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const [selectedHighlightElement, setSelectedHighlightElement] =
     useState<HTMLElement | null>(null);
@@ -192,7 +231,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       case "ADD_RECORD":
         try {
           const sources = action.payload;
-          if (state.feedbackId) {
+          if (state.feedbackInfo) {
             const creationStatus = service.addAnnotations(sources);
             toast.promise(creationStatus, {
               pending: "Saving...",
@@ -207,19 +246,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           } else {
             toast.error("Please select valid assignment");
           }
-        } catch (err) {
-          console.log(err);
-        }
-        break;
-      case "ADD_FEEDBACK":
-        try {
-          const feedback = action.payload;
-          const feedbackVal = await service.createFeedback(feedback);
-          feedbackVal.assessmentId &&
-            baseDispatch({
-              type: "ADD_FEEDBACK",
-              payload: feedbackVal,
-            });
         } catch (err) {
           console.log(err);
         }
@@ -256,6 +282,72 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           if (res.status !== 200) {
             return;
           }
+          baseDispatch({
+            type: "UPDATE_HIGHLIGHT_NOTES",
+            payload: action.payload,
+          });
+        } catch (err) {
+          console.log(err);
+        }
+
+        break;
+      case "DELETE_ALL_HIGHLIGHTS":
+        try {
+          const status = state.feedbackInfo?.id
+            ? service.deleteAllHighlights(state.feedbackInfo.id)
+            : undefined;
+          if (status) {
+            toast.promise(status, {
+              pending: "Deleting all highlights...",
+              success: "Deleted Highlight",
+              error: "Error deleting please try again",
+            });
+            const res = await status;
+            if (res.status == 200) {
+              state.highlighterLib?.removeAll();
+              baseDispatch({type: "DELETE_ALL_HIGHLIGHTS"});
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        break;
+      case "DELETE_FEEDBACK":
+        try {
+          const status = state.feedbackInfo?.id
+            ? service.deleteFeedback(state.feedbackInfo.id)
+            : undefined;
+          if (status) {
+            toast.promise(status, {
+              pending: "Deleting feedback...",
+              success: "Deleted feedback",
+              error: "Error deleting please try again",
+            });
+            const res = await status;
+            if (res.status == 200) {
+              state.highlighterLib?.removeAll();
+              baseDispatch({type: "DELETE_FEEDBACK"});
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        break;
+      case "ADD_ACTION_ITEM":
+        try {
+          const status = service.addActionItem(
+            action.payload.id,
+            action.payload.actionItem
+          );
+          toast.promise(status, {
+            pending: "Adding action item...",
+            success: "Added action item",
+            error: "Error adding action item please try again",
+          });
+          const res = await status;
+          if (res.status == 200) {
+            baseDispatch({type: "ADD_ACTION_ITEM", payload: action.payload});
+          }
         } catch (err) {
           console.log(err);
         }
@@ -285,8 +377,10 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
 
       const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
       selectedArea ? setSelectedHighlightElement(selectedArea) : null;
+      console.log("selected elem", selectedHighlightElement);
       setSelectedHighlightId(data.id);
       dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
+      setCollapsed(false);
     };
 
     const handleHover = (data: {id: string}) => {
@@ -329,6 +423,12 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       {state.drafting ? (
         <RenderPop highlighting={state.drafting}></RenderPop>
       ) : null}
+      <Tippy
+        appendTo={
+          selectedHighlightElement ? selectedHighlightElement : undefined
+        }
+        render={(attrs) => <div className="box">My tippy box</div>}
+      ></Tippy>
     </HighlighterContext.Provider>
   );
 };
