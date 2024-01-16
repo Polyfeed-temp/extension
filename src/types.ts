@@ -8,7 +8,6 @@ export interface Annotation {
   id: string;
   annotationTag: AnnotationTag;
   notes?: string
-  gptResponse?: string
 }
 
 
@@ -34,6 +33,7 @@ export interface AnnotationNotes {
 
 }
 export interface AnnotationActionPoint {
+  id?: number;
   action: string;
   category: ActionPointCategory;
   deadline: Date;
@@ -41,7 +41,7 @@ export interface AnnotationActionPoint {
 }
 
 export interface Feedback {
-  id?: number
+  id: number
   assessmentId: number
   assessmentName: string;
   unitCode: string;
@@ -55,6 +55,9 @@ export interface Feedback {
   marker?: string;
   url: string
   studentEmail: string
+  gptQueryText?: string
+  gptResponse?: string
+  gptResponseRating?: number
 }
 export interface FeedbackRating {
   clarity: number,

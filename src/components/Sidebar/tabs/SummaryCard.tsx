@@ -64,7 +64,6 @@ export const SummaryCard: React.FC<Props> = ({annotationData}) => {
     "Action Item": 0,
     Confused: 0,
     Other: 0,
-    ChatGPT: 0,
   };
   console.log(annotationData[0]);
 

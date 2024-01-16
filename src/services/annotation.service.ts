@@ -193,6 +193,9 @@ class AnnotationService {
     public async updateHighlightActionItem(highlightId: string, actionItem: AnnotationActionPoint[]) {
         return axios.patch(`/api/action/${highlightId}/action`, actionItem)
     }
+    public async rateGptResponse(feedbackId: number, rating: number) {
+        return axios.post(`/api/feedback/rate/gpt/${feedbackId}`, null, { params: { rating }, })
+    }
 
 }
 
