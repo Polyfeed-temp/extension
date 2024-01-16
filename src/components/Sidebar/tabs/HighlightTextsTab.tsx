@@ -14,21 +14,25 @@ import {
 } from "../../../types";
 import {SideBarAction} from "../../../types";
 import {getColorForTag, getClassForTag} from "../../../types";
-import OpenAIService from "../../../services/openai.service";
 import {useState, useEffect} from "react";
 import {toast} from "react-toastify";
 import {input} from "@material-tailwind/react";
 import AnnotationService from "../../../services/annotation.service";
 import {ExplainFutherToggle} from "../ExplainFutherInput";
-function RenderTabs() {
+
+function RenderTabs({
+  currentEditing,
+}: {
+  currentEditing: {sidebarAction: SideBarAction; annotation: Annotation} | null;
+}) {
   const [explanation, setExplanation] = useState("");
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
-  const currentEditing = highlighterState.editing;
+  // const currentEditing = highlighterState.editing;
   const editing = highlighterState.records.find(
     (annotation) => annotation.annotation.id === currentEditing?.annotation.id
   );
-  console.log("editing", editing);
+  console.log("editing", currentEditing);
   const addNotes = (input: String) => {
     highlighterDispatch({
       type: "ADD_RECORD",
@@ -40,7 +44,12 @@ function RenderTabs() {
       } as AnnotationData,
     });
   };
+
   const addToDo = (actionItems: AnnotationActionPoint[]) => {
+    const currentActions = highlighterState.records.find(
+      (record) => record.annotation.id === currentEditing?.annotation.id
+    )?.actionItems;
+
     highlighterDispatch({
       type: "ADD_RECORD",
       payload: {
@@ -49,25 +58,18 @@ function RenderTabs() {
       } as AnnotationData,
     });
   };
-  const fetchExplanationData = async () => {
-    const text = currentEditing?.annotation.text;
-    if (!text) {
-      return;
-    }
-    const gptStatus = new OpenAIService().explainFuther(text);
-    toast.promise(gptStatus, {
-      pending: "Generating explanation...",
-      success: "Explanation generated!",
-      error: "Failed to generate explanation",
-    });
-    const gptResponse = await gptStatus;
-    console.log("gptResponse", gptResponse);
 
-    setExplanation(gptResponse);
+  const updateToDO = (actionItems: AnnotationActionPoint[]) => {
+    highlighterDispatch({
+      type: "UPDATE_HIGHLIGHT_ACTION_ITEMS",
+      payload: {
+        id: currentEditing?.annotation.id ?? "",
+        actionItems: actionItems,
+      },
+    });
   };
-  const handleButtonClick = () => {
-    console.log("handleButtonClick");
-    fetchExplanationData();
+  const cancelHighlighting = () => {
+    highlighterDispatch({type: "CANCEL_HIGHLIGHTED"});
   };
 
   switch (currentEditing?.sidebarAction) {
@@ -78,6 +80,7 @@ function RenderTabs() {
             <Notes
               setNote={addNotes}
               notes={currentEditing.annotation.notes || ""}
+              cancelFunc={cancelHighlighting}
             ></Notes>
           </div>
         </div>
@@ -88,25 +91,25 @@ function RenderTabs() {
       return (
         <div>
           <p>
-            <Notes
-              setNote={(input) =>
-                highlighterDispatch({
-                  type: "UPDATE_HIGHLIGHT_NOTES",
-                  payload: {id: currentEditing.annotation.id, notes: input},
-                })
-              }
-              notes={currentEditing.annotation.notes || ""}
-            ></Notes>
-
-            <TodoCard
-              saveFunc={addToDo}
-              todoitems={
-                highlighterState.records.find(
-                  (annotation) =>
-                    annotation.annotation.id === currentEditing?.annotation.id
-                )?.actionItems
-              }
-            ></TodoCard>
+            {editing?.actionItems?.length ?? 0 > 0 ? (
+              <TodoCard
+                key={editing?.annotation.id}
+                saveFunc={updateToDO}
+                todoitems={editing?.actionItems}
+              ></TodoCard>
+            ) : (
+              <Notes
+                key={editing?.annotation.id}
+                setNote={(input) =>
+                  highlighterDispatch({
+                    type: "UPDATE_HIGHLIGHT_NOTES",
+                    payload: {id: currentEditing.annotation.id, notes: input},
+                  })
+                }
+                notes={currentEditing.annotation.notes || ""}
+                cancelFunc={cancelHighlighting}
+              ></Notes>
+            )}
           </p>
         </div>
       );
@@ -148,7 +151,7 @@ export function HighlightingTab() {
         ) : null}
       </div>
       <div className="w-full">
-        <RenderTabs></RenderTabs>
+        <RenderTabs currentEditing={currentEditing}></RenderTabs>
       </div>
     </div>
   );

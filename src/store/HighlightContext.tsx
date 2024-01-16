@@ -85,7 +85,13 @@ interface AddActionItem {
   type: "ADD_ACTION_ITEM";
   payload: {id: string; actionItem: AnnotationActionPoint};
 }
-
+interface CancelHighlighted {
+  type: "CANCEL_HIGHLIGHTED";
+}
+interface UpdateActionItems {
+  type: "UPDATE_HIGHLIGHT_ACTION_ITEMS";
+  payload: {id: string; actionItems: AnnotationActionPoint[]};
+}
 type Action =
   | AddRecordAction
   | SetEditingAction
@@ -98,7 +104,10 @@ type Action =
   | UpdateHighlight
   | DeleteAllHighlights
   | DeleteFeedback
-  | AddActionItem;
+  | AddActionItem
+  | CancelHighlighted
+  | UpdateActionItems;
+
 const HighlighterContext = createContext<
   {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
 >(undefined);
@@ -200,6 +209,17 @@ const highlighterReducer = (
       );
       if (recordToUpdate) {
         recordToUpdate.annotation.notes = action.payload.notes;
+      }
+      return {...state, editing: null, drafting: null};
+    case "CANCEL_HIGHLIGHTED":
+      state.highlighterLib?.remove(state.drafting?.id || "");
+      return {...state, editing: null, drafting: null};
+    case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
+      const recordToUpdateAction = state.records.find(
+        (record) => record.annotation.id === action.payload.id
+      );
+      if (recordToUpdateAction) {
+        recordToUpdateAction.actionItems = action.payload.actionItems;
       }
       return {...state, editing: null, drafting: null};
     default:
@@ -347,6 +367,28 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           const res = await status;
           if (res.status == 200) {
             baseDispatch({type: "ADD_ACTION_ITEM", payload: action.payload});
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        break;
+      case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
+        try {
+          const status = service.updateHighlightActionItem(
+            action.payload.id,
+            action.payload.actionItems
+          );
+          toast.promise(status, {
+            pending: "Updating action items...",
+            success: "Updated action items",
+            error: "Error updating action items please try again",
+          });
+          const res = await status;
+          if (res.status == 200) {
+            baseDispatch({
+              type: "UPDATE_HIGHLIGHT_ACTION_ITEMS",
+              payload: action.payload,
+            });
           }
         } catch (err) {
           console.log(err);
