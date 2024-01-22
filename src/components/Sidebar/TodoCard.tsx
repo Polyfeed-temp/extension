@@ -4,6 +4,11 @@ import {ActionPointCategory} from "../../types";
 import {Button, Typography, IconButton} from "@material-tailwind/react";
 import {useHighlighterDispatch} from "../../store/HighlightContext";
 import {EditIcon, DeleteIcon} from "../AnnotationIcons";
+import {
+  updateActionStatus,
+  deleteActionItem,
+} from "../../services/actionItem.service";
+import {toast} from "react-toastify";
 const ToDoActions: ActionPointCategory[] = [
   "Further Practice",
   "Contact Tutor",
@@ -12,7 +17,8 @@ const ToDoActions: ActionPointCategory[] = [
   "Explore Online",
   "Other",
 ];
-function ToDoItems({
+
+export function ToDoItems({
   actionItems,
   setActionItems,
   setSelectedActionItem,
@@ -31,8 +37,19 @@ function ToDoItems({
         const handleOnChecked = (
           event: React.ChangeEvent<HTMLInputElement>
         ) => {
+          if (actionItems[index].id) {
+            const status = updateActionStatus(
+              actionItems[index].id as number,
+              event.target.checked
+            );
+            toast.promise(status, {
+              pending: "Updating action item status...",
+              success: "Action item status updated!",
+              error: "Failed to update action item status",
+            });
+          }
           const newActionItems = [...actionItems];
-          newActionItems[index].completed = event.target.checked;
+          newActionItems[index].status = event.target.checked;
           setActionItems(newActionItems);
         };
         return (
@@ -40,12 +57,13 @@ function ToDoItems({
             <input
               type="checkbox"
               className="mr-2"
-              checked={actionPointItem.completed}
+              checked={actionPointItem.status}
               onChange={handleOnChecked}
             />
             <button
               className="flex items-center space-x-2 flex-grow text-left"
               onClick={() => setSelectedActionItem(actionPointItem)}
+              title="Edit action item"
             >
               <div className="flex-grow flex">
                 <h3 className="font-normal truncate flex-grow">
@@ -66,9 +84,20 @@ function ToDoItems({
 
             <IconButton
               variant="text"
-              title="delete"
+              title="Delete Action Item"
               ripple={true}
               onClick={() => {
+                if (actionItems[index].id) {
+                  const status = deleteActionItem(
+                    actionItems[index].id as number
+                  );
+                  toast.promise(status, {
+                    pending: "Deleting action item...",
+                    success: "Action item deleted!",
+                    error: "Failed to delete action item",
+                  });
+                }
+
                 const newActionItems = [...actionItems];
                 newActionItems.splice(index, 1);
                 setActionItems(newActionItems);
@@ -86,9 +115,11 @@ function ToDoItems({
 function TodoCard({
   saveFunc,
   todoitems,
+  viewOnly,
 }: {
   saveFunc: (actionItems: AnnotationActionPoint[]) => void;
   todoitems?: AnnotationActionPoint[];
+  viewOnly?: boolean;
 }) {
   const [actionItems, setActionItems] = useState<AnnotationActionPoint[]>(
     todoitems ? todoitems : []
@@ -102,14 +133,14 @@ function TodoCard({
     actionItems.length > 0 && !addToDo && !selectedActionItem;
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-md">
+    <div className="p-2 mb-4 bg-white shadow-md rounded-md">
       <ToDoItems
         actionItems={actionItems}
         setActionItems={setActionItems}
         setSelectedActionItem={setSelectedActionItem}
       />
 
-      {showAddAndDoneButtons && (
+      {showAddAndDoneButtons && !viewOnly && (
         <div className="flex justify-between my-2">
           <Button className="bg-black" onClick={() => setAddToDo(true)}>
             Add Another item
@@ -139,6 +170,7 @@ function TodoCard({
             key={selectedActionItem.action}
             hideFunc={() => setSelectedActionItem(null)}
             saveFunc={(actionItem) => {
+              console.log(actionItem);
               const newActionItems = [...actionItems];
               const index = newActionItems.findIndex(
                 (item) => item === selectedActionItem
@@ -236,7 +268,7 @@ function ToDoForm({
         htmlFor="dueDate"
         className="block text-sm font-medium text-gray-700 mt-4 mb-2"
       >
-        Due Date:
+        Expected to comptete by:
       </label>
       <input
         type="date"
