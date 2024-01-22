@@ -48,7 +48,6 @@ export const annotationTagsIcons: {[key in AnnotationTag]: string} = {
   "Action Item": actionItemIcon,
   Confused: confusedIcon,
   Other: otherIcon,
-  ChatGPT: otherIcon,
 };
 
 const green = require("../assets/emoticons/Green.svg").default as string;

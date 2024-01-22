@@ -11,7 +11,7 @@ export interface Annotation {
 }
 
 
-export type SideBarAction = "To-Dos" | "Notes" | "Explain Further" | "Editing"
+export type SideBarAction = "To-Dos" | "Notes"
 export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
 
 export type ActionPointCategory =
@@ -37,7 +37,7 @@ export interface AnnotationActionPoint {
   action: string;
   category: ActionPointCategory;
   deadline: Date;
-  completed: boolean;
+  status: boolean;
 }
 
 export interface Feedback {

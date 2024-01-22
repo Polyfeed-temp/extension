@@ -24,9 +24,6 @@ export function CurrentFeedbackSummary({feedback}: {feedback: Feedback}) {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
-  const [isHighlighting, setIsHighlighting] = useState(
-    highlightState.isHighlighting
-  );
 
   const [editing, setEditing] = useState(false);
 
@@ -88,7 +85,7 @@ export function CurrentFeedbackSummary({feedback}: {feedback: Feedback}) {
             <IconButton
               variant="text"
               ripple={true}
-              title="Edit Assessment"
+              title="Change Assessment"
               onClick={() => setEditing(true)}
             >
               {EditIcon}
@@ -167,19 +164,6 @@ export function CurrentFeedbackSummary({feedback}: {feedback: Feedback}) {
           {feedback.highlights && (
             <SummaryCard annotationData={feedback.highlights} />
           )}
-          <Button
-            fullWidth
-            className="bg-black my-4"
-            onClick={() => {
-              setIsHighlighting(!isHighlighting);
-              highlighterDispatch({
-                type: "SET_IS_HIGHLIGHTING",
-                payload: !isHighlighting,
-              });
-            }}
-          >
-            {!isHighlighting ? "Continue Highlighting" : "Stop Highlighting"}
-          </Button>
         </>
       )}
     </div>

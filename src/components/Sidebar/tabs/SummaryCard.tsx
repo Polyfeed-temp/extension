@@ -39,7 +39,7 @@ export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
       {isDropdownOpen && feedback.highlights ? (
         <>
           <div className="border-2 border-solid">
-            Assessment {feedback.assessmentName}
+            Assessment: {feedback.assessmentName}
           </div>
 
           <SummaryCard annotationData={feedback.highlights} />

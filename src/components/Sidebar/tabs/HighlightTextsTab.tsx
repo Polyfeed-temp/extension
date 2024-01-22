@@ -87,32 +87,6 @@ function RenderTabs({
       );
     case "To-Dos":
       return <div>{<TodoCard saveFunc={addToDo}></TodoCard>}</div>;
-    case "Editing":
-      return (
-        <div>
-          <p>
-            {editing?.actionItems?.length ?? 0 > 0 ? (
-              <TodoCard
-                key={editing?.annotation.id}
-                saveFunc={updateToDO}
-                todoitems={editing?.actionItems}
-              ></TodoCard>
-            ) : (
-              <Notes
-                key={editing?.annotation.id}
-                setNote={(input) =>
-                  highlighterDispatch({
-                    type: "UPDATE_HIGHLIGHT_NOTES",
-                    payload: {id: currentEditing.annotation.id, notes: input},
-                  })
-                }
-                notes={currentEditing.annotation.notes || ""}
-                cancelFunc={cancelHighlighting}
-              ></Notes>
-            )}
-          </p>
-        </div>
-      );
     default:
       return null;
   }
@@ -135,8 +109,7 @@ export function HighlightingTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-start">
-        {currentEditing &&
-        currentEditing.sidebarAction !== "Explain Further" ? (
+        {currentEditing && (
           <blockquote
             className={`flex-grow border-l-4 pl-4 text-left`}
             style={{borderColor: `${annotationTagColor}`}}
@@ -148,7 +121,7 @@ export function HighlightingTab() {
               {currentEditing.annotation.text}
             </p>
           </blockquote>
-        ) : null}
+        )}
       </div>
       <div className="w-full">
         <RenderTabs currentEditing={currentEditing}></RenderTabs>

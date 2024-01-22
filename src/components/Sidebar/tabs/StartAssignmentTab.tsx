@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from "react";
 import {Button} from "@material-tailwind/react";
 import SearchableSelect from "../SearchableSelect";
-import UnitService from "../../../services/unit.service";
+import {getAllUnits} from "../../../services/unit.service";
 import {Assessment, Unit, Feedback} from "../../../types";
 import {useHighlighterDispatch} from "../../../store/HighlightContext";
 import {useUserState} from "../../../store/UserContext";
-
+import AnnotationService from "../../../services/annotation.service";
+import {toast} from "react-toastify";
 export function SelectUnitAssignmentTab({
   switchTabFunc,
 }: {
@@ -17,17 +18,17 @@ export function SelectUnitAssignmentTab({
     useState<Assessment | null>(null);
   const [mark, setMark] = useState<number | null>(null);
   // const [marker, setMarker] = useState<string | null>("");
-  const unitService = new UnitService();
+
   const highlightterDispatch = useHighlighterDispatch();
   const user = useUserState().user;
 
   useEffect(() => {
-    const getAllUnits = () =>
-      unitService.getAllUnits().then((res) => {
+    const retriveUnitsInfo = () =>
+      getAllUnits().then((res) => {
         setUnits(res);
       });
 
-    getAllUnits();
+    retriveUnitsInfo();
   }, []);
 
   const handleAssignmentChange = (
@@ -45,12 +46,9 @@ export function SelectUnitAssignmentTab({
     setMark(isNaN(value) ? null : value);
   };
 
-  // const handleMarkerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setMarker(event.target.value);
-  // };
-
   return (
     <div className="flex flex-col h-full">
+      <h1 className="text-xl font-semibold">Select assessment feedback</h1>
       <div className="relative mt-2 rounded-md shadow-sm">
         <SearchableSelect
           options={units}
@@ -77,7 +75,9 @@ export function SelectUnitAssignmentTab({
               className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               onChange={handleAssignmentChange}
             >
-              <option value="">Select an assignment</option>
+              <option value="" disabled selected>
+                Select an assignment
+              </option>
               {selectedUnit.assessments.map((assignment) => (
                 <option key={assignment.id} value={assignment.id}>
                   {assignment.assessmentName}
@@ -103,6 +103,7 @@ export function SelectUnitAssignmentTab({
             onChange={handleMarksChange}
             className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             placeholder="Enter marks"
+            required
           />
           {/* <input
             id="markers"
@@ -120,8 +121,9 @@ export function SelectUnitAssignmentTab({
           <Button
             fullWidth
             className="bg-black"
-            onClick={() => {
+            onClick={async () => {
               const feedback: Feedback = {
+                id: 0, //temp id
                 assessmentId: selectedAssignment.id,
                 assessmentName: selectedAssignment.assessmentName,
                 unitCode: selectedUnit.unitCode,
@@ -130,9 +132,25 @@ export function SelectUnitAssignmentTab({
                 // marker: marker || "",
                 url: window.location.href,
               };
-              console.log(feedback);
-              highlightterDispatch({type: "ADD_FEEDBACK", payload: feedback});
-              switchTabFunc();
+              try {
+                const status = new AnnotationService().createFeedback(feedback);
+
+                toast.promise(status, {
+                  pending: "Saving assessment information",
+                  success: "Saved",
+                  error: "Error saving please try again",
+                });
+                const updatedFeedback = await status;
+                highlightterDispatch({
+                  type: "ADD_FEEDBACK",
+                  payload: {
+                    ...updatedFeedback,
+                    assessmentName: selectedAssignment.assessmentName,
+                    unitCode: selectedUnit.unitCode,
+                  },
+                });
+                switchTabFunc();
+              } catch (error) {}
             }}
           >
             Start highlighting

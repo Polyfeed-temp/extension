@@ -12,6 +12,7 @@ type SidebarTab =
   | "Select Assignment";
 
 import {SummaryCard, UnitAssignmentSummary} from "./tabs/SummaryCard";
+import {CurrentFeedbackSummary} from "../MyNotesSummaryCard";
 import AnnotatedCard from "./AnnotatedCard";
 import {SelectUnitAssignmentTab} from "./tabs/StartAssignmentTab";
 import {HighlightingTab} from "./tabs/HighlightTextsTab";
@@ -20,7 +21,8 @@ import {useUserState} from "../../store/UserContext";
 import AnnotationService from "../../services/annotation.service";
 import config from "../../config.json";
 import {ExplainFutherToggle} from "./ExplainFutherInput";
-
+import {DeleteIcon, leftChevron} from "../AnnotationIcons";
+import ConfirmationModal from "../ConfirmationModal";
 function RenderTabs({
   currentTab,
   setCurrentTab,
@@ -35,7 +37,10 @@ function RenderTabs({
 }) {
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalConfirm, setModalConfirm] = useState(() => () => {});
+  const [modalCancel, setModalCancel] = useState(() => () => {});
   switch (currentTab) {
     case "Summary":
       return (
@@ -70,19 +75,7 @@ function RenderTabs({
                   <SummaryCard annotationData={highlighterState.records} />
                 )}
 
-                <Button
-                  fullWidth
-                  className="bg-black"
-                  onClick={() => {
-                    setCurrentTab("Highlight Texts");
-                    highlighterDispatch({
-                      type: "SET_IS_HIGHLIGHTING",
-                      payload: true,
-                    });
-                  }}
-                >
-                  Continue Highlighting
-                </Button>
+                {setCurrentTab("Highlight Texts")}
               </>
             )}
           </div>
@@ -94,10 +87,12 @@ function RenderTabs({
           <SelectUnitAssignmentTab
             // units={currentUser.units}
             switchTabFunc={() => {
-              highlighterDispatch({
-                type: "SET_IS_HIGHLIGHTING",
-                payload: true,
-              });
+              {
+                highlighterDispatch({
+                  type: "SET_IS_HIGHLIGHTING",
+                  payload: true,
+                });
+              }
               setCurrentTab("Highlight Texts");
             }}
           ></SelectUnitAssignmentTab>
@@ -109,25 +104,34 @@ function RenderTabs({
       return (
         <div className="mb-4">
           {feedback && (
-            <UnitAssignmentSummary
-              feedback={{...feedback, highlights: highlighterState.records}}
-            ></UnitAssignmentSummary>
+            <>
+              {" "}
+              <CurrentFeedbackSummary
+                feedback={{...feedback, highlights: highlighterState.records}}
+              ></CurrentFeedbackSummary>
+              <Button
+                fullWidth
+                className="bg-black my-4"
+                onClick={() => {
+                  highlighterDispatch({
+                    type: "SET_IS_HIGHLIGHTING",
+                    payload: !highlighterState.isHighlighting,
+                  });
+                }}
+              >
+                {!highlighterState.isHighlighting
+                  ? "Continue Highlighting"
+                  : "Stop Highlighting"}
+              </Button>
+            </>
           )}
           <HighlightingTab></HighlightingTab>
           <ExplainFutherToggle></ExplainFutherToggle>
           {highlighterState.records.map((record: AnnotationData, index) => (
             <div key={index} className="mb-4">
               <AnnotatedCard
+                key={index}
                 annotationData={record}
-                onEdit={() => {
-                  highlighterDispatch({
-                    type: "SET_EDITING",
-                    payload: {
-                      sidebarAction: "Editing",
-                      annotation: record.annotation,
-                    },
-                  });
-                }}
                 onDelete={() => {
                   highlighterDispatch({
                     type: "DELETE_RECORD",
@@ -155,7 +159,6 @@ function RenderTabs({
 
 const SidebarPanel = () => {
   const [currentTab, setCurrentTab] = useState("My Notes" as SidebarTab);
-  const [currentFeedback, setCurrentFeedback] = useState<Feedback | null>(null);
   const [feedbacks, setAllFeedbacks] = useState<Feedback[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -168,9 +171,7 @@ const SidebarPanel = () => {
     const fetchAnnotations = async () => {
       const feedback = await annotationService.getCurrentPageFeedback();
       console.log(feedback);
-      if (feedback) {
-        setCurrentFeedback(feedback);
-      }
+
       highlighterDispatch({type: "INITIALIZE", payload: feedback});
       setLoading(false);
     };
@@ -193,7 +194,7 @@ const SidebarPanel = () => {
             <div className="flex">
               <Button
                 className={`${
-                  currentTab === "My Notes"
+                  currentTab != "Summary"
                     ? "bg-black text-white"
                     : "bg-gray text-black"
                 } flex-1`}
@@ -234,7 +235,7 @@ const SidebarPanel = () => {
               <RenderTabs
                 currentTab={currentTab}
                 setCurrentTab={setCurrentTab}
-                feedback={currentFeedback}
+                feedback={highlighterState.feedbackInfo}
                 feedbacks={feedbacks}
               ></RenderTabs>
             )}

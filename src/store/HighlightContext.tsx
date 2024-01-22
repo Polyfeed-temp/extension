@@ -66,10 +66,6 @@ interface SetDraftingAction {
   type: "SET_DRAFTING";
   payload: HighlightSource;
 }
-interface SelectHighlightAction {
-  type: "SELECT_HIGHLIGHT";
-  payload: string;
-}
 
 interface UpdateHighlight {
   type: "UPDATE_HIGHLIGHT_NOTES";
@@ -100,7 +96,6 @@ type Action =
   | InitializeAction
   | SetDraftingAction
   | AddFeedbackAction
-  | SelectHighlightAction
   | UpdateHighlight
   | DeleteAllHighlights
   | DeleteFeedback
@@ -171,24 +166,6 @@ const highlighterReducer = (
       return {...state, records: newRecords};
     case "ADD_FEEDBACK":
       return {...state, feedbackInfo: action.payload};
-    case "SELECT_HIGHLIGHT":
-      const highlight = state.records.find(
-        (record) => record.annotation.id === action.payload
-      );
-
-      if (!highlight) {
-        return {
-          ...state,
-          drafting:
-            state.unlabledHighlights.find(
-              (highlight) => highlight.id === action.payload
-            ) || null,
-        };
-      }
-      return {
-        ...state,
-        editing: {sidebarAction: "Editing", annotation: highlight.annotation},
-      };
     case "DELETE_ALL_HIGHLIGHTS":
       return {...state, records: []};
     case "DELETE_FEEDBACK":
@@ -201,7 +178,7 @@ const highlighterReducer = (
         record.actionItems ??= [];
         record.actionItems.push(action.payload.actionItem);
       }
-      console.log(state.records);
+
       return {...state};
     case "UPDATE_HIGHLIGHT_NOTES":
       const recordToUpdate = state.records.find(
@@ -240,7 +217,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   const {setCollapsed} = useSidebar();
   const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const [selectedHighlightElement, setSelectedHighlightElement] =
-    useState<HTMLElement | null>(null);
+    useState<Element | null>(null);
   const [selectedHighlighId, setSelectedHighlightId] = useState<string | null>(
     null
   );
@@ -403,7 +380,6 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
-      console.log(data);
       if (_node) {
         _node.innerHTML =
           `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
@@ -421,8 +397,22 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       selectedArea ? setSelectedHighlightElement(selectedArea) : null;
       console.log("selected elem", selectedHighlightElement);
       setSelectedHighlightId(data.id);
-      dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
+      // dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
       setCollapsed(false);
+      const hostElement = document.getElementById("sidebar-root");
+      const sidebarShadowRoot = hostElement?.shadowRoot;
+      //remove selected focus
+      sidebarShadowRoot?.querySelectorAll(".selected").forEach((elem) => {
+        elem.classList.remove("selected");
+      });
+      const cardView = sidebarShadowRoot?.getElementById(
+        `card-view-${data.id}`
+      );
+      cardView?.classList.add("selected");
+      // const cardView = document.getElementById(`card-view-${data.id}`);
+      console.log("card view", cardView);
+
+      cardView?.scrollIntoView({behavior: "smooth", block: "center"});
     };
 
     const handleHover = (data: {id: string}) => {
@@ -462,15 +452,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   return (
     <HighlighterContext.Provider value={{state, dispatch}}>
       {children}
-      {state.drafting ? (
-        <RenderPop highlighting={state.drafting}></RenderPop>
-      ) : null}
-      <Tippy
-        appendTo={
-          selectedHighlightElement ? selectedHighlightElement : undefined
-        }
-        render={(attrs) => <div className="box">My tippy box</div>}
-      ></Tippy>
+      {state.drafting && <RenderPop highlighting={state.drafting}></RenderPop>}
     </HighlighterContext.Provider>
   );
 };

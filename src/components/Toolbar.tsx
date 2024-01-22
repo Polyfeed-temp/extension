@@ -19,6 +19,7 @@ import HighlightSource from "web-highlighter/dist/model/source";
 import {AnnotationTag, SideBarAction, Annotation} from "../types";
 import {annotationTagsIcons} from "./AnnotationIcons";
 import {useSidebar} from "../hooks/useSidebar";
+import Tippy from "@tippyjs/react";
 
 function ToolbarMenu({
   Label,
@@ -31,19 +32,50 @@ function ToolbarMenu({
   return (
     <Menu>
       <MenuHandler className="p-1">
-        <button>
+        <button
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
           <img
             src={annotationTagsIcons[Label]}
             style={{width: 50, height: 25}}
           />
-          <span>{Label}</span>
+          <span style={{marginTop: "5px", whiteSpace: "nowrap"}}>{Label}</span>
         </button>
       </MenuHandler>
       <MenuList>
-        <MenuItem onClick={() => setAnnotationTag("Notes")}>Add Note</MenuItem>
-        <MenuItem onClick={() => setAnnotationTag("To-Dos")}>
-          Add to-do list
-        </MenuItem>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {" "}
+          <button
+            onClick={() => setAnnotationTag("Notes")}
+            style={{
+              width: "150px",
+              height: "40px",
+              marginBottom: "10px",
+            }}
+          >
+            Add Note
+          </button>
+          <button
+            onClick={() => setAnnotationTag("To-Dos")}
+            style={{
+              width: "150px",
+              height: "40px",
+            }}
+          >
+            Add to-do list
+          </button>
+        </div>
       </MenuList>
     </Menu>
   );
@@ -86,36 +118,6 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
         payload: {sidebarAction: sidebarAction, annotation: annotation},
       });
     };
-  const theme = {
-    popover: {
-      defaultProps: {
-        placement: "top",
-        offset: 5,
-        dismiss: {},
-        animate: {
-          unmount: {},
-          mount: {},
-        },
-        className: "",
-      },
-      styles: {
-        base: {
-          bg: "bg-white",
-          p: "p-4",
-          border: "border border-blue-gray-50",
-          borderRadius: "rounded-lg",
-          boxShadow: "shadow-lg shadow-blue-gray-500/10",
-          fontFamily: "font-sans",
-          fontSize: "text-sm",
-          fontWeight: "font-normal",
-          color: "text-blue-gray-500",
-          outline: "focus:outline-none",
-          overflowWrap: "break-words",
-          whiteSpace: "whitespace-normal",
-        },
-      },
-    },
-  };
   useEffect(() => {
     const dom = highlighter?.getDoms(highlightingID)[0];
     const onClick = () => {
@@ -130,29 +132,30 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
       };
     }
   }, [highlighter, highlightingID]);
-  return el
-    ? createPortal(
-        <Popover open={visible} handler={setVisible}>
-          <PopoverHandler {...triggers}>
-            <span></span>
-          </PopoverHandler>
-          <PopoverContent {...triggers} className="border border-2 p-0 z-100">
-            {annotationTags.map((tag) => (
-              <ToolbarMenu
-                Label={tag}
-                setAnnotationTag={setAnnotationTag(tag)}
-              ></ToolbarMenu>
-            ))}
-
-            <button
-              onClick={() => setAnnotationTag("Other")("Explain Further")}
-              className="p-1"
-            >
-              <span>Ask Chat GPT</span>
-            </button>
-          </PopoverContent>
-        </Popover>,
-        el
-      )
-    : null;
+  return (
+    <Tippy
+      reference={el}
+      interactive={true}
+      render={() => (
+        <div
+          style={{
+            zIndex: 9999999,
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {annotationTags.map((Label) => (
+            <ToolbarMenu
+              key={Label}
+              Label={Label}
+              setAnnotationTag={setAnnotationTag(Label)}
+            />
+          ))}
+        </div>
+      )}
+      visible={visible}
+    ></Tippy>
+  );
 }

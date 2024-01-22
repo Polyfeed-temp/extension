@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {User, Role, Faculty} from "../types";
 import {register} from "../services/user.service";
 import {toast} from "react-toastify";
+import {AxiosError} from "axios";
 const xMarkIcon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -63,9 +64,14 @@ const SignUpPopup = ({
       error: "Unable to register user please try again",
     });
     status
-      .then((res: any) => {})
-      .catch((err: any) => {
-        console.log(err);
+      .then((res: any) => {
+        if (res.status === 409) {
+          setErrorMessage("User already exists");
+          setIsOpen(true);
+        }
+      })
+      .catch((err: AxiosError) => {
+        console.log(err.code);
         setErrorMessage("Unable to register user please try again");
         setIsOpen(true);
       });
@@ -98,7 +104,7 @@ const SignUpPopup = ({
         <form onSubmit={handleSubmit}>
           <div className="mt-3 text-center">
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Sign UP
+              Sign Up
             </h3>
             <div className="mt-2 px-7 py-3">
               <input
@@ -108,6 +114,7 @@ const SignUpPopup = ({
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="First Name"
+                required
               />
               <input
                 type="text"
@@ -116,6 +123,7 @@ const SignUpPopup = ({
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Last Name"
+                required
               />
               <input
                 type="email"
@@ -124,6 +132,7 @@ const SignUpPopup = ({
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Email"
+                required
               />
 
               <input
@@ -133,6 +142,7 @@ const SignUpPopup = ({
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Password"
+                required
               />
               <label className="block text-sm font-medium text-gray-700 text-left">
                 Role
@@ -142,6 +152,7 @@ const SignUpPopup = ({
                 value={formData.role}
                 onChange={handleChange}
                 className="mb-3 px-3 py-2 border rounded-md w-full"
+                required
               >
                 <option value="Student">Student</option>
                 <option value="Tutor">Tutor</option>
@@ -155,6 +166,7 @@ const SignUpPopup = ({
                 className="mb-3 px-3 py-2 border rounded-md w-full"
                 onChange={handleChange}
                 placeholder="Select Faculty"
+                required
               >
                 <option value="" disabled selected>
                   Select your faculty

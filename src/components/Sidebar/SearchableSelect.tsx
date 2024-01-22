@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useRef, useEffect} from "react";
 
 type OptionType = {
   [key: string]: any;
@@ -9,6 +9,7 @@ type SearchableSelectProps = {
   displayFunction: (option: OptionType) => string;
   filterFunction: (option: OptionType, searchTerm: string) => boolean;
   onSelectFunction: (selectedUnit: any) => void;
+  
 };
 
 function SearchableSelect({
@@ -34,9 +35,26 @@ function SearchableSelect({
     setShowOptions(false);
     onSelectFunction(option);
   };
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: {target: any}) {
+      if (
+        wrapperRef.current &&
+        !!(wrapperRef.current as HTMLElement).contains(event.target)
+      ) {
+        setShowOptions(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [wrapperRef]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapperRef}>
       <input
         type="text"
         value={searchTerm}
@@ -52,7 +70,7 @@ function SearchableSelect({
             <li
               key={index}
               onClick={() => handleOptionClick(option)}
-              className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+              className=" px-3 py-2 cursor-pointer hover:bg-gray-100"
             >
               {displayFunction(option)}
             </li>

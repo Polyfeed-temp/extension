@@ -53,6 +53,5 @@ export async function logout() {
 
 export async function register(user: User) {
     const response = await axios.post("api/user/signup", user, { withCredentials: true, headers: { 'Content-Type': 'application/json', "Authorization": 'Bearer ' + localStorage.getItem('token') }, });
-    return response.data as UserState
-
+    return response
 }
