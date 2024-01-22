@@ -4,6 +4,12 @@ import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {useSidebar} from "./hooks/useSidebar";
 
+export function restoreHostDom() {
+  const nav = document.querySelector("nav") as HTMLElement;
+  const docs = document.querySelector("#docs-chrome") as HTMLElement;
+  nav.style.marginRight = "0";
+  document.body.style.marginRight = "0";
+}
 function App() {
   const {collapsed, setCollapsed, location, setLocation} = useSidebar();
   const toggleSidebar = () => {

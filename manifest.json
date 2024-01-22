@@ -3,33 +3,30 @@
     "manifest_version": 3,
     "name": "Polyfeed",
     "icons": {
-        "128": "./public/Polyfeed_Social_Grey.png"
+        "128": "./public/Polyfeed_Social_On.png"
     },
     "action": {
-        "default_popup": "./public/popup.html",
         "default_icon": {
-            "32": "./public/Polyfeed_Social_Grey.png"
+            "32": "./public/Polyfeed_Social_On.png"
         }
+    },
+    "background": {
+        "service_worker": "./public/background.js"
     },
     "content_scripts": [
         {
             "matches": [
-                "https://lms.monash.edu/*",
-                "https://learning.monash.edu/*",
-                "https://docs.google.com/*"
+                "<all_urls>"
             ],
-            "exclude_matches": [
+            "excludeMatches": [
                 "http://localhost:3000/"
             ],
             "js": [
                 "./js/index.js"
             ],
-            "run_at": "document_end"
+            "runAt": "document_end"
         }
     ],
-    "background": {
-        "service_worker": "./public/background.js"
-    },
     "permissions": [
         "storage",
         "activeTab"

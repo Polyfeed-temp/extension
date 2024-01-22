@@ -1,13 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import App, {restoreHostDom} from "./App";
 import "./index.css";
 import {HighlighterProvider} from "./store/HighlightContext";
 import UserProvider from "./store/UserContext";
 import {SidebarProvider} from "./hooks/useSidebar";
 
-function load() {
+function shadowHostInitailize() {
   const host = document.createElement("div");
+  host.id = "sidebar-root";
   document.body.appendChild(host);
 
   const shadowRoot = host.attachShadow({mode: "open"});
@@ -19,22 +20,11 @@ function load() {
   link.rel = "stylesheet";
   shadowRoot.appendChild(link);
 
-  // // Injecting Tailwind script into the shadow root
-  // const materialScript = document.createElement("script");
-  // materialScript.src =
-  //   "https://unpkg.com/@material-tailwind/html@latest/scripts/script-name.js";
-  // shadowRoot.appendChild(materialScript);
-
-  // Injecting Material Icons into the shadow root
   const materialIcons = document.createElement("link");
   materialIcons.href =
     "https://fonts.googleapis.com/icon?family=Material+Icons";
   materialIcons.rel = "stylesheet";
   shadowRoot.appendChild(materialIcons);
-
-  // const tailwind = document.createElement("script");
-  // tailwind.src = "https://cdn.tailwindcss.com";
-  // shadowRoot.appendChild(tailwind);
 
   const toastify = document.createElement("link");
   toastify.href =
@@ -42,24 +32,21 @@ function load() {
   toastify.rel = "stylesheet";
   shadowRoot.appendChild(toastify);
 
-  // Appending a div to shadow root for React to mount to
-  const reactRootDiv = document.createElement("div");
-  shadowRoot.appendChild(reactRootDiv);
+  const popper = document.createElement("script");
+  popper.src = "https://unpkg.com/@popperjs/core@2";
+  shadowRoot.appendChild(popper);
 
-  const root = ReactDOM.createRoot(reactRootDiv);
-  const tailwindStyle = document.createElement("style");
+  const tippy = document.createElement("script");
+  tippy.src = "https://unpkg.com/tippy.js@6";
+  shadowRoot.appendChild(tippy);
 
-  // Add Tailwind CSS utility class
-  tailwindStyle.innerHTML = `
-@layer components {
-  button {
-    @apply bg-gray-500 text-white hover:bg-black;
-  }
-}
-`;
+  const mainBodyStyle = document.createElement("style");
+  mainBodyStyle.innerHTML = `.button-with-hover:hover {
+  background-color: #f0f0f0; /* Example hover color */
+  cursor: pointer;
+}`;
+  document.head.appendChild(mainBodyStyle);
 
-  // Append the style element to the head of the document
-  document.head.appendChild(tailwindStyle);
   const style = document.createElement("style");
   style.textContent = `
 .border-Strength {
@@ -106,11 +93,59 @@ input[type=number] {
 
 Button:hover {
   background-color: #1a202c;
+  color: white;
+}
+
+button:hover {
+  background-color: #1a202c;
+  color: white;
+}
+
+.card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Initial subtle shadow */
+    border: 1px solid #ddd; /* Light border for definition */
+    background-color: #fff; /* A background color for the card */
+}
+
+.card-container:hover .card {
+    /* Slightly reduce the opacity of other cards when any card is hovered */
+    opacity: 0.9; 
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    border-color: #ccc
+    cursor: pointer;
+    background-color: #f8f8f8;
+    transform: scale(1.05)
+}
+
+.selected{
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+  border-color: #ccc
+  background-color: #f8f8f8;
+  transform: scale(1.1)
+
 }
 
 
 `;
+
   shadowRoot.appendChild(style);
+
+  return shadowRoot;
+}
+
+let root: ReactDOM.Root | null = null;
+function load() {
+  const shadowRoot = shadowHostInitailize();
+  const reactRootDiv = document.createElement("div");
+
+  shadowRoot.appendChild(reactRootDiv);
+
+  root = ReactDOM.createRoot(reactRootDiv);
 
   root.render(
     <React.StrictMode>
@@ -125,9 +160,34 @@ Button:hover {
   );
 }
 
-setTimeout(load, 1000);
-// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-//   if (request.message === "triggerContentScript") {
-//     load();
-//   }
-// });
+const allowedDomains = [
+  "https://lms.monash.edu/*",
+  "https://learning.monash.edu/*",
+  "https://docs.google.com/*",
+];
+console.log(window.location.href);
+let active = false;
+
+if (allowedDomains.some((domain) => window.location.href.match(domain))) {
+  chrome.runtime.sendMessage({action: "contentScriptActive"});
+
+  console.log("active");
+  active = true;
+  load();
+} else {
+  chrome.runtime.sendMessage({action: "contentScriptInActive"});
+}
+
+chrome.runtime.onMessage.addListener(function (response, sendResponse) {
+  console.log(response);
+  if (response.action === "contentScriptOn" && !active) {
+    active = true;
+    load();
+  }
+  if (response.action === "contentScriptOff" && active) {
+    root ? root.unmount() : null;
+    root = null;
+    active = false;
+    restoreHostDom();
+  }
+});
