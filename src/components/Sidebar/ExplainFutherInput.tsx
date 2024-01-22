@@ -154,13 +154,19 @@ function ViewOnlyGPTResponse({
   rating?: number;
   feedbackId: number;
 }) {
+  const formatted = response.split("\n").map((line, index) => (
+    <li key={index} className="bg-gray-100 p-4 text-left">
+      {line}
+    </li>
+  ));
   return (
     <div>
       <p className="text-left text-gray-700 italic">{query}</p>
 
       <div className="border-2 bg-gray-100 p-4 text-left">
         <p className="font-bold">{"Explanation from Chat GPT"}</p>
-        <p className="bg-gray-100 p-4 text-left">{response}</p>
+
+        <p className="bg-gray-100 p-4 text-left">{formatted}</p>
       </div>
 
       <RateGPTResponse feedbackId={feedbackId} rating={rating} />
@@ -204,7 +210,7 @@ function RateGPTResponse({
   };
 
   return (
-    <div className="flex item-center text-left border-4">
+    <div className="flex item-center text-left border-4 bg-gray-400">
       How do you feel about the explanation?
       {Object.entries(emoticons).map(([color, icon]) => (
         <button
