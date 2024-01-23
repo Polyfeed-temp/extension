@@ -1,0 +1,34 @@
+{
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "name": "Polyfeed",
+    "icons": {
+        "128": "./public/Polyfeed_Social_On.png"
+    },
+    "action": {
+        "default_icon": {
+            "32": "./public/Polyfeed_Social_On.png"
+        }
+    },
+    "background": {
+        "service_worker": "./public/background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "excludeMatches": [
+                "http://localhost:3000/"
+            ],
+            "js": [
+                "./js/index.js"
+            ],
+            "runAt": "document_end"
+        }
+    ],
+    "permissions": [
+        "storage",
+        "activeTab"
+    ]
+}

@@ -1,0 +1,5 @@
+{
+    "backend": "https://3.27.136.223:8000",
+    "server": "https://3.27.136.223:8000",
+    "dashboard": "http://localhost:3000"
+}
