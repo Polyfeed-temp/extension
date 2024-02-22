@@ -172,6 +172,7 @@ if (allowedDomains.some((domain) => window.location.href.match(domain))) {
   chrome.runtime.sendMessage({action: "contentScriptActive"});
 
   console.log("active");
+
   active = true;
   load();
 } else {
@@ -179,6 +180,8 @@ if (allowedDomains.some((domain) => window.location.href.match(domain))) {
 }
 
 chrome.runtime.onMessage.addListener(function (response, sendResponse) {
+
+  console.log("Good morning")
   console.log(response);
   if (response.action === "contentScriptOn" && !active) {
     active = true;

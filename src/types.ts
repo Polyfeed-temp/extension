@@ -94,7 +94,7 @@ export interface User {
   email: string
   lastName: string;
   role: Role
-  faculty: string;
+  faculty: Faculty;
 }
 
 export interface UserState {

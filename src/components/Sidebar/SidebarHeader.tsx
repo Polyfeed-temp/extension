@@ -2,7 +2,7 @@ import {useState} from "react";
 import LoginPopup from "./LoginPopUp";
 import {useUserState} from "../../store/UserContext";
 import {ProfileMenu} from "./Profile";
-import SignUpPopup from "../SignUpPopUp";
+// import SignUpPopup from "../SignUpPopUp";
 import config from "../../config.json";
 const Logo = require("../../assets/logo/PolyFeed_BlackText.png")
   .default as string;
@@ -25,7 +25,7 @@ export function SidebarHeader() {
         }}
         style={{cursor: "pointer"}}
       />
-      {!user.login ? (
+      {/* {!user.login ? (
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsSignUpPopupOpen(true)}
@@ -51,7 +51,8 @@ export function SidebarHeader() {
         </div>
       ) : (
         <ProfileMenu></ProfileMenu>
-      )}
+      )} */}
+      <ProfileMenu></ProfileMenu>
     </div>
   );
 }

@@ -29,6 +29,14 @@
     ],
     "permissions": [
         "storage",
-        "activeTab"
-    ]
+        "activeTab",
+        "identity"
+    ],
+    "oauth2": {
+        "client_id": "838168997555-oenqc5ap4le8iqmsdc2s0ji9r06t3mrq.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/userinfo.email"
+        ]
+    },
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArH9ypWdMRjUb3tWdP7dkBpPVs1amCgfWzdyugjErhwSX/DQi8TZoR4iJt0x2nZ/80mj91nQrsRGXNQvBnJniQweyYgCHbVE1uB/drtq2TAoyOWtzQmeVL1bH3VcfvedBgZ1kd0IhMy6B0Y9jSQXA6Kf1Qj9Z6DyAu/9loc54WPbYGqjubxXYs8RqsYeVqZ5WtSk31ZUIGWMcGOwCua+Aqajs4HEynI4enGUSiotxRiRtfUMpNeoarRkdRc9DjKg6BJPODC3canySwDRHlaOGaLwBY+lr2A5+IX7PCYuhywiuXISspFKD4wQlHuwAVegueHRtrRyTXyrzzcasTpQeuwIDAQAB"
 }
