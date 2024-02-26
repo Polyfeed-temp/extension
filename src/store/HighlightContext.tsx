@@ -381,8 +381,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
       if (_node) {
-        _node.innerHTML =
-          `<span id=${`__highlight-${id}`}></span>` + _node.innerHTML;
+        _node.id = `__highlight-${id}`;
       }
       if (data.type != "from-store") {
         dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
