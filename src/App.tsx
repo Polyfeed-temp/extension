@@ -25,10 +25,10 @@ provider.addScope("https://www.googleapis.com/auth/userinfo.email");
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
       if (request.action === "login") {
-        console.log("Token here from app.tsx"+request.token);
+        // console.log("Token here from app.tsx"+request.token);
         const credential = GoogleAuthProvider.credential(null, request.token);
         signInWithCredential(auth, credential).then(async (result) => {
-          console.log("Successful Login for"+await result.user.getIdToken()) 
+          // console.log("Successful Login for"+await result.user.getIdToken()) 
 
           const googleUser = result.user;
 

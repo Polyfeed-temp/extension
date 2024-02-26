@@ -1,7 +1,7 @@
 
 export function setChromeLocalStorage({ key, value }: { [key: string]: any }) {
     chrome.storage.local.set({ [key]: value }, () => {
-        console.log("Value is set to " + value);
+        console.log("LocalStorage updated with " + key);
     });
 
 }
