@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
   Popover,
   PopoverHandler,
@@ -10,15 +10,15 @@ import {
   MenuItem,
   IconButton,
 } from "@material-tailwind/react";
-import {createPortal} from "react-dom";
+import { createPortal } from "react-dom";
 import {
   useHighlighterState,
   useHighlighterDispatch,
 } from "../store/HighlightContext";
 import HighlightSource from "web-highlighter/dist/model/source";
-import {AnnotationTag, SideBarAction, Annotation} from "../types";
-import {annotationTagsIcons} from "./AnnotationIcons";
-import {useSidebar} from "../hooks/useSidebar";
+import { AnnotationTag, SideBarAction, Annotation } from "../types";
+import { annotationTagsIcons } from "./AnnotationIcons";
+import { useSidebar } from "../hooks/useSidebar";
 import Tippy from "@tippyjs/react";
 
 function ToolbarMenu({
@@ -42,9 +42,11 @@ function ToolbarMenu({
         >
           <img
             src={annotationTagsIcons[Label]}
-            style={{width: 50, height: 25}}
+            style={{ width: 50, height: 25 }}
           />
-          <span style={{marginTop: "5px", whiteSpace: "nowrap"}}>{Label}</span>
+          <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
+            {Label}
+          </span>
         </button>
       </MenuHandler>
       <MenuList>
@@ -55,7 +57,6 @@ function ToolbarMenu({
             alignItems: "center",
           }}
         >
-          {" "}
           <button
             onClick={() => setAnnotationTag("Notes")}
             style={{
@@ -81,14 +82,14 @@ function ToolbarMenu({
   );
 }
 
-export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
+export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   const highlighter = useHighlighterState().highlighterLib;
   const feedbackId = useHighlighterState().feedbackInfo?.id || 0;
   const highlightingID = highlighting.id;
   const _id = `__highlight-${highlightingID}`;
   const el = document.getElementById(_id);
   const [visible, setVisible] = useState(true);
-  const {setCollapsed} = useSidebar();
+  const { setCollapsed } = useSidebar();
   const triggers = {
     onmouseenter: () => setVisible(true),
     onmouseleave: () => setVisible(false),
@@ -115,7 +116,7 @@ export function RenderPop({highlighting}: {highlighting: HighlightSource}) {
       setCollapsed(false);
       annotationDispatch({
         type: "SET_EDITING",
-        payload: {sidebarAction: sidebarAction, annotation: annotation},
+        payload: { sidebarAction: sidebarAction, annotation: annotation },
       });
     };
   useEffect(() => {

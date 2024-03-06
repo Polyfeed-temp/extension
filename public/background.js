@@ -1,5 +1,4 @@
 try {
-
   chrome.action.onClicked.addListener(async (tab) => {
     const enabled = !(await chrome.storage.local.get("enabled")).enabled;
     console.log(enabled);
@@ -35,9 +34,12 @@ try {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "contentScriptActive") {
       chrome.identity.getAuthToken({ interactive: true }, function (token) {
-        chrome.tabs.sendMessage(sender.tab.id, { action: "login", token: token });
+        chrome.tabs.sendMessage(sender.tab.id, {
+          action: "login",
+          token: token,
+        });
       });
-      
+
       console.log("contentScriptActive");
       chrome.action.setIcon({ path: "Polyfeed_Social_On.png" });
       chrome.action.setBadgeText({ text: "Active" });
@@ -48,8 +50,6 @@ try {
       chrome.action.setBadgeText({ text: "" });
     }
   });
-
-
 } catch (e) {
   console.error(e);
 }

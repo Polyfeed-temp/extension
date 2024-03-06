@@ -9,7 +9,7 @@ import React, {
 import Highlighter from "web-highlighter";
 import HighlightSource from "web-highlighter/dist/model/source";
 import AnnotationService from "../services/annotation.service";
-import {RenderPop} from "../components/Toolbar";
+import { RenderPop } from "../components/Toolbar";
 import {
   Annotation,
   AnnotationTag,
@@ -20,8 +20,8 @@ import {
   AnnotationActionPoint,
 } from "../types";
 import Tippy from "@tippyjs/react";
-import {toast} from "react-toastify";
-import {useSidebar} from "../hooks/useSidebar";
+import { toast } from "react-toastify";
+import { useSidebar } from "../hooks/useSidebar";
 interface HighlightState {
   highlighterLib: Highlighter | null;
   feedbackInfo: Feedback | null;
@@ -50,7 +50,7 @@ interface AddRecordAction {
 
 interface SetEditingAction {
   type: "SET_EDITING";
-  payload: {sidebarAction: SideBarAction; annotation: Annotation};
+  payload: { sidebarAction: SideBarAction; annotation: Annotation };
 }
 
 interface SetIsHighlightingAction {
@@ -69,7 +69,7 @@ interface SetDraftingAction {
 
 interface UpdateHighlight {
   type: "UPDATE_HIGHLIGHT_NOTES";
-  payload: {id: string; notes: string};
+  payload: { id: string; notes: string };
 }
 interface DeleteAllHighlights {
   type: "DELETE_ALL_HIGHLIGHTS";
@@ -79,14 +79,14 @@ interface DeleteFeedback {
 }
 interface AddActionItem {
   type: "ADD_ACTION_ITEM";
-  payload: {id: string; actionItem: AnnotationActionPoint};
+  payload: { id: string; actionItem: AnnotationActionPoint };
 }
 interface CancelHighlighted {
   type: "CANCEL_HIGHLIGHTED";
 }
 interface UpdateActionItems {
   type: "UPDATE_HIGHLIGHT_ACTION_ITEMS";
-  payload: {id: string; actionItems: AnnotationActionPoint[]};
+  payload: { id: string; actionItems: AnnotationActionPoint[] };
 }
 type Action =
   | AddRecordAction
@@ -104,7 +104,7 @@ type Action =
   | UpdateActionItems;
 
 const HighlighterContext = createContext<
-  {state: HighlightState; dispatch: React.Dispatch<Action>} | undefined
+  { state: HighlightState; dispatch: React.Dispatch<Action> } | undefined
 >(undefined);
 
 const highlighterReducer = (
@@ -119,6 +119,7 @@ const highlighterReducer = (
         : console.log("not doco streamview");
       const lib = new Highlighter({
         $root: root ? root : document.documentElement,
+        wrapTag: "span",
         exceptSelectors: ["#react-root"],
       });
 
@@ -136,7 +137,7 @@ const highlighterReducer = (
       }
       console.log("initialize");
 
-      return {...state, ...initialState};
+      return { ...state, ...initialState };
     case "SET_DRAFTING":
       return {
         ...state,
@@ -152,24 +153,24 @@ const highlighterReducer = (
         records: [...state.records, action.payload],
       };
     case "SET_EDITING":
-      return {...state, editing: action.payload};
+      return { ...state, editing: action.payload };
     case "SET_IS_HIGHLIGHTING":
       action.payload
         ? state.highlighterLib?.run()
         : state.highlighterLib?.stop();
-      return {...state, isHighlighting: action.payload};
+      return { ...state, isHighlighting: action.payload };
     case "DELETE_RECORD":
       const newRecords = state.records.filter(
         (record) => record.annotation.id !== action.payload
       );
       state.highlighterLib?.remove(action.payload);
-      return {...state, records: newRecords};
+      return { ...state, records: newRecords };
     case "ADD_FEEDBACK":
-      return {...state, feedbackInfo: action.payload};
+      return { ...state, feedbackInfo: action.payload };
     case "DELETE_ALL_HIGHLIGHTS":
-      return {...state, records: []};
+      return { ...state, records: [] };
     case "DELETE_FEEDBACK":
-      return {...state, feedbackInfo: null, records: []};
+      return { ...state, feedbackInfo: null, records: [] };
     case "ADD_ACTION_ITEM":
       const record = state.records.find(
         (record) => record.annotation.id === action.payload.id
@@ -179,7 +180,7 @@ const highlighterReducer = (
         record.actionItems.push(action.payload.actionItem);
       }
 
-      return {...state};
+      return { ...state };
     case "UPDATE_HIGHLIGHT_NOTES":
       const recordToUpdate = state.records.find(
         (record) => record.annotation.id === action.payload.id
@@ -187,10 +188,10 @@ const highlighterReducer = (
       if (recordToUpdate) {
         recordToUpdate.annotation.notes = action.payload.notes;
       }
-      return {...state, editing: null, drafting: null};
+      return { ...state, editing: null, drafting: null };
     case "CANCEL_HIGHLIGHTED":
       state.highlighterLib?.remove(state.drafting?.id || "");
-      return {...state, editing: null, drafting: null};
+      return { ...state, editing: null, drafting: null };
     case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
       const recordToUpdateAction = state.records.find(
         (record) => record.annotation.id === action.payload.id
@@ -198,13 +199,13 @@ const highlighterReducer = (
       if (recordToUpdateAction) {
         recordToUpdateAction.actionItems = action.payload.actionItems;
       }
-      return {...state, editing: null, drafting: null};
+      return { ...state, editing: null, drafting: null };
     default:
       return state;
   }
 };
 
-export const HighlighterProvider = ({children}: {children: ReactNode}) => {
+export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
   const initialState: HighlightState = {
     highlighterLib: null,
     records: [],
@@ -214,7 +215,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     unlabledHighlights: [],
     feedbackInfo: null,
   };
-  const {setCollapsed} = useSidebar();
+  const { setCollapsed } = useSidebar();
   const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const [selectedHighlightElement, setSelectedHighlightElement] =
     useState<Element | null>(null);
@@ -239,7 +240,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
             if (res.status !== 200) {
               return;
             }
-            baseDispatch({type: "ADD_RECORD", payload: action.payload});
+            baseDispatch({ type: "ADD_RECORD", payload: action.payload });
           } else {
             toast.error("Please select valid assignment");
           }
@@ -259,7 +260,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           if (res.status !== 200) {
             return;
           }
-          baseDispatch({type: "DELETE_RECORD", payload: action.payload});
+          baseDispatch({ type: "DELETE_RECORD", payload: action.payload });
         } catch (err) {
           console.log(err);
         }
@@ -302,7 +303,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
             const res = await status;
             if (res.status == 200) {
               state.highlighterLib?.removeAll();
-              baseDispatch({type: "DELETE_ALL_HIGHLIGHTS"});
+              baseDispatch({ type: "DELETE_ALL_HIGHLIGHTS" });
             }
           }
         } catch (err) {
@@ -323,7 +324,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
             const res = await status;
             if (res.status == 200) {
               state.highlighterLib?.removeAll();
-              baseDispatch({type: "DELETE_FEEDBACK"});
+              baseDispatch({ type: "DELETE_FEEDBACK" });
             }
           }
         } catch (err) {
@@ -343,7 +344,7 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
           });
           const res = await status;
           if (res.status == 200) {
-            baseDispatch({type: "ADD_ACTION_ITEM", payload: action.payload});
+            baseDispatch({ type: "ADD_ACTION_ITEM", payload: action.payload });
           }
         } catch (err) {
           console.log(err);
@@ -377,22 +378,30 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
   };
 
   useEffect(() => {
-    const handleCreate = (data: {sources: HighlightSource[]; type: string}) => {
+    const handleCreate = (data: {
+      sources: HighlightSource[];
+      type: string;
+    }) => {
+      console.log("sources", data.sources);
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
       if (_node) {
         _node.id = `__highlight-${id}`;
       }
       if (data.type != "from-store") {
-        dispatch({type: "SET_DRAFTING", payload: data.sources[0]});
+        dispatch({ type: "SET_DRAFTING", payload: data.sources[0] });
       }
     };
-    const handleClick = (data: {id: string}) => {
+
+    const handleClick = (data: { id: string }) => {
       // const currentSelected = state.records.find(
       //   (record) => record.id === data.id
       // ) as Annotation;
 
       const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
+
+      console.log("selectedArea", selectedArea);
+
       selectedArea ? setSelectedHighlightElement(selectedArea) : null;
       console.log("selected elem", selectedHighlightElement);
       setSelectedHighlightId(data.id);
@@ -411,14 +420,14 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
       // const cardView = document.getElementById(`card-view-${data.id}`);
       console.log("card view", cardView);
 
-      cardView?.scrollIntoView({behavior: "smooth", block: "center"});
+      cardView?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
-    const handleHover = (data: {id: string}) => {
+    const handleHover = (data: { id: string }) => {
       const id = data.id;
       state.highlighterLib?.addClass("highlight-hover", id);
     };
-    const handleHoverOut = (data: {id: string}) => {
+    const handleHoverOut = (data: { id: string }) => {
       const id = data.id;
       state.highlighterLib?.removeClass("highlight-hover", id);
     };
@@ -427,19 +436,22 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     state.highlighterLib?.on(Highlighter.event.HOVER_OUT, handleHoverOut);
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
-    const records = state.records.map((highlight) => {
+    state.records.map((highlight) => {
+      console.log("highlight", highlight);
+
       state.highlighterLib?.fromStore(
         highlight.annotation.startMeta,
         highlight.annotation.endMeta,
-
         highlight.annotation.text,
         highlight.annotation.id
       );
+
       state.highlighterLib?.addClass(
         getClassForTag(highlight.annotation.annotationTag),
         highlight.annotation.id
       );
     });
+
     // Cleanup function to remove the listeners
     return () => {
       state.highlighterLib?.off(Highlighter.event.CREATE, handleCreate);
@@ -448,8 +460,55 @@ export const HighlighterProvider = ({children}: {children: ReactNode}) => {
     };
   }, [state.highlighterLib]);
 
+  // monitor the expand icon onclick
+  useEffect(() => {
+    const handleIconClick = (event: any) => {
+      state.records.map((highlight) => {
+        state.highlighterLib?.fromStore(
+          {
+            ...highlight.annotation.startMeta,
+            parentIndex: highlight.annotation.startMeta.parentIndex + 4,
+          },
+          {
+            ...highlight.annotation.endMeta,
+            parentIndex: highlight.annotation.endMeta.parentIndex + 4,
+          },
+          highlight.annotation.text,
+          highlight.annotation.id
+        );
+
+        state.highlighterLib?.addClass(
+          getClassForTag(highlight.annotation.annotationTag),
+          highlight.annotation.id
+        );
+      });
+    };
+
+    // Polling function to wait for elements to be available
+    const waitForIcons = setInterval(() => {
+      const icons = document.querySelectorAll('i[title][title="View full"]');
+
+      if (icons.length > 0) {
+        clearInterval(waitForIcons); // Stop polling once elements are found
+        icons[1].addEventListener("click", handleIconClick);
+      }
+    }, 500); // Check every 500ms
+
+    // Cleanup
+    return () => {
+      clearInterval(waitForIcons); // Ensure to clear the interval on component unmount
+      // Remove event listeners if necessary
+      const icons = document.querySelectorAll('i[title][title="View full"]');
+
+      if (icons.length > 0) {
+        clearInterval(waitForIcons); // Stop polling once elements are found
+        icons[1].addEventListener("click", handleIconClick);
+      }
+    };
+  }, [state.records, state.highlighterLib]); // Empty dependency array means this effect runs only once after the initial render
+
   return (
-    <HighlighterContext.Provider value={{state, dispatch}}>
+    <HighlighterContext.Provider value={{ state, dispatch }}>
       {children}
       {state.drafting && <RenderPop highlighting={state.drafting}></RenderPop>}
     </HighlighterContext.Provider>

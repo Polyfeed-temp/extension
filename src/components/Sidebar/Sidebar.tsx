@@ -1,9 +1,9 @@
 import SidebarPanel from "./SidebarContent";
 
-import {SidebarHeader} from "./SidebarHeader";
+import { SidebarHeader } from "./SidebarHeader";
 const Logo = require("../../assets/logo/PolyFeed_Social_White.png")
   .default as string;
-import {leftChevron, rightChevron} from "../AnnotationIcons";
+import { leftChevron, rightChevron } from "../AnnotationIcons";
 
 export function Sidebar({
   collapsed,
@@ -19,6 +19,7 @@ export function Sidebar({
         width: collapsed ? "0" : "428px",
         transition: "width 0.3s",
         zIndex: 9999,
+        backgroundColor: "white",
       }}
     >
       <div
@@ -29,7 +30,7 @@ export function Sidebar({
         <img src={Logo} className="h-8 md:h-12" alt="Logo" />
       </div>
 
-      <div style={{overflowY: "auto", height: "100%"}}>
+      <div style={{ overflowY: "auto", height: "100%" }}>
         <SidebarHeader></SidebarHeader>
         <SidebarPanel></SidebarPanel>
       </div>

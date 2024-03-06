@@ -1,4 +1,4 @@
-import {Sidebar} from "./components/Sidebar/Sidebar";
+import { Sidebar } from "./components/Sidebar/Sidebar";
 import {
   useState,
   createContext,
@@ -7,18 +7,22 @@ import {
   useRef,
   useEffect,
 } from "react";
-import {ToastContainer, toast} from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {useSidebar} from "./hooks/useSidebar";
+import { useSidebar } from "./hooks/useSidebar";
 
-import {initializeApp} from "firebase/app";
-import {getAuth, GoogleAuthProvider, signInWithCredential} from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from "firebase/auth";
 import firebaseConfig from "../firebaseConfig.json";
-import {setChromeLocalStorage} from "./services/localStorage";
-import {User, Role, Faculty} from "./types";
-import {checkUserExists, register} from "./services/user.service";
-import {TOKEN_KEY} from "./services/api.service";
-import {useHighlighterState} from "./store/HighlightContext";
+import { setChromeLocalStorage } from "./services/localStorage";
+import { User, Role, Faculty } from "./types";
+import { checkUserExists, register } from "./services/user.service";
+import { TOKEN_KEY } from "./services/api.service";
+import { useHighlighterState } from "./store/HighlightContext";
 // Your web app's Firebase configuration
 
 // Initialize Firebase
@@ -40,7 +44,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
         const googleUser = result.user;
 
-        register(googleUser.email ?? "", googleUser.displayName ?? "");
+        console.log("googleUser", googleUser);
+
+        const displayName: any = googleUser.displayName || googleUser.email;
+
+        register(googleUser.email ?? "", displayName);
 
         setChromeLocalStorage({
           key: TOKEN_KEY,
@@ -61,7 +69,7 @@ export function restoreHostDom() {
 }
 
 function App() {
-  const {collapsed, setCollapsed, location, setLocation} = useSidebar();
+  const { collapsed, setCollapsed, location, setLocation } = useSidebar();
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -106,7 +114,7 @@ function App() {
       <ToastContainer
         position="bottom-right"
         theme="dark"
-        style={{zIndex: 999999}}
+        style={{ zIndex: 999999 }}
       />
     </div>
   );

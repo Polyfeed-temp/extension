@@ -1,4 +1,4 @@
-import {Notes} from "../Notes";
+import { Notes } from "../Notes";
 import TodoCard from "../TodoCard";
 import {
   useHighlighterDispatch,
@@ -12,27 +12,26 @@ import {
   AnnotationTag,
   Annotation,
 } from "../../../types";
-import {SideBarAction} from "../../../types";
-import {getColorForTag, getClassForTag} from "../../../types";
-import {useState, useEffect} from "react";
-import {toast} from "react-toastify";
-import {input} from "@material-tailwind/react";
+import { SideBarAction } from "../../../types";
+import { getColorForTag, getClassForTag } from "../../../types";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { input } from "@material-tailwind/react";
 import AnnotationService from "../../../services/annotation.service";
-import {ExplainFutherToggle} from "../ExplainFutherInput";
+import { ExplainFutherToggle } from "../ExplainFutherInput";
 
 function RenderTabs({
   currentEditing,
 }: {
-  currentEditing: {sidebarAction: SideBarAction; annotation: Annotation} | null;
+  currentEditing: {
+    sidebarAction: SideBarAction;
+    annotation: Annotation;
+  } | null;
 }) {
-  const [explanation, setExplanation] = useState("");
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
   // const currentEditing = highlighterState.editing;
-  const editing = highlighterState.records.find(
-    (annotation) => annotation.annotation.id === currentEditing?.annotation.id
-  );
-  console.log("editing", currentEditing);
+
   const addNotes = (input: String) => {
     highlighterDispatch({
       type: "ADD_RECORD",
@@ -68,8 +67,9 @@ function RenderTabs({
       },
     });
   };
+
   const cancelHighlighting = () => {
-    highlighterDispatch({type: "CANCEL_HIGHLIGHTED"});
+    highlighterDispatch({ type: "CANCEL_HIGHLIGHTED" });
   };
 
   switch (currentEditing?.sidebarAction) {
@@ -112,7 +112,7 @@ export function HighlightingTab() {
         {currentEditing && (
           <blockquote
             className={`flex-grow border-l-4 pl-4 text-left`}
-            style={{borderColor: `${annotationTagColor}`}}
+            style={{ borderColor: `${annotationTagColor}` }}
           >
             <p className="text text-gray-700 italic">
               <span className="block text-xl text-gray-500 mb-1">
