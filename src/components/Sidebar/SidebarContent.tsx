@@ -1,27 +1,27 @@
-import React, {useEffect, useState} from "react";
-import {Button} from "@material-tailwind/react";
+import React, { useEffect, useState } from "react";
+import { Button } from "@material-tailwind/react";
 import {
   useHighlighterDispatch,
   useHighlighterState,
 } from "../../store/HighlightContext";
-import {AnnotationData, Feedback} from "../../types";
+import { AnnotationData, Feedback } from "../../types";
 type SidebarTab =
   | "Summary"
   | "My Notes"
   | "Highlight Texts"
   | "Select Assignment";
 
-import {SummaryCard, UnitAssignmentSummary} from "./tabs/SummaryCard";
-import {CurrentFeedbackSummary} from "../MyNotesSummaryCard";
+import { SummaryCard, UnitAssignmentSummary } from "./tabs/SummaryCard";
+import { CurrentFeedbackSummary } from "../MyNotesSummaryCard";
 import AnnotatedCard from "./AnnotatedCard";
-import {SelectUnitAssignmentTab} from "./tabs/StartAssignmentTab";
-import {HighlightingTab} from "./tabs/HighlightTextsTab";
-import {RateFeedbackTab} from "./tabs/RateFeedbackTab";
-import {useUserState} from "../../store/UserContext";
+import { SelectUnitAssignmentTab } from "./tabs/StartAssignmentTab";
+import { HighlightingTab } from "./tabs/HighlightTextsTab";
+import { RateFeedbackTab } from "./tabs/RateFeedbackTab";
+import { useUserState } from "../../store/UserContext";
 import AnnotationService from "../../services/annotation.service";
 import config from "../../config.json";
-import {ExplainFutherToggle} from "./ExplainFutherInput";
-import {DeleteIcon, leftChevron} from "../AnnotationIcons";
+import { ExplainFutherToggle } from "./ExplainFutherInput";
+import { DeleteIcon, leftChevron } from "../AnnotationIcons";
 import ConfirmationModal from "../ConfirmationModal";
 function RenderTabs({
   currentTab,
@@ -101,17 +101,25 @@ function RenderTabs({
     //drop down for summary of feedback the tags
     //assignemnt drop down add a other option from teacher
     case "Highlight Texts":
+      const currentUrl = window.location.pathname;
+
+      const enableBtn =
+        currentUrl === "/mod/assign/view.php" ||
+        currentUrl === "/mod/quiz/view.php";
+      console.log("enableBtn", enableBtn);
       return (
         <div className="mb-4">
           {feedback && (
             <>
-              {" "}
               <CurrentFeedbackSummary
-                feedback={{...feedback, highlights: highlighterState.records}}
+                feedback={{ ...feedback, highlights: highlighterState.records }}
               ></CurrentFeedbackSummary>
               <Button
                 fullWidth
-                className="bg-black my-4"
+                className={`${
+                  enableBtn ? "bg-black" : "!bg-grey"
+                } my-4 shadow-md`}
+                disabled={!enableBtn}
                 onClick={() => {
                   highlighterDispatch({
                     type: "SET_IS_HIGHLIGHTING",
@@ -172,7 +180,7 @@ const SidebarPanel = () => {
       const feedback = await annotationService.getCurrentPageFeedback();
       console.log(feedback);
 
-      highlighterDispatch({type: "INITIALIZE", payload: feedback});
+      highlighterDispatch({ type: "INITIALIZE", payload: feedback });
       setLoading(false);
     };
     const fetchFeedbacks = async () => {
@@ -189,7 +197,7 @@ const SidebarPanel = () => {
   return (
     <>
       {userState.login && (
-        <div style={{width: "100%", boxSizing: "border-box"}}>
+        <div style={{ width: "100%", boxSizing: "border-box" }}>
           <div id="content" className="p-6 text-center gap-x-4 relative">
             <div className="flex">
               <Button

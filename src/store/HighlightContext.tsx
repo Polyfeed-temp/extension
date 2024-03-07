@@ -382,7 +382,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       sources: HighlightSource[];
       type: string;
     }) => {
-      console.log("sources", data.sources);
       const id = data.sources[0].id;
       const _node = state.highlighterLib?.getDoms(id)[0];
       if (_node) {
@@ -437,14 +436,28 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
     state.records.map((highlight) => {
-      console.log("highlight", highlight);
-
       state.highlighterLib?.fromStore(
         highlight.annotation.startMeta,
         highlight.annotation.endMeta,
         highlight.annotation.text,
         highlight.annotation.id
       );
+
+      // assignment
+      if (highlight.annotation.startMeta.parentIndex > 10) {
+        state.highlighterLib?.fromStore(
+          {
+            ...highlight.annotation.startMeta,
+            parentIndex: highlight.annotation.startMeta.parentIndex - 4,
+          },
+          {
+            ...highlight.annotation.endMeta,
+            parentIndex: highlight.annotation.endMeta.parentIndex - 4,
+          },
+          highlight.annotation.text,
+          highlight.annotation.id
+        );
+      }
 
       state.highlighterLib?.addClass(
         getClassForTag(highlight.annotation.annotationTag),
@@ -464,18 +477,19 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const handleIconClick = (event: any) => {
       state.records.map((highlight) => {
-        state.highlighterLib?.fromStore(
-          {
-            ...highlight.annotation.startMeta,
-            parentIndex: highlight.annotation.startMeta.parentIndex + 4,
-          },
-          {
-            ...highlight.annotation.endMeta,
-            parentIndex: highlight.annotation.endMeta.parentIndex + 4,
-          },
-          highlight.annotation.text,
-          highlight.annotation.id
-        );
+        if (highlight.annotation.startMeta.parentIndex < 11)
+          state.highlighterLib?.fromStore(
+            {
+              ...highlight.annotation.startMeta,
+              parentIndex: highlight.annotation.startMeta.parentIndex + 4,
+            },
+            {
+              ...highlight.annotation.endMeta,
+              parentIndex: highlight.annotation.endMeta.parentIndex + 4,
+            },
+            highlight.annotation.text,
+            highlight.annotation.id
+          );
 
         state.highlighterLib?.addClass(
           getClassForTag(highlight.annotation.annotationTag),
@@ -505,7 +519,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         icons[1].addEventListener("click", handleIconClick);
       }
     };
-  }, [state.records, state.highlighterLib]); // Empty dependency array means this effect runs only once after the initial render
+  }, [state.records, state.highlighterLib]);
 
   return (
     <HighlighterContext.Provider value={{ state, dispatch }}>
