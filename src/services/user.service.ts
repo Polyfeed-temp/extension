@@ -23,7 +23,6 @@ export async function login(username: string, password: string) {
 
 export async function verifyToken(token: string) {
   const response = (await axios.get("/api/login/verifyToken")) as User;
-  console.log(response);
 }
 
 export async function getUser() {
@@ -82,7 +81,6 @@ export async function register(email: string, displayName: string) {
   };
 
   if (await checkUserExists(email)) {
-    console.log("User already exists");
     setChromeLocalStorage({ key: USER_KEY, value: user });
   } else {
     const response = await axios.post("api/user/create", user, {
@@ -90,9 +88,6 @@ export async function register(email: string, displayName: string) {
         "Content-Type": "application/json",
       },
     });
-
-    console.log("Registration successful", response.data);
-
     setChromeLocalStorage({ key: USER_KEY, value: response.data });
   }
 }

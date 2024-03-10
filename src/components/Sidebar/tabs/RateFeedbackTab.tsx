@@ -1,8 +1,8 @@
-import {emoticons, emoticonsInversed} from "../../AnnotationIcons";
-import {toast} from "react-toastify";
-import React, {useRef, useEffect, useState} from "react";
+import { emoticons, emoticonsInversed } from "../../AnnotationIcons";
+import { toast } from "react-toastify";
+import React, { useRef, useEffect, useState } from "react";
 import AnnotationService from "../../../services/annotation.service";
-import {FeedbackRating} from "../../../types";
+import { FeedbackRating } from "../../../types";
 export const RateFeedbackTab = ({
   feedbackId,
   rating,
@@ -109,7 +109,6 @@ export const RateFeedbackTab = ({
         usability: feedbackUsability,
         emotion: feedbackEmotion,
       };
-      console.log(feedback);
       const submission = new AnnotationService().rateFeedback(
         feedbackId,
         feedback
@@ -167,7 +166,7 @@ export const RateFeedbackTab = ({
                         : emoticonsInversed[color]
                     }
                     alt={color}
-                    style={{width: 40, height: 40}}
+                    style={{ width: 40, height: 40 }}
                   />
                 </button>
               ))}

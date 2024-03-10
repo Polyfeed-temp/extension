@@ -3,25 +3,24 @@ import config from "../config.json";
 import { getChromeLocalStorage, setChromeLocalStorage } from "./localStorage";
 export const TOKEN_KEY = "token";
 function getToken() {
-    return getChromeLocalStorage(TOKEN_KEY)
+  return getChromeLocalStorage(TOKEN_KEY);
 }
 const commonAxios = axios.create({
-    baseURL: config.backend,
-    headers: {
-    }
+  baseURL: config.backend,
+  headers: {},
 });
-commonAxios.get("/healthcheck").then((response) => {
-    console.log(response.data)
-})
-commonAxios.interceptors.request.use(async (config) => {
+commonAxios.get("/healthcheck").then((response) => {});
+commonAxios.interceptors.request.use(
+  async (config) => {
     const token = await getToken();
     if (token) {
-        config.headers.Authorization = `${token}`;
+      config.headers.Authorization = `${token}`;
     }
     return config;
-}, (error) => {
+  },
+  (error) => {
     return Promise.reject(error);
-}
+  }
 );
 
 // const decodeJWT = (token: string) => {
@@ -63,7 +62,4 @@ commonAxios.interceptors.request.use(async (config) => {
 //     return response;
 // });
 
-
-
 export default commonAxios;
-

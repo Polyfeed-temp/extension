@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from "react";
-import {AnnotationData, AnnotationTag, Feedback, Unit} from "../../../types";
-import {IconButton, Button} from "@material-tailwind/react";
+import React, { useState, useEffect } from "react";
+import { AnnotationData, AnnotationTag, Feedback, Unit } from "../../../types";
+import { IconButton, Button } from "@material-tailwind/react";
 import {
   annotationTagsIcons,
   chevronIconDown,
@@ -13,14 +13,13 @@ import {
   useHighlighterState,
 } from "../../../store/HighlightContext";
 import SearchableSelect from "../SearchableSelect";
-import {getAllUnits} from "../../../services/unit.service";
+import { getAllUnits } from "../../../services/unit.service";
 interface Props {
   annotationData: AnnotationData[];
 }
 
-export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
+export function UnitAssignmentSummary({ feedback }: { feedback: Feedback }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  console.log(feedback);
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -57,8 +56,8 @@ export function UnitAssignmentSummary({feedback}: {feedback: Feedback}) {
   );
 }
 
-export const SummaryCard: React.FC<Props> = ({annotationData}) => {
-  const annotationTagCount: {[key in AnnotationTag]: number} = {
+export const SummaryCard: React.FC<Props> = ({ annotationData }) => {
+  const annotationTagCount: { [key in AnnotationTag]: number } = {
     Strength: 0,
     Weakness: 0,
     "Action Item": 0,
@@ -67,7 +66,7 @@ export const SummaryCard: React.FC<Props> = ({annotationData}) => {
   };
   console.log(annotationData[0]);
 
-  annotationData.forEach(({annotation}) => {
+  annotationData.forEach(({ annotation }) => {
     annotationTagCount[annotation.annotationTag] += 1;
   });
 
@@ -80,7 +79,7 @@ export const SummaryCard: React.FC<Props> = ({annotationData}) => {
             <img
               src={annotationTagsIcons[category as AnnotationTag]}
               alt={category}
-              style={{width: 20, height: 20, marginRight: 8}}
+              style={{ width: 20, height: 20, marginRight: 8 }}
             />
             {category + ": " + counter}
           </div>

@@ -1,5 +1,5 @@
-import {useState} from "react";
-import {Button} from "@material-tailwind/react";
+import { useState } from "react";
+import { Button } from "@material-tailwind/react";
 export function Notes({
   ref,
   setNote,
@@ -11,7 +11,6 @@ export function Notes({
   cancelFunc: () => void;
   ref?: any;
 }) {
-  console.log(notes);
   const [value, setValue] = useState(notes);
 
   return (

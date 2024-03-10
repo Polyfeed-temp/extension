@@ -1,17 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App, {restoreHostDom} from "./App";
+import App, { restoreHostDom } from "./App";
 import "./index.css";
-import {HighlighterProvider} from "./store/HighlightContext";
+import { HighlighterProvider } from "./store/HighlightContext";
 import UserProvider from "./store/UserContext";
-import {SidebarProvider} from "./hooks/useSidebar";
+import { SidebarProvider } from "./hooks/useSidebar";
 
 function shadowHostInitailize() {
   const host = document.createElement("div");
   host.id = "sidebar-root";
   document.body.appendChild(host);
 
-  const shadowRoot = host.attachShadow({mode: "open"});
+  const shadowRoot = host.attachShadow({ mode: "open" });
 
   // Injecting Material Tailwind CSS into the shadow root
   const link = document.createElement("link");
@@ -165,24 +165,18 @@ const allowedDomains = [
   "https://learning.monash.edu/*",
   "https://docs.google.com/*",
 ];
-console.log(window.location.href);
 let active = false;
 
 if (allowedDomains.some((domain) => window.location.href.match(domain))) {
-  chrome.runtime.sendMessage({action: "contentScriptActive"});
-
-  console.log("active");
+  chrome.runtime.sendMessage({ action: "contentScriptActive" });
 
   active = true;
   load();
 } else {
-  chrome.runtime.sendMessage({action: "contentScriptInActive"});
+  chrome.runtime.sendMessage({ action: "contentScriptInActive" });
 }
 
 chrome.runtime.onMessage.addListener(function (response, sendResponse) {
-
-  // console.log("Good morning")
-  console.log(response);
   if (response.action === "contentScriptOn" && !active) {
     active = true;
     load();

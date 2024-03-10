@@ -119,10 +119,17 @@ const highlighterReducer = (
         : console.log("not doco streamview");
       const lib = new Highlighter({
         $root: root ? root : document.documentElement,
-        wrapTag: "span",
-        exceptSelectors: ["#react-root"],
+        // wrapTag: "span",
+        exceptSelectors: ["#react-root", "img", "br", "footer"],
       });
 
+      lib.on("selection:create", ({ sources }: any) => {
+        sources = sources.map((hs: any) => ({ hs }));
+
+        console.log("sources", sources);
+      });
+
+      lib.run();
       const initialState: HighlightState = {
         highlighterLib: lib,
         records: action.payload?.highlights ? action.payload.highlights : [],
@@ -388,6 +395,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         _node.id = `__highlight-${id}`;
       }
       if (data.type != "from-store") {
+        console.log("data.sources[0]", data.sources[0]);
         dispatch({ type: "SET_DRAFTING", payload: data.sources[0] });
       }
     };
@@ -399,12 +407,13 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
       const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
 
-      console.log("selectedArea", selectedArea);
+      console.log("selectedArea", state.highlighterLib?.getDoms(data.id));
 
       selectedArea ? setSelectedHighlightElement(selectedArea) : null;
       console.log("selected elem", selectedHighlightElement);
       setSelectedHighlightId(data.id);
       // dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
+
       setCollapsed(false);
       const hostElement = document.getElementById("sidebar-root");
       const sidebarShadowRoot = hostElement?.shadowRoot;
@@ -436,6 +445,8 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
     state.records.map((highlight) => {
+      console.log("highlight", highlight);
+
       state.highlighterLib?.fromStore(
         highlight.annotation.startMeta,
         highlight.annotation.endMeta,
@@ -443,8 +454,19 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         highlight.annotation.id
       );
 
-      // assignment
+      console.log(
+        "highlight.annotation.startMeta.parentIndex",
+        highlight.annotation.startMeta.parentIndex
+      );
       if (highlight.annotation.startMeta.parentIndex > 10) {
+        console.log("checking", {
+          ...highlight.annotation.endMeta,
+          parentIndex: highlight.annotation.endMeta.parentIndex - 4,
+          parentTagName:
+            highlight.annotation.endMeta.parentTagName === "BR"
+              ? highlight.annotation.startMeta.parentTagName
+              : highlight.annotation.endMeta.parentTagName,
+        });
         state.highlighterLib?.fromStore(
           {
             ...highlight.annotation.startMeta,

@@ -43,9 +43,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         // console.log("Successful Login for"+await result.user.getIdToken())
 
         const googleUser = result.user;
-
-        console.log("googleUser", googleUser);
-
         const displayName: any = googleUser.displayName || googleUser.email;
 
         register(googleUser.email ?? "", displayName);
@@ -98,8 +95,6 @@ function App() {
   //clean up highlight
   useLayoutEffect(() => {
     return () => {
-      console.log("unmounting");
-
       const lib = highlightStateRef.current;
       if (lib) {
         lib.removeAll();

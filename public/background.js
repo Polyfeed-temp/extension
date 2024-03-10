@@ -1,7 +1,6 @@
 try {
   chrome.action.onClicked.addListener(async (tab) => {
     const enabled = !(await chrome.storage.local.get("enabled")).enabled;
-    console.log(enabled);
     chrome.action.setIcon({
       path: enabled ? "Polyfeed_Social_On.png" : "Polyfeed_Social_Off.png",
     });
@@ -11,7 +10,7 @@ try {
           tabs[0].id,
           { action: "contentScriptOn" },
           function (response) {
-            console.log(response);
+            // console.log(response);
           }
         );
       });
@@ -21,7 +20,7 @@ try {
           tabs[0].id,
           { action: "contentScriptOff" },
           function (response) {
-            console.log(response.farewell);
+            // console.log(response.farewell);
           }
         );
       });

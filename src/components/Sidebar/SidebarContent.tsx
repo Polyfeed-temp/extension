@@ -106,7 +106,7 @@ function RenderTabs({
       const enableBtn =
         currentUrl === "/mod/assign/view.php" ||
         currentUrl === "/mod/quiz/view.php";
-      console.log("enableBtn", enableBtn);
+
       return (
         <div className="mb-4">
           {feedback && (
@@ -178,14 +178,12 @@ const SidebarPanel = () => {
   useEffect(() => {
     const fetchAnnotations = async () => {
       const feedback = await annotationService.getCurrentPageFeedback();
-      console.log(feedback);
 
       highlighterDispatch({ type: "INITIALIZE", payload: feedback });
       setLoading(false);
     };
     const fetchFeedbacks = async () => {
       const feedbacks = await annotationService.getAllFeedack();
-      console.log(feedbacks);
       setAllFeedbacks(feedbacks);
     };
     if (userState.login) {

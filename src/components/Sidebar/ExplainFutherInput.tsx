@@ -52,7 +52,6 @@ export function ExplainFutherToggle() {
       error: "Failed to generate explanation",
     });
     const gptResponse = await gptStatus;
-    console.log("gptResponse", gptResponse);
     setQuery(text);
     setExplanation(gptResponse);
 

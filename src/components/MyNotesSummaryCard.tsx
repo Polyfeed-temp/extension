@@ -1,23 +1,23 @@
-import React, {useEffect, useState} from "react";
-import {Button, IconButton} from "@material-tailwind/react";
+import React, { useEffect, useState } from "react";
+import { Button, IconButton } from "@material-tailwind/react";
 import {
   useHighlighterDispatch,
   useHighlighterState,
 } from "../store/HighlightContext";
-import {AnnotationData, Feedback, Unit, Assessment} from "../types";
+import { AnnotationData, Feedback, Unit, Assessment } from "../types";
 import {
   EditIcon,
   chevronIconDown,
   chevronIconUp,
   CancelIcon,
 } from "./AnnotationIcons";
-import {getAllUnits} from "../services/unit.service";
-import {SummaryCard} from "./Sidebar/tabs/SummaryCard";
+import { getAllUnits } from "../services/unit.service";
+import { SummaryCard } from "./Sidebar/tabs/SummaryCard";
 import SearchableSelect from "./Sidebar/SearchableSelect";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import AnnotationService from "../services/annotation.service";
 
-export function CurrentFeedbackSummary({feedback}: {feedback: Feedback}) {
+export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(true);
   const highlightState = useHighlighterState();
   const highlighterDispatch = useHighlighterDispatch();
@@ -31,7 +31,6 @@ export function CurrentFeedbackSummary({feedback}: {feedback: Feedback}) {
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assessment | null>(null);
-  console.log("selected assignemnt", selectedAssignment);
   const handleAssignmentChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {

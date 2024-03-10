@@ -1,5 +1,5 @@
-import HighlightSource from 'web-highlighter/dist/model/source';
-import { DomMeta } from '../node_modules/web-highlighter/dist/types';
+import HighlightSource from "web-highlighter/dist/model/source";
+import { DomMeta } from "../node_modules/web-highlighter/dist/types";
 export interface Annotation {
   feedbackId: number;
   startMeta: DomMeta;
@@ -7,12 +7,16 @@ export interface Annotation {
   text: string;
   id: string;
   annotationTag: AnnotationTag;
-  notes?: string
+  notes?: string;
 }
 
-
-export type SideBarAction = "To-Dos" | "Notes"
-export type AnnotationTag = "Strength" | "Weakness" | "Action Item" | "Confused" | "Other"
+export type SideBarAction = "To-Dos" | "Notes";
+export type AnnotationTag =
+  | "Strength"
+  | "Weakness"
+  | "Action Item"
+  | "Confused"
+  | "Other";
 
 export type ActionPointCategory =
   | "Further Practice"
@@ -25,12 +29,11 @@ export type ActionPointCategory =
 export interface AnnotationData {
   annotation: Annotation;
   // notes?: AnnotationNotes
-  actionItems?: AnnotationActionPoint[]
+  actionItems?: AnnotationActionPoint[];
 }
 
 export interface AnnotationNotes {
   content: string;
-
 }
 export interface AnnotationActionPoint {
   id?: number;
@@ -41,59 +44,68 @@ export interface AnnotationActionPoint {
 }
 
 export interface Feedback {
-  id: number
-  assessmentId: number
+  id: number;
+  assessmentId: number;
   assessmentName: string;
   unitCode: string;
   mark: number;
-  clarity?: number
-  personalise?: number
-  evaluativeJudgement?: number,
-  usability?: number
-  emotion?: number
+  clarity?: number;
+  personalise?: number;
+  evaluativeJudgement?: number;
+  usability?: number;
+  emotion?: number;
   highlights?: AnnotationData[];
   marker?: string;
-  url: string
-  studentEmail: string
-  gptQueryText?: string
-  gptResponse?: string
-  gptResponseRating?: number
+  url: string;
+  studentEmail: string;
+  gptQueryText?: string;
+  gptResponse?: string;
+  gptResponseRating?: number;
 }
 export interface FeedbackRating {
-  clarity: number,
-  personalise: number,
-  evaluativeJudgement: number,
-  usability: number,
-  emotion: number,
-};
+  clarity: number;
+  personalise: number;
+  evaluativeJudgement: number;
+  usability: number;
+  emotion: number;
+}
 export interface Assessment {
-  id: number
+  id: number;
   assessmentName: string;
   rubric?: string;
 }
 
-
 export interface Unit {
-  unitId: string
+  unitId: string;
   unitCode: string;
-  year: number
-  semester: number
+  year: number;
+  semester: number;
   assessments: Assessment[];
-
 }
 
-export type Role = "Student" | "Tutor" | "Admin" | "Chief Examiner"
+export type Role = "Student" | "Tutor" | "Admin" | "Chief Examiner";
 
-export type Faculty = "Information Technology" | "Engineering" | "Arts" | "Business and Economics" | "Science" | "Medicine, Nursing and Health Sciences" | "Education" | "Law" | "Pharmacy" | "Art, Design and Architecture" | "Pharmacy and Pharmaceutical Sciences"
+export type Faculty =
+  | "Information Technology"
+  | "Engineering"
+  | "Arts"
+  | "Business and Economics"
+  | "Science"
+  | "Medicine, Nursing and Health Sciences"
+  | "Education"
+  | "Law"
+  | "Pharmacy"
+  | "Art, Design and Architecture"
+  | "Pharmacy and Pharmaceutical Sciences";
 
 export interface User {
   firstName: string;
   monashId?: string;
-  monashObjectId: string | null
-  authcate: string
-  email: string
+  monashObjectId: string | null;
+  authcate: string;
+  email: string;
   lastName: string;
-  role: Role
+  role: Role;
   faculty: Faculty;
 }
 
@@ -104,7 +116,7 @@ export interface UserState {
 }
 
 export function getColorForTag(tag: AnnotationTag | undefined) {
-  console.log(tag);
+  console.log("tag", tag);
   switch (tag) {
     case "Strength":
       return "#3a70b7";
