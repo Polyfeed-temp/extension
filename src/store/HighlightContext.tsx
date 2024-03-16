@@ -12,14 +12,12 @@ import AnnotationService from "../services/annotation.service";
 import { RenderPop } from "../components/Toolbar";
 import {
   Annotation,
-  AnnotationTag,
   SideBarAction,
   AnnotationData,
   Feedback,
   getClassForTag,
   AnnotationActionPoint,
 } from "../types";
-import Tippy from "@tippyjs/react";
 import { toast } from "react-toastify";
 import { useSidebar } from "../hooks/useSidebar";
 interface HighlightState {
@@ -120,16 +118,10 @@ const highlighterReducer = (
       const lib = new Highlighter({
         $root: root ? root : document.documentElement,
         // wrapTag: "span",
-        exceptSelectors: ["#react-root", "img", "br", "footer"],
+        exceptSelectors: ["#react-root", "img", "footer"],
+        // "img", "br",
       });
 
-      lib.on("selection:create", ({ sources }: any) => {
-        sources = sources.map((hs: any) => ({ hs }));
-
-        console.log("sources", sources);
-      });
-
-      lib.run();
       const initialState: HighlightState = {
         highlighterLib: lib,
         records: action.payload?.highlights ? action.payload.highlights : [],
@@ -229,14 +221,33 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
   const [selectedHighlighId, setSelectedHighlightId] = useState<string | null>(
     null
   );
+
+  const [doubleClick, setDoubleClick] = useState(false);
   const service = new AnnotationService();
 
   const dispatch = async (action: Action) => {
     switch (action.type) {
       case "ADD_RECORD":
         try {
-          const sources = action.payload;
+          let sources = action.payload;
           if (state.feedbackInfo) {
+            if (
+              doubleClick ||
+              sources.annotation.endMeta.parentTagName != "P"
+            ) {
+              console.log("changed");
+              sources = {
+                annotation: {
+                  ...sources.annotation,
+                  endMeta: {
+                    parentIndex: sources.annotation.startMeta.parentIndex,
+                    parentTagName: sources.annotation.startMeta.parentTagName,
+                    textOffset: sources.annotation.text.length,
+                  },
+                },
+              };
+            }
+            console.log("double click", doubleClick);
             const creationStatus = service.addAnnotations(sources);
             toast.promise(creationStatus, {
               pending: "Saving...",
@@ -385,6 +396,18 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    addEventListener("click", (event: any) => {
+      switch (event.detail) {
+        case 1:
+          setDoubleClick(false);
+          break;
+        case 2:
+        case 3:
+          setDoubleClick(true);
+          break;
+      }
+    });
+
     const handleCreate = (data: {
       sources: HighlightSource[];
       type: string;
@@ -394,9 +417,13 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       if (_node) {
         _node.id = `__highlight-${id}`;
       }
+
+      console.log("doubleClick", doubleClick);
+
       if (data.type != "from-store") {
-        console.log("data.sources[0]", data.sources[0]);
-        dispatch({ type: "SET_DRAFTING", payload: data.sources[0] });
+        let payload = data.sources[0];
+
+        dispatch({ type: "SET_DRAFTING", payload });
       }
     };
 

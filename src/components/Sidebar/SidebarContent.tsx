@@ -227,16 +227,15 @@ const SidebarPanel = () => {
               <Button
                 className="bg-gray text-black flex-1 ml-2"
                 onClick={() => {
-                  window.location.href = config.dashboard;
+                  window.open(config.dashboard, "_blank");
                 }}
               >
-                {" "}
                 Dashboard
               </Button>
             </div>
             <hr className="my-4" />
             {loading ? (
-              <div className="center animate-spin rounded-full border-t-4 border-black border-opacity-25 border-b-4 border-black-500 border-opacity-25 h-12 w-12"></div>
+              <div className="center animate-spin rounded-full border-t-4 border-black border-b-4 border-black-500 border-opacity-25 h-12 w-12"></div>
             ) : (
               <RenderTabs
                 currentTab={currentTab}
