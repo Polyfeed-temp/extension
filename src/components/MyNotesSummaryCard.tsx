@@ -16,13 +16,24 @@ import { SummaryCard } from "./Sidebar/tabs/SummaryCard";
 import SearchableSelect from "./Sidebar/SearchableSelect";
 import { toast } from "react-toastify";
 import AnnotationService from "../services/annotation.service";
-
+import {
+  addLogs,
+  eventType,
+  eventSource,
+  tagName,
+} from "../services/logs.serivce";
 export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(true);
   const highlightState = useHighlighterState();
   const highlighterDispatch = useHighlighterDispatch();
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+    addLogs({
+      eventType: eventType[0],
+      tagName: "dropDownList",
+      content: "",
+      eventSource: eventSource[7],
+    });
   };
 
   const [editing, setEditing] = useState(false);
@@ -31,6 +42,7 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assessment | null>(null);
+
   const handleAssignmentChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -40,6 +52,12 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
     );
 
     setSelectedAssignment(selectedAssignment || null);
+    addLogs({
+      eventType: eventType[1],
+      tagName: "",
+      content: "",
+      eventSource: eventSource[6],
+    });
   };
   useEffect(() => {
     const retriveUnitsInfo = () =>
@@ -64,28 +82,51 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
                   .toLowerCase()
                   .includes(searchTerm.toLowerCase())
               }
-              onSelectFunction={(selectedUnit: Unit) =>
-                setSelectedUnit(selectedUnit)
-              }
+              onSelectFunction={(selectedUnit: Unit) => {
+                setSelectedUnit(selectedUnit);
+
+                addLogs({
+                  eventType: eventType[1],
+                  tagName: "",
+                  content: "",
+                  eventSource: eventSource[7],
+                });
+              }}
             ></SearchableSelect>
             <IconButton
               variant="text"
               ripple={true}
               title="Cancel Editing"
-              onClick={() => setEditing(false)}
+              onClick={() => {
+                setEditing(false);
+                addLogs({
+                  eventType: eventType[6],
+                  tagName: "",
+                  content: "",
+                  eventSource: eventSource[7],
+                });
+              }}
             >
               {CancelIcon}
             </IconButton>
           </>
         ) : (
           <>
-            {" "}
             Highlights For {feedback.unitCode}
             <IconButton
               variant="text"
               ripple={true}
               title="Change Assessment"
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setEditing(true);
+
+                addLogs({
+                  eventType: eventType[1],
+                  tagName: "",
+                  content: "",
+                  eventSource: eventSource[0],
+                });
+              }}
             >
               {EditIcon}
             </IconButton>
@@ -145,6 +186,19 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
                             assessmentId: selectedAssignment.id,
                           },
                         });
+
+                        addLogs({
+                          eventType: eventType[2],
+                          tagName: tagName[1],
+                          content: JSON.stringify({
+                            ...feedback,
+                            assessmentName: selectedAssignment.assessmentName,
+                            unitCode: selectedUnit.unitCode,
+                            assessmentId: selectedAssignment.id,
+                          }),
+                          eventSource: eventSource[2],
+                        });
+
                         setSelectedAssignment(null);
                         setSelectedUnit(null);
 

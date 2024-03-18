@@ -3,6 +3,12 @@ import { toast } from "react-toastify";
 import React, { useRef, useEffect, useState } from "react";
 import AnnotationService from "../../../services/annotation.service";
 import { FeedbackRating } from "../../../types";
+import {
+  addLogs,
+  eventType,
+  eventSource,
+} from "../../../services/logs.serivce";
+
 export const RateFeedbackTab = ({
   feedbackId,
   rating,
@@ -113,6 +119,17 @@ export const RateFeedbackTab = ({
         feedbackId,
         feedback
       );
+
+      addLogs({
+        eventType: eventType[0],
+        tagName: "",
+        content: JSON.stringify({
+          ...feedback,
+          feedbackId,
+        }),
+        eventSource: eventSource[3],
+      });
+
       toast.promise(submission, {
         pending: "Submitting Rating...",
         success: "Submitted Rating!",

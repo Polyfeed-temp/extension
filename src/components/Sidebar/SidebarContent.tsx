@@ -21,13 +21,17 @@ import { useUserState } from "../../store/UserContext";
 import AnnotationService from "../../services/annotation.service";
 import config from "../../config.json";
 import { ExplainFutherToggle } from "./ExplainFutherInput";
-import { DeleteIcon, leftChevron } from "../AnnotationIcons";
-import ConfirmationModal from "../ConfirmationModal";
+import {
+  addLogs,
+  eventType,
+  eventSource,
+  tagName,
+} from "../../services/logs.serivce";
+
 function RenderTabs({
   currentTab,
   setCurrentTab,
   feedback,
-
   feedbacks,
 }: {
   currentTab: SidebarTab;
@@ -37,10 +41,7 @@ function RenderTabs({
 }) {
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalConfirm, setModalConfirm] = useState(() => () => {});
-  const [modalCancel, setModalCancel] = useState(() => () => {});
+
   switch (currentTab) {
     case "Summary":
       return (
@@ -63,7 +64,14 @@ function RenderTabs({
               <Button
                 fullWidth
                 className="bg-black"
-                onClick={() => {
+                onClick={async () => {
+                  await addLogs({
+                    eventType: eventType[0],
+                    tagName: "",
+                    content: "Select Assignment",
+                    eventSource: currentTab,
+                  });
+
                   setCurrentTab("Select Assignment");
                 }}
               >
@@ -76,6 +84,12 @@ function RenderTabs({
                 )}
 
                 {setCurrentTab("Highlight Texts")}
+                {addLogs({
+                  eventType: eventType[0],
+                  tagName: "",
+                  content: "Highlight Texts",
+                  eventSource: currentTab,
+                })}
               </>
             )}
           </div>
@@ -94,6 +108,12 @@ function RenderTabs({
                 });
               }
               setCurrentTab("Highlight Texts");
+              addLogs({
+                eventType: eventType[8],
+                tagName: currentTab,
+                content: "Highlight Texts",
+                eventSource: eventSource[1],
+              });
             }}
           ></SelectUnitAssignmentTab>
         </div>
@@ -125,6 +145,13 @@ function RenderTabs({
                     type: "SET_IS_HIGHLIGHTING",
                     payload: !highlighterState.isHighlighting,
                   });
+
+                  addLogs({
+                    eventType: eventType[8],
+                    tagName: tagName[1],
+                    content: `${!highlighterState.isHighlighting}`,
+                    eventSource: currentTab,
+                  });
                 }}
               >
                 {!highlighterState.isHighlighting
@@ -144,6 +171,13 @@ function RenderTabs({
                   highlighterDispatch({
                     type: "DELETE_RECORD",
                     payload: record.annotation.id,
+                  });
+
+                  addLogs({
+                    eventType: eventType[8],
+                    tagName: tagName[1],
+                    content: record.annotation.id,
+                    eventSource: currentTab,
                   });
                 }}
               ></AnnotatedCard>
@@ -204,7 +238,16 @@ const SidebarPanel = () => {
                     ? "bg-black text-white"
                     : "bg-gray text-black"
                 } flex-1`}
-                onClick={() => setCurrentTab("My Notes")}
+                onClick={() => {
+                  setCurrentTab("My Notes");
+
+                  addLogs({
+                    eventType: eventType[8],
+                    tagName: currentTab,
+                    content: "My Notes",
+                    eventSource: eventSource[1],
+                  });
+                }}
               >
                 My Notes
               </Button>
@@ -220,6 +263,13 @@ const SidebarPanel = () => {
                     type: "SET_IS_HIGHLIGHTING",
                     payload: false,
                   });
+
+                  addLogs({
+                    eventType: eventType[8],
+                    tagName: currentTab,
+                    content: "Summary",
+                    eventSource: eventSource[1],
+                  });
                 }}
               >
                 Summary
@@ -228,6 +278,12 @@ const SidebarPanel = () => {
                 className="bg-gray text-black flex-1 ml-2"
                 onClick={() => {
                   window.open(config.dashboard, "_blank");
+                  addLogs({
+                    eventType: eventType[8],
+                    tagName: currentTab,
+                    content: "Dashboard",
+                    eventSource: eventSource[1],
+                  });
                 }}
               >
                 Dashboard
