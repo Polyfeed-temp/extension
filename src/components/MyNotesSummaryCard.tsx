@@ -4,7 +4,7 @@ import {
   useHighlighterDispatch,
   useHighlighterState,
 } from "../store/HighlightContext";
-import { AnnotationData, Feedback, Unit, Assessment } from "../types";
+import { Feedback, Unit, Assessment } from "../types";
 import {
   EditIcon,
   chevronIconDown,
@@ -16,12 +16,7 @@ import { SummaryCard } from "./Sidebar/tabs/SummaryCard";
 import SearchableSelect from "./Sidebar/SearchableSelect";
 import { toast } from "react-toastify";
 import AnnotationService from "../services/annotation.service";
-import {
-  addLogs,
-  eventType,
-  eventSource,
-  tagName,
-} from "../services/logs.serivce";
+import { addLogs, eventType, eventSource } from "../services/logs.serivce";
 export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(true);
   const highlightState = useHighlighterState();
@@ -30,9 +25,8 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
     setIsDropdownOpen(!isDropdownOpen);
     addLogs({
       eventType: eventType[0],
-      tagName: "dropDownList",
       content: "",
-      eventSource: eventSource[7],
+      eventSource: eventSource[8],
     });
   };
 
@@ -54,9 +48,8 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
     setSelectedAssignment(selectedAssignment || null);
     addLogs({
       eventType: eventType[1],
-      tagName: "",
-      content: "",
-      eventSource: eventSource[6],
+      content: JSON.stringify(selectedAssignment),
+      eventSource: eventSource[7],
     });
   };
   useEffect(() => {
@@ -87,9 +80,8 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
 
                 addLogs({
                   eventType: eventType[1],
-                  tagName: "",
-                  content: "",
-                  eventSource: eventSource[7],
+                  content: JSON.stringify(selectedUnit),
+                  eventSource: eventSource[0],
                 });
               }}
             ></SearchableSelect>
@@ -100,9 +92,8 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
               onClick={() => {
                 setEditing(false);
                 addLogs({
-                  eventType: eventType[6],
-                  tagName: "",
-                  content: "",
+                  eventType: eventType[0],
+                  content: "Cancel Editing",
                   eventSource: eventSource[7],
                 });
               }}
@@ -121,9 +112,8 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
                 setEditing(true);
 
                 addLogs({
-                  eventType: eventType[1],
-                  tagName: "",
-                  content: "",
+                  eventType: eventType[0],
+                  content: "edit unit code icon",
                   eventSource: eventSource[0],
                 });
               }}
@@ -188,15 +178,14 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
                         });
 
                         addLogs({
-                          eventType: eventType[2],
-                          tagName: tagName[1],
+                          eventType: eventType[3],
                           content: JSON.stringify({
                             ...feedback,
                             assessmentName: selectedAssignment.assessmentName,
                             unitCode: selectedUnit.unitCode,
                             assessmentId: selectedAssignment.id,
                           }),
-                          eventSource: eventSource[2],
+                          eventSource: eventSource[0],
                         });
 
                         setSelectedAssignment(null);

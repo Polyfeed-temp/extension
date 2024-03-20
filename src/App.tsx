@@ -23,7 +23,7 @@ import { User, Role, Faculty } from "./types";
 import { checkUserExists, register } from "./services/user.service";
 import { TOKEN_KEY } from "./services/api.service";
 import { useHighlighterState } from "./store/HighlightContext";
-import { addLogs, eventType, tagName } from "./services/logs.serivce";
+import { addLogs, eventType } from "./services/logs.serivce";
 // Your web app's Firebase configuration
 
 // Initialize Firebase
@@ -41,23 +41,20 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     const credential = GoogleAuthProvider.credential(null, request.token);
     signInWithCredential(auth, credential)
       .then(async (result) => {
-        // console.log("Successful Login for"+await result.user.getIdToken())
-
         const googleUser = result.user;
         const displayName: any = googleUser.displayName || googleUser.email;
 
         await register(googleUser.email ?? "", displayName);
 
-        await addLogs({
-          eventType: eventType[5],
-          tagName: tagName[0],
-          content: "",
-          eventSource: "",
-        });
-
         setChromeLocalStorage({
           key: TOKEN_KEY,
           value: await googleUser.getIdToken(),
+        });
+
+        await addLogs({
+          eventType: eventType[5],
+          content: "",
+          eventSource: "",
         });
       })
       .catch((error) => {

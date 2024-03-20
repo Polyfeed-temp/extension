@@ -10,24 +10,26 @@ export const eventType: string[] = [
   "close", //6
   "navigate", //7
   "delete", // 8
+  "search", // 9
 ];
-
-export const tagName: string[] = ["auth", "form"];
 
 export const eventSource: string[] = [
   "highlights", //0
   "chatgpt", //1
-  "notes", //2
-  "rating", //3
-  "dashboard", //4
-  "summery", //5
-  "assignment", //6
-  "unit", //7
+  "myMotes", //2
+  "notes", //3
+  "rating", //4
+  "dashboard", //5
+  "summery", //6
+  "assignment", //7
+  "unit", //8
+  "todoList", //9
+  "feedback", //10
+  "menuBar", //11
 ];
 
 export async function addLogs(params: {
   eventType: string;
-  tagName: string;
   content: string;
   eventSource: string;
   baseUrl?: string;

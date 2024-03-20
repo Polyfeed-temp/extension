@@ -20,6 +20,7 @@ import {
 } from "../types";
 import { toast } from "react-toastify";
 import { useSidebar } from "../hooks/useSidebar";
+import { addLogs, eventSource, eventType } from "../services/logs.serivce";
 interface HighlightState {
   highlighterLib: Highlighter | null;
   feedbackInfo: Feedback | null;
@@ -247,7 +248,13 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
                 },
               };
             }
-            console.log("double click", doubleClick);
+
+            addLogs({
+              eventType: eventType[1],
+              content: JSON.stringify(sources),
+              eventSource: eventSource[0],
+            });
+
             const creationStatus = service.addAnnotations(sources);
             toast.promise(creationStatus, {
               pending: "Saving...",
@@ -278,6 +285,13 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
           if (res.status !== 200) {
             return;
           }
+
+          addLogs({
+            eventType: eventType[8],
+            content: JSON.stringify(action.payload),
+            eventSource: eventSource[0],
+          });
+
           baseDispatch({ type: "DELETE_RECORD", payload: action.payload });
         } catch (err) {
           console.log(err);
@@ -298,6 +312,13 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
           if (res.status !== 200) {
             return;
           }
+
+          addLogs({
+            eventType: eventType[3],
+            content: JSON.stringify(action.payload),
+            eventSource: eventSource[0],
+          });
+
           baseDispatch({
             type: "UPDATE_HIGHLIGHT_NOTES",
             payload: action.payload,
@@ -320,6 +341,12 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             });
             const res = await status;
             if (res.status == 200) {
+              addLogs({
+                eventType: eventType[8],
+                content: "delete all highlights",
+                eventSource: eventSource[0],
+              });
+
               state.highlighterLib?.removeAll();
               baseDispatch({ type: "DELETE_ALL_HIGHLIGHTS" });
             }
@@ -341,6 +368,11 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             });
             const res = await status;
             if (res.status == 200) {
+              addLogs({
+                eventType: eventType[8],
+                content: `${state.feedbackInfo?.id}` || "",
+                eventSource: eventSource[0],
+              });
               state.highlighterLib?.removeAll();
               baseDispatch({ type: "DELETE_FEEDBACK" });
             }
@@ -360,6 +392,16 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             success: "Added action item",
             error: "Error adding action item please try again",
           });
+
+          addLogs({
+            eventType: eventType[2],
+            content: JSON.stringify({
+              id: action.payload.id,
+              actionItem: action.payload.actionItem,
+            }),
+            eventSource: eventSource[10],
+          });
+
           const res = await status;
           if (res.status == 200) {
             baseDispatch({ type: "ADD_ACTION_ITEM", payload: action.payload });
@@ -379,6 +421,16 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             success: "Updated action items",
             error: "Error updating action items please try again",
           });
+
+          addLogs({
+            eventType: eventType[8],
+            content: JSON.stringify({
+              id: action.payload.id,
+              actionItem: action.payload.actionItems,
+            }),
+            eventSource: eventSource[10],
+          });
+
           const res = await status;
           if (res.status == 200) {
             baseDispatch({
@@ -418,8 +470,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         _node.id = `__highlight-${id}`;
       }
 
-      console.log("doubleClick", doubleClick);
-
       if (data.type != "from-store") {
         let payload = data.sources[0];
 
@@ -428,10 +478,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const handleClick = (data: { id: string }) => {
-      // const currentSelected = state.records.find(
-      //   (record) => record.id === data.id
-      // ) as Annotation;
-
       const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
 
       console.log("selectedArea", state.highlighterLib?.getDoms(data.id));
@@ -481,19 +527,19 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         highlight.annotation.id
       );
 
-      console.log(
-        "highlight.annotation.startMeta.parentIndex",
-        highlight.annotation.startMeta.parentIndex
-      );
+      // console.log(
+      //   "highlight.annotation.startMeta.parentIndex",
+      //   highlight.annotation.startMeta.parentIndex
+      // );
       if (highlight.annotation.startMeta.parentIndex > 10) {
-        console.log("checking", {
-          ...highlight.annotation.endMeta,
-          parentIndex: highlight.annotation.endMeta.parentIndex - 4,
-          parentTagName:
-            highlight.annotation.endMeta.parentTagName === "BR"
-              ? highlight.annotation.startMeta.parentTagName
-              : highlight.annotation.endMeta.parentTagName,
-        });
+        // console.log("checking", {
+        //   ...highlight.annotation.endMeta,
+        //   parentIndex: highlight.annotation.endMeta.parentIndex - 4,
+        //   parentTagName:
+        //     highlight.annotation.endMeta.parentTagName === "BR"
+        //       ? highlight.annotation.startMeta.parentTagName
+        //       : highlight.annotation.endMeta.parentTagName,
+        // });
         state.highlighterLib?.fromStore(
           {
             ...highlight.annotation.startMeta,

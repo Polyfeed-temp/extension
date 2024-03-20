@@ -66,6 +66,11 @@ export const RateFeedbackTab = ({
     rateFeedbackStatmentsFunction[ratingIndex](rating);
   };
   const toggleDropdown = () => {
+    addLogs({
+      eventType: eventType[0],
+      content: !isDropdownOpen ? "Rate this feedback" : "This Feedback ",
+      eventSource: eventSource[4],
+    });
     setIsDropdownOpen(!isDropdownOpen);
   };
   const chevronIconDown = (
@@ -121,8 +126,7 @@ export const RateFeedbackTab = ({
       );
 
       addLogs({
-        eventType: eventType[0],
-        tagName: "",
+        eventType: eventType[2],
         content: JSON.stringify({
           ...feedback,
           feedbackId,
@@ -158,7 +162,7 @@ export const RateFeedbackTab = ({
         onClick={toggleDropdown}
         className="flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left"
       >
-        <span>{!isDropdownOpen ? "Rate this feedback" : "This Feedback "}</span>
+        <span>{!isDropdownOpen ? "Rate this feedback" : "This Feedback"}</span>
         {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
       {isDropdownOpen &&

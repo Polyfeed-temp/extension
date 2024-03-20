@@ -1,5 +1,5 @@
 {
-    "backend": "https://www.polyfeed.com.au/",
-    "server": "https://www.polyfeed.com.au/",
-    "dashboard": "https://www.polyfeed.com.au/dashboard/"
+  "backend": "http://127.0.0.1:8000/",
+  "server": "https://www.polyfeed.com.au/",
+  "dashboard": "https://www.polyfeed.com.au/dashboard/"
 }

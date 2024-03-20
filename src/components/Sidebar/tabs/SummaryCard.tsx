@@ -14,6 +14,11 @@ import {
 } from "../../../store/HighlightContext";
 import SearchableSelect from "../SearchableSelect";
 import { getAllUnits } from "../../../services/unit.service";
+import {
+  addLogs,
+  eventType,
+  eventSource,
+} from "../../../services/logs.serivce";
 interface Props {
   annotationData: AnnotationData[];
 }
@@ -21,6 +26,13 @@ interface Props {
 export function UnitAssignmentSummary({ feedback }: { feedback: Feedback }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {
+    addLogs({
+      eventType: eventType[7],
+      content: isDropdownOpen
+        ? feedback.unitCode
+        : "Highlight Summary for " + feedback.unitCode,
+      eventSource: eventSource[1],
+    });
     setIsDropdownOpen(!isDropdownOpen);
   };
   return (

@@ -21,12 +21,7 @@ import { useUserState } from "../../store/UserContext";
 import AnnotationService from "../../services/annotation.service";
 import config from "../../config.json";
 import { ExplainFutherToggle } from "./ExplainFutherInput";
-import {
-  addLogs,
-  eventType,
-  eventSource,
-  tagName,
-} from "../../services/logs.serivce";
+import { addLogs, eventType, eventSource } from "../../services/logs.serivce";
 
 function RenderTabs({
   currentTab,
@@ -67,9 +62,8 @@ function RenderTabs({
                 onClick={async () => {
                   await addLogs({
                     eventType: eventType[0],
-                    tagName: "",
-                    content: "Select Assignment",
-                    eventSource: currentTab,
+                    content: "Start Highlight",
+                    eventSource: eventSource[2],
                   });
 
                   setCurrentTab("Select Assignment");
@@ -82,14 +76,7 @@ function RenderTabs({
                 {highlighterState.records && (
                   <SummaryCard annotationData={highlighterState.records} />
                 )}
-
                 {setCurrentTab("Highlight Texts")}
-                {addLogs({
-                  eventType: eventType[0],
-                  tagName: "",
-                  content: "Highlight Texts",
-                  eventSource: currentTab,
-                })}
               </>
             )}
           </div>
@@ -108,12 +95,6 @@ function RenderTabs({
                 });
               }
               setCurrentTab("Highlight Texts");
-              addLogs({
-                eventType: eventType[8],
-                tagName: currentTab,
-                content: "Highlight Texts",
-                eventSource: eventSource[1],
-              });
             }}
           ></SelectUnitAssignmentTab>
         </div>
@@ -147,9 +128,10 @@ function RenderTabs({
                   });
 
                   addLogs({
-                    eventType: eventType[8],
-                    tagName: tagName[1],
-                    content: `${!highlighterState.isHighlighting}`,
+                    eventType: eventType[0],
+                    content: !highlighterState.isHighlighting
+                      ? "Continue Highlighting"
+                      : "Stop Highlighting",
                     eventSource: currentTab,
                   });
                 }}
@@ -175,9 +157,8 @@ function RenderTabs({
 
                   addLogs({
                     eventType: eventType[8],
-                    tagName: tagName[1],
                     content: record.annotation.id,
-                    eventSource: currentTab,
+                    eventSource: eventSource[0],
                   });
                 }}
               ></AnnotatedCard>
@@ -242,10 +223,12 @@ const SidebarPanel = () => {
                   setCurrentTab("My Notes");
 
                   addLogs({
-                    eventType: eventType[8],
-                    tagName: currentTab,
-                    content: "My Notes",
-                    eventSource: eventSource[1],
+                    eventType: eventType[7],
+                    content: JSON.stringify({
+                      currentTab,
+                      navigateTo: "My Notes",
+                    }),
+                    eventSource: eventSource[11],
                   });
                 }}
               >
@@ -265,10 +248,12 @@ const SidebarPanel = () => {
                   });
 
                   addLogs({
-                    eventType: eventType[8],
-                    tagName: currentTab,
-                    content: "Summary",
-                    eventSource: eventSource[1],
+                    eventType: eventType[7],
+                    content: JSON.stringify({
+                      currentTab,
+                      navigateTo: "Summery",
+                    }),
+                    eventSource: eventSource[11],
                   });
                 }}
               >
@@ -279,10 +264,12 @@ const SidebarPanel = () => {
                 onClick={() => {
                   window.open(config.dashboard, "_blank");
                   addLogs({
-                    eventType: eventType[8],
-                    tagName: currentTab,
-                    content: "Dashboard",
-                    eventSource: eventSource[1],
+                    eventType: eventType[7],
+                    content: JSON.stringify({
+                      currentTab,
+                      navigateTo: "Dashboard",
+                    }),
+                    eventSource: eventSource[11],
                   });
                 }}
               >
