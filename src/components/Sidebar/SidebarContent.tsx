@@ -132,7 +132,7 @@ function RenderTabs({
                     content: !highlighterState.isHighlighting
                       ? "Continue Highlighting"
                       : "Stop Highlighting",
-                    eventSource: currentTab,
+                    eventSource: eventSource[0],
                   });
                 }}
               >

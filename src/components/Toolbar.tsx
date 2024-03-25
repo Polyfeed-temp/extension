@@ -20,6 +20,7 @@ import { AnnotationTag, SideBarAction, Annotation } from "../types";
 import { annotationTagsIcons } from "./AnnotationIcons";
 import { useSidebar } from "../hooks/useSidebar";
 import Tippy from "@tippyjs/react";
+import { addLogs, eventSource, eventType } from "../services/logs.serivce";
 
 function ToolbarMenu({
   Label,
@@ -29,8 +30,19 @@ function ToolbarMenu({
   setAnnotationTag: (sideBarAction: SideBarAction) => void;
 }) {
   //hover the index
+  const [open, setOpen] = useState(false);
   return (
-    <Menu>
+    <Menu
+      open={open}
+      handler={() => {
+        addLogs({
+          eventType: eventType[1],
+          content: Label,
+          eventSource: eventSource[0],
+        });
+        setOpen(!open);
+      }}
+    >
       <MenuHandler className="p-1">
         <button
           style={{
@@ -105,6 +117,12 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   const annotationDispatch = useHighlighterDispatch();
   const setAnnotationTag =
     (tag: AnnotationTag) => (sidebarAction: SideBarAction) => {
+      addLogs({
+        eventType: eventType[0],
+        content: JSON.stringify({ sidebarAction, tag }),
+        eventSource: eventSource[0],
+      });
+
       const annotation: Annotation = {
         feedbackId: feedbackId,
         id: highlightingID,
@@ -133,6 +151,7 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
       };
     }
   }, [highlighter, highlightingID]);
+
   return (
     <Tippy
       reference={el}

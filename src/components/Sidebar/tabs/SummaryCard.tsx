@@ -27,11 +27,9 @@ export function UnitAssignmentSummary({ feedback }: { feedback: Feedback }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {
     addLogs({
-      eventType: eventType[7],
-      content: isDropdownOpen
-        ? feedback.unitCode
-        : "Highlight Summary for " + feedback.unitCode,
-      eventSource: eventSource[1],
+      eventType: isDropdownOpen ? eventType[6] : eventType[1],
+      content: "Highlight Summary for " + feedback.unitCode,
+      eventSource: eventSource[6],
     });
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -57,9 +55,15 @@ export function UnitAssignmentSummary({ feedback }: { feedback: Feedback }) {
           <Button
             fullWidth
             className="bg-black"
-            onClick={() => (window.location.href = feedback.url)}
+            onClick={() => {
+              addLogs({
+                eventSource: eventSource[6],
+                content: feedback.url,
+                eventType: eventType[7],
+              });
+              window.location.href = feedback.url;
+            }}
           >
-            {" "}
             Go to Feedback
           </Button>
         </>

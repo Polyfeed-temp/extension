@@ -24,9 +24,9 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
     addLogs({
-      eventType: eventType[0],
-      content: "",
-      eventSource: eventSource[8],
+      eventType: isDropdownOpen ? eventType[6] : eventType[1],
+      content: "icon " + isDropdownOpen ? "close" : "open",
+      eventSource: eventSource[0],
     });
   };
 
@@ -47,7 +47,7 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
 
     setSelectedAssignment(selectedAssignment || null);
     addLogs({
-      eventType: eventType[1],
+      eventType: eventType[9],
       content: JSON.stringify(selectedAssignment),
       eventSource: eventSource[7],
     });
@@ -112,7 +112,7 @@ export function CurrentFeedbackSummary({ feedback }: { feedback: Feedback }) {
                 setEditing(true);
 
                 addLogs({
-                  eventType: eventType[0],
+                  eventType: eventType[1],
                   content: "edit unit code icon",
                   eventSource: eventSource[0],
                 });

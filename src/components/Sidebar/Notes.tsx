@@ -24,12 +24,10 @@ export function Notes({
       <hr className="my-4" />
       <div className="flex justify-between">
         <Button className="bg-black my-4" onClick={() => setNote(value)}>
-          {" "}
-          Save note{" "}
+          Save note
         </Button>
 
         <Button className="bg-black my-4" onClick={cancelFunc}>
-          {" "}
           Cancel
         </Button>
       </div>

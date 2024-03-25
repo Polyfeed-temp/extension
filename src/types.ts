@@ -116,7 +116,6 @@ export interface UserState {
 }
 
 export function getColorForTag(tag: AnnotationTag | undefined) {
-  console.log("tag", tag);
   switch (tag) {
     case "Strength":
       return "#3a70b7";

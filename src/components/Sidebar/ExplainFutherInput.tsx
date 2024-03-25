@@ -1,13 +1,13 @@
-import React, {useState, useEffect, useRef} from "react";
-import {explainFuther} from "../../services/openai.service";
-import {toast} from "react-toastify";
+import React, { useState, useEffect, useRef } from "react";
+import { explainFuther } from "../../services/openai.service";
+import { toast } from "react-toastify";
 
 import Highlighter from "web-highlighter";
 import {
   useHighlighterState,
   useHighlighterDispatch,
 } from "../../store/HighlightContext";
-import {Button, rating} from "@material-tailwind/react";
+import { Button, rating } from "@material-tailwind/react";
 import {
   emoticons,
   emoticonsInversed,
@@ -15,6 +15,7 @@ import {
   chevronIconUp,
 } from "../AnnotationIcons";
 import AnnotationService from "../../services/annotation.service";
+import { addLogs, eventSource, eventType } from "../../services/logs.serivce";
 
 export function ExplainFutherToggle() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -25,6 +26,12 @@ export function ExplainFutherToggle() {
   );
 
   const toggleDropdown = () => {
+    addLogs({
+      eventSource: eventSource[1],
+      content: isDropdownOpen ? "close" : "open",
+      eventType: eventType[0],
+    });
+
     setIsDropdownOpen(!isDropdownOpen);
   };
   const [query, setQuery] = useState(
@@ -109,12 +116,12 @@ function GPTQueryTextBox({
       exceptSelectors: ["#react-root"],
     });
 
-    highlighter.on("selection:create", ({sources}) => {
+    highlighter.on("selection:create", ({ sources }) => {
       setHighlightedText((prev) => prev + "\n" + sources[0].text);
       highlighter.remove(sources[0].id);
     });
     highlighter.run();
-    highlighterDispatch({type: "SET_IS_HIGHLIGHTING", payload: false});
+    highlighterDispatch({ type: "SET_IS_HIGHLIGHTING", payload: false });
     return () => {
       highlighter.stop();
     };
@@ -201,6 +208,13 @@ function RateGPTResponse({
       feedbackId,
       colorToRating(color)
     );
+
+    addLogs({
+      eventSource: eventSource[1],
+      content: JSON.stringify({ feedbackId, rate: colorToRating(color) }),
+      eventType: eventType[0],
+    });
+
     toast.promise(status, {
       pending: "Saving rating...",
       success: "Rating saved!",
@@ -224,7 +238,7 @@ function RateGPTResponse({
                 : emoticonsInversed[color]
             }
             alt={color}
-            style={{width: 40, height: 40}}
+            style={{ width: 40, height: 40 }}
           />
         </button>
       ))}
