@@ -65,9 +65,8 @@ class AnnotationService {
       },
     });
   }
-  public async getAllFeedack(): Promise<Feedback[]> {
+  public async getAllFeedback(): Promise<Feedback[]> {
     const response = await axios.get("/api/feedback/all");
-    console.log(response.data);
     return response.data as Feedback[];
   }
 

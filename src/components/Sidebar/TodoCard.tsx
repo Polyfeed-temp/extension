@@ -1,14 +1,14 @@
-import React, {useState, useRef, useEffect} from "react";
-import {AnnotationActionPoint} from "../../types";
-import {ActionPointCategory} from "../../types";
-import {Button, Typography, IconButton} from "@material-tailwind/react";
-import {useHighlighterDispatch} from "../../store/HighlightContext";
-import {EditIcon, DeleteIcon} from "../AnnotationIcons";
+import React, { useState, useRef, useEffect } from "react";
+import { AnnotationActionPoint } from "../../types";
+import { ActionPointCategory } from "../../types";
+import { Button, Typography, IconButton } from "@material-tailwind/react";
+import { useHighlighterDispatch } from "../../store/HighlightContext";
+import { EditIcon, DeleteIcon } from "../AnnotationIcons";
 import {
   updateActionStatus,
   deleteActionItem,
 } from "../../services/actionItem.service";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 const ToDoActions: ActionPointCategory[] = [
   "Further Practice",
   "Contact Tutor",
@@ -161,7 +161,7 @@ function TodoCard({
           cancelFunc={() => {
             actionItems.length > 0
               ? setAddToDo(false)
-              : highlighterDispatch({type: "CANCEL_HIGHLIGHTED"});
+              : highlighterDispatch({ type: "CANCEL_HIGHLIGHTED" });
           }}
         />
       ) : (
@@ -170,7 +170,6 @@ function TodoCard({
             key={selectedActionItem.action}
             hideFunc={() => setSelectedActionItem(null)}
             saveFunc={(actionItem) => {
-              console.log(actionItem);
               const newActionItems = [...actionItems];
               const index = newActionItems.findIndex(
                 (item) => item === selectedActionItem
@@ -201,7 +200,6 @@ function ToDoForm({
   cancelFunc: () => void;
   defaultActionItem?: AnnotationActionPoint;
 }) {
-  console.log(defaultActionItem);
   const [todoText, setTodoText] = useState<string>(
     defaultActionItem?.action ?? ""
   );

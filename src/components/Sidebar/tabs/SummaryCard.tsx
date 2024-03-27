@@ -80,7 +80,6 @@ export const SummaryCard: React.FC<Props> = ({ annotationData }) => {
     Confused: 0,
     Other: 0,
   };
-  console.log(annotationData[0]);
 
   annotationData.forEach(({ annotation }) => {
     annotationTagCount[annotation.annotationTag] += 1;

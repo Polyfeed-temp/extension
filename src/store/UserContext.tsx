@@ -5,13 +5,13 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import {User, UserState, Unit} from "../types";
+import { User, UserState, Unit } from "../types";
 
-import {login, logout, getUser} from "../services/user.service";
+import { login, logout, getUser } from "../services/user.service";
 
 interface UserAction {
   type: "LOGIN";
-  payload?: {username: string; password: string};
+  payload?: { username: string; password: string };
 }
 interface LogoutAction {
   type: "LOGOUT";
@@ -23,7 +23,7 @@ interface InitializeAction {
 
 type actions = UserAction | InitializeAction | LogoutAction;
 const UserContext = createContext<
-  {state: UserState; dispatch: React.Dispatch<actions>} | undefined
+  { state: UserState; dispatch: React.Dispatch<actions> } | undefined
 >(undefined);
 
 function userReducer(state: UserState, action: actions): UserState {
@@ -47,7 +47,7 @@ function userReducer(state: UserState, action: actions): UserState {
   }
 }
 
-function UserProvider({children}: {children: ReactNode}) {
+function UserProvider({ children }: { children: ReactNode }) {
   const initialState: UserState = {
     login: false,
     user: undefined,
@@ -60,7 +60,7 @@ function UserProvider({children}: {children: ReactNode}) {
       try {
         const user = await getUser();
         if (user) {
-          baseDispatch({type: "INITIALIZE", payload: user});
+          baseDispatch({ type: "INITIALIZE", payload: user });
         }
       } catch (err) {
         console.log(err);
@@ -82,7 +82,7 @@ function UserProvider({children}: {children: ReactNode}) {
   };
 
   return (
-    <UserContext.Provider value={{state, dispatch: serviceDispatch}}>
+    <UserContext.Provider value={{ state, dispatch: serviceDispatch }}>
       {children}
     </UserContext.Provider>
   );

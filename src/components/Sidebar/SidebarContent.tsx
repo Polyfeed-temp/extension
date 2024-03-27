@@ -198,7 +198,7 @@ const SidebarPanel = () => {
       setLoading(false);
     };
     const fetchFeedbacks = async () => {
-      const feedbacks = await annotationService.getAllFeedack();
+      const feedbacks = await annotationService.getAllFeedback();
       setAllFeedbacks(feedbacks);
     };
     if (userState.login) {

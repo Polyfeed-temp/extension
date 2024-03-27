@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 type OptionType = {
   [key: string]: any;
@@ -9,7 +9,6 @@ type SearchableSelectProps = {
   displayFunction: (option: OptionType) => string;
   filterFunction: (option: OptionType, searchTerm: string) => boolean;
   onSelectFunction: (selectedUnit: any) => void;
-  
 };
 
 function SearchableSelect({
@@ -38,7 +37,7 @@ function SearchableSelect({
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    function handleClickOutside(event: {target: any}) {
+    function handleClickOutside(event: { target: any }) {
       if (
         wrapperRef.current &&
         !!(wrapperRef.current as HTMLElement).contains(event.target)

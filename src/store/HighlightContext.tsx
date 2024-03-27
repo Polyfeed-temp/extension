@@ -479,11 +479,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
     const handleClick = (data: { id: string }) => {
       const selectedArea = state.highlighterLib?.getDoms(data.id)[0];
-
-      console.log("selectedArea", state.highlighterLib?.getDoms(data.id));
-
       selectedArea ? setSelectedHighlightElement(selectedArea) : null;
-      console.log("selected elem", selectedHighlightElement);
       setSelectedHighlightId(data.id);
       // dispatch({type: "SELECT_HIGHLIGHT", payload: data.id});
 
@@ -499,7 +495,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       );
       cardView?.classList.add("selected");
       // const cardView = document.getElementById(`card-view-${data.id}`);
-      console.log("card view", cardView);
 
       cardView?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
@@ -518,8 +513,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
     state.records.map((highlight) => {
-      console.log("highlight", highlight);
-
       state.highlighterLib?.fromStore(
         highlight.annotation.startMeta,
         highlight.annotation.endMeta,
@@ -599,7 +592,9 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
       if (icons.length > 0) {
         clearInterval(waitForIcons); // Stop polling once elements are found
-        icons[1].addEventListener("click", handleIconClick);
+        if (icons.length > 1)
+          icons[1].addEventListener("click", handleIconClick);
+        else icons[0].addEventListener("click", handleIconClick);
       }
     }, 500); // Check every 500ms
 
@@ -611,7 +606,9 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
       if (icons.length > 0) {
         clearInterval(waitForIcons); // Stop polling once elements are found
-        icons[1].addEventListener("click", handleIconClick);
+        if (icons.length > 1)
+          icons[1].addEventListener("click", handleIconClick);
+        else icons[0].addEventListener("click", handleIconClick);
       }
     };
   }, [state.records, state.highlighterLib]);
