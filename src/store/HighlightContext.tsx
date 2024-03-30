@@ -236,7 +236,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               doubleClick ||
               sources.annotation.endMeta.parentTagName != "P"
             ) {
-              console.log("changed");
               sources = {
                 annotation: {
                   ...sources.annotation,
@@ -507,10 +506,13 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       const id = data.id;
       state.highlighterLib?.removeClass("highlight-hover", id);
     };
+
     state.highlighterLib?.on(Highlighter.event.CREATE, handleCreate);
     state.highlighterLib?.on(Highlighter.event.CLICK, handleClick);
     state.highlighterLib?.on(Highlighter.event.HOVER_OUT, handleHoverOut);
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
+
+    console.log("state.records", state.records);
 
     state.records.map((highlight) => {
       state.highlighterLib?.fromStore(
@@ -520,21 +522,20 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         highlight.annotation.id
       );
 
-      if (highlight.annotation.startMeta.parentIndex > 10) {
-        console.log("called parentIndex > 10");
-        state.highlighterLib?.fromStore(
-          {
-            ...highlight.annotation.startMeta,
-            parentIndex: highlight.annotation.startMeta.parentIndex - 4,
-          },
-          {
-            ...highlight.annotation.endMeta,
-            parentIndex: highlight.annotation.endMeta.parentIndex - 4,
-          },
-          highlight.annotation.text,
-          highlight.annotation.id
-        );
-      }
+      // if (highlight.annotation.startMeta.parentIndex > 11) {
+      //   state.highlighterLib?.fromStore(
+      //     {
+      //       ...highlight.annotation.startMeta,
+      //       parentIndex: highlight.annotation.startMeta.parentIndex + 4,
+      //     },
+      //     {
+      //       ...highlight.annotation.endMeta,
+      //       parentIndex: highlight.annotation.endMeta.parentIndex + 4,
+      //     },
+      //     highlight.annotation.text,
+      //     highlight.annotation.id
+      //   );
+      // }
 
       state.highlighterLib?.addClass(
         getClassForTag(highlight.annotation.annotationTag),
@@ -548,25 +549,34 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       state.highlighterLib?.off(Highlighter.event.CLICK, handleClick);
       state.highlighterLib?.off(Highlighter.event.HOVER_OUT, handleHoverOut);
     };
-  }, [state.highlighterLib]);
+  }, [state]);
 
   // monitor the expand icon onclick
   useEffect(() => {
     const handleIconClick = (event: any) => {
       state.records.map((highlight) => {
-        if (highlight.annotation.startMeta.parentIndex < 11)
+        if (highlight.annotation.startMeta.parentIndex < 11) {
+          const pElementAmount = document.querySelectorAll(
+            'div[class*="summary_assignfeedback_comments_"] p'
+          ).length;
+
+          console.log("pElementAmount", pElementAmount);
+
           state.highlighterLib?.fromStore(
             {
               ...highlight.annotation.startMeta,
-              parentIndex: highlight.annotation.startMeta.parentIndex + 4,
+              parentIndex:
+                highlight.annotation.startMeta.parentIndex + pElementAmount,
             },
             {
               ...highlight.annotation.endMeta,
-              parentIndex: highlight.annotation.endMeta.parentIndex + 4,
+              parentIndex:
+                highlight.annotation.endMeta.parentIndex + pElementAmount,
             },
             highlight.annotation.text,
             highlight.annotation.id
           );
+        }
 
         state.highlighterLib?.addClass(
           getClassForTag(highlight.annotation.annotationTag),
@@ -600,7 +610,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         else icons[0].addEventListener("click", handleIconClick);
       }
     };
-  }, [state.records, state.highlighterLib]);
+  }, [state]);
 
   return (
     <HighlighterContext.Provider value={{ state, dispatch }}>
