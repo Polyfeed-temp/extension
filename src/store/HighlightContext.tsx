@@ -520,19 +520,8 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         highlight.annotation.id
       );
 
-      // console.log(
-      //   "highlight.annotation.startMeta.parentIndex",
-      //   highlight.annotation.startMeta.parentIndex
-      // );
       if (highlight.annotation.startMeta.parentIndex > 10) {
-        // console.log("checking", {
-        //   ...highlight.annotation.endMeta,
-        //   parentIndex: highlight.annotation.endMeta.parentIndex - 4,
-        //   parentTagName:
-        //     highlight.annotation.endMeta.parentTagName === "BR"
-        //       ? highlight.annotation.startMeta.parentTagName
-        //       : highlight.annotation.endMeta.parentTagName,
-        // });
+        console.log("called parentIndex > 10");
         state.highlighterLib?.fromStore(
           {
             ...highlight.annotation.startMeta,
