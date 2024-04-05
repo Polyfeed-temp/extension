@@ -61,6 +61,8 @@ export interface Feedback {
   gptQueryText?: string;
   gptResponse?: string;
   gptResponseRating?: number;
+  performance?: string;
+  feedbackUseful?: string;
 }
 export interface FeedbackRating {
   clarity: number;
