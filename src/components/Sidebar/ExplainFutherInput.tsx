@@ -19,10 +19,14 @@ import { addLogs, eventSource, eventType } from "../../services/logs.serivce";
 
 export function ExplainFutherToggle() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const highlightState = useHighlighterState();
+  const highlightState: any = useHighlighterState();
 
   const [explanation, setExplanation] = useState(
     highlightState.feedbackInfo?.gptResponse || ""
+  );
+
+  const [explanation_2, setExplanation_2] = useState(
+    highlightState.feedbackInfo?.gptResponse_2 || ""
   );
 
   const toggleDropdown = () => {
@@ -37,10 +41,17 @@ export function ExplainFutherToggle() {
   const [query, setQuery] = useState(
     highlightState.feedbackInfo?.gptQueryText || ""
   );
+
+  const [query_2, setQuery_2] = useState(
+    highlightState.feedbackInfo?.gptQueryText_2 || ""
+  );
   const [viewOnly, setViewOnly] = useState<Boolean>(false);
+
   useEffect(() => {
     setExplanation(highlightState.feedbackInfo?.gptResponse || "");
+    setExplanation_2(highlightState.feedbackInfo?.gptResponse_2 || "");
     setQuery(highlightState.feedbackInfo?.gptQueryText || "");
+    setQuery_2(highlightState.feedbackInfo?.gptQueryText_2 || "");
     setViewOnly(
       highlightState.feedbackInfo?.gptQueryText &&
         highlightState.feedbackInfo?.gptResponse
@@ -51,8 +62,13 @@ export function ExplainFutherToggle() {
     highlightState.feedbackInfo?.gptQueryText,
     highlightState.feedbackInfo?.gptResponse,
   ]);
-  const fetchExplanationData = async (text: string) => {
-    const gptStatus = explainFuther(highlightState.feedbackInfo?.id || 0, text);
+
+  const fetchExplanationData = async (text: string, attemptTime = 1) => {
+    const gptStatus = explainFuther(
+      highlightState.feedbackInfo?.id || 0,
+      text,
+      attemptTime
+    );
     toast.promise(gptStatus, {
       pending: "Generating explanation...",
       success: "Explanation generated!",
@@ -77,12 +93,43 @@ export function ExplainFutherToggle() {
         </button>
         {isDropdownOpen &&
           (viewOnly ? (
-            <ViewOnlyGPTResponse
-              query={query}
-              response={explanation}
-              feedbackId={highlightState.feedbackInfo?.id || 0}
-              rating={highlightState.feedbackInfo?.gptResponseRating}
-            />
+            <div>
+              <ViewOnlyGPTResponse
+                query={query}
+                response={explanation}
+                feedbackId={highlightState.feedbackInfo?.id || 0}
+                rating={highlightState.feedbackInfo?.gptResponseRating}
+              />
+
+              {highlightState?.feedbackInfo?.gptResponseRating < 3 &&
+                highlightState?.feedbackInfo?.gptResponseRating > 0 && (
+                  <div className="p-5">
+                    {!explanation_2 && (
+                      <>
+                        <p className="text-left">
+                          This is your second chances to ask chat gpt for the
+                          feedback
+                        </p>
+                        <GPTQueryTextBox
+                          submitFunc={(text) => fetchExplanationData(text, 2)}
+                        />
+                      </>
+                    )}
+
+                    {explanation_2 && (
+                      <ViewOnlyGPTResponse
+                        query={query_2}
+                        response={explanation_2}
+                        feedbackId={highlightState.feedbackInfo?.id || 0}
+                        rating={
+                          highlightState.feedbackInfo?.gptResponseRating_2
+                        }
+                        attemptTime={2}
+                      />
+                    )}
+                  </div>
+                )}
+            </div>
           ) : (
             <GPTQueryTextBox submitFunc={fetchExplanationData} />
           ))}
@@ -131,7 +178,7 @@ function GPTQueryTextBox({
     <>
       <textarea
         ref={textareaRef}
-        className="w-full"
+        className="w-full p-2 border rounded-[5px] border-black"
         onChange={(e) => setHighlightedText(e.target.value)}
         value={highlightedText}
         placeholder="Highlight the feedback and click on ask chat gpt please enter at least 50 characters"
@@ -154,11 +201,13 @@ function ViewOnlyGPTResponse({
   response,
   feedbackId,
   rating,
+  attemptTime,
 }: {
   query: string;
   response: string;
   rating?: number;
   feedbackId: number;
+  attemptTime?: number;
 }) {
   const formatted = response.split("\n").map((line, index) => (
     <li key={index} className="bg-gray-100 p-4 text-left">
@@ -166,16 +215,23 @@ function ViewOnlyGPTResponse({
     </li>
   ));
   return (
-    <div>
+    <div className="mt-2">
+      <p className="underline">Submitted Highlights:</p>
       <p className="text-left text-gray-700 italic">{query}</p>
 
       <div className="border-2 bg-gray-100 p-4 text-left">
-        <p className="font-bold">{"Explanation from Chat GPT"}</p>
+        <p className="font-bold">
+          {"Explanation from Chat GPT"} {attemptTime && " (Second time)"}
+        </p>
 
         <p className="bg-gray-100 p-4 text-left">{formatted}</p>
       </div>
 
-      <RateGPTResponse feedbackId={feedbackId} rating={rating} />
+      <RateGPTResponse
+        feedbackId={feedbackId}
+        rating={rating}
+        attemptTime={attemptTime || 1}
+      />
     </div>
   );
 }
@@ -183,9 +239,11 @@ function ViewOnlyGPTResponse({
 function RateGPTResponse({
   feedbackId,
   rating,
+  attemptTime,
 }: {
   feedbackId: number;
   rating?: number;
+  attemptTime?: number;
 }) {
   const [gptRating, setGptRating] = useState(rating || 0);
   const colorToRating = (color: string) => {
@@ -206,7 +264,8 @@ function RateGPTResponse({
     setGptRating(colorToRating(color));
     const status = new AnnotationService().rateGptResponse(
       feedbackId,
-      colorToRating(color)
+      colorToRating(color),
+      attemptTime
     );
 
     addLogs({
@@ -222,26 +281,35 @@ function RateGPTResponse({
     });
   };
 
+  const highlightState: any = useHighlighterState();
+
   return (
-    <div className="flex item-center text-left border-4 bg-gray-400">
-      How do you feel about the explanation?
-      {Object.entries(emoticons).map(([color, icon]) => (
-        <button
-          key={color}
-          className="ml-2"
-          onClick={() => handleEmoticonClick(color)}
-        >
-          <img
-            src={
-              gptRating == colorToRating(color) || gptRating == 0
-                ? icon
-                : emoticonsInversed[color]
+    <div className="flex flex-col item-center text-left border-4 bg-gray-400 p-2">
+      <p className="ml-2"> How do you feel about the explanation?</p>
+      <div className="flex flex-row mt-5">
+        {Object.entries(emoticons).map(([color, icon]) => (
+          <button
+            disabled={
+              attemptTime === 1
+                ? highlightState?.feedbackInfo?.gptResponseRating > 0
+                : highlightState?.feedbackInfo?.gptResponseRating_2 > 0
             }
-            alt={color}
-            style={{ width: 40, height: 40 }}
-          />
-        </button>
-      ))}
+            key={color}
+            className="ml-2"
+            onClick={() => handleEmoticonClick(color)}
+          >
+            <img
+              src={
+                gptRating == colorToRating(color) || gptRating == 0
+                  ? icon
+                  : emoticonsInversed[color]
+              }
+              alt={color}
+              style={{ width: 40, height: 40 }}
+            />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

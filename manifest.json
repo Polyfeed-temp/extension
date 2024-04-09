@@ -26,8 +26,8 @@
   ],
   "permissions": ["storage", "activeTab", "identity"],
   "oauth2": {
-    "client_id": "838168997555-oenqc5ap4le8iqmsdc2s0ji9r06t3mrq.apps.googleusercontent.com",
+    "client_id": "838168997555-c2comdje7instc0k6dptdribmkln9t67.apps.googleusercontent.com",
     "scopes": ["https://www.googleapis.com/auth/userinfo.email"]
   },
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArH9ypWdMRjUb3tWdP7dkBpPVs1amCgfWzdyugjErhwSX/DQi8TZoR4iJt0x2nZ/80mj91nQrsRGXNQvBnJniQweyYgCHbVE1uB/drtq2TAoyOWtzQmeVL1bH3VcfvedBgZ1kd0IhMy6B0Y9jSQXA6Kf1Qj9Z6DyAu/9loc54WPbYGqjubxXYs8RqsYeVqZ5WtSk31ZUIGWMcGOwCua+Aqajs4HEynI4enGUSiotxRiRtfUMpNeoarRkdRc9DjKg6BJPODC3canySwDRHlaOGaLwBY+lr2A5+IX7PCYuhywiuXISspFKD4wQlHuwAVegueHRtrRyTXyrzzcasTpQeuwIDAQAB"
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApNC374RYLgJ3Xyr+5opKAMiPOdSKikOMyYJrG90fTro+uDw+QK0FO+/3T7D/np2okNmkf7kaAKqPvm/+mMijux/S7vM6qXHU6ubo7NqY4uOKWHtndGMir7sVuKlzk8UXaOBAazmHdKPtgFblyhfT9Yemul8damKIpZQScNkQO/mVEQxF0JV3gH354p5p9mt69dy1wWAU7Gviu9J19e1l85msjhJf5A7d54xSVYy+FfhKAO1ju5B+ef0/Oxe2cprxi8+ul+81oRDnT0wl4sKjNmC5DHm9+garX+J64U0Y5yvm3/Thj0eTERthPrNis7rXQw06+IU0efaonW/bTlrCjwIDAQAB"
 }

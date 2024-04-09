@@ -95,9 +95,13 @@ class AnnotationService {
   ) {
     return axios.patch(`/api/action/${highlightId}/action`, actionItem);
   }
-  public async rateGptResponse(feedbackId: number, rating: number) {
+  public async rateGptResponse(
+    feedbackId: number,
+    rating: number,
+    attemptTime = 1
+  ) {
     return axios.post(`/api/feedback/rate/gpt/${feedbackId}`, null, {
-      params: { rating },
+      params: { rating, attemptTime },
     });
   }
 

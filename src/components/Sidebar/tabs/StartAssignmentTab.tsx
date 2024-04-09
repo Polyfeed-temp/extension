@@ -161,6 +161,9 @@ export function SelectUnitAssignmentTab({
                 value={performance}
                 onChange={(e) => setPerformance(e.target.value)}
               >
+                <option key={"default-performance"} disabled value={""}>
+                  Please Select
+                </option>
                 {performanceOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -185,6 +188,9 @@ export function SelectUnitAssignmentTab({
                 value={feedbackUsefulness}
                 onChange={(e) => setFeedbackUsefulness(e.target.value)}
               >
+                <option key={"default-feedbackUsefulness"} disabled value={""}>
+                  Please Select
+                </option>
                 {feedbackUsefulnessOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
