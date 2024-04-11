@@ -6,19 +6,13 @@ import {
 } from "../../../store/HighlightContext";
 
 import {
-  AnnotationNotes,
   AnnotationData,
   AnnotationActionPoint,
-  AnnotationTag,
   Annotation,
 } from "../../../types";
 import { SideBarAction } from "../../../types";
 import { getColorForTag, getClassForTag } from "../../../types";
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import { input } from "@material-tailwind/react";
-import AnnotationService from "../../../services/annotation.service";
-import { ExplainFutherToggle } from "../ExplainFutherInput";
+import { useEffect } from "react";
 
 function RenderTabs({
   currentEditing,

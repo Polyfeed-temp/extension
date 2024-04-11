@@ -142,8 +142,8 @@ function RenderTabs({
               </Button>
             </>
           )}
-          <HighlightingTab></HighlightingTab>
-          <ExplainFutherToggle></ExplainFutherToggle>
+          <HighlightingTab />
+          <ExplainFutherToggle />
           {highlighterState.records.map((record: AnnotationData, index) => (
             <div key={index} className="mb-4">
               <AnnotatedCard

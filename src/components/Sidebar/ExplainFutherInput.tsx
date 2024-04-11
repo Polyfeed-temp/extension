@@ -61,6 +61,8 @@ export function ExplainFutherToggle() {
   }, [
     highlightState.feedbackInfo?.gptQueryText,
     highlightState.feedbackInfo?.gptResponse,
+    highlightState.feedbackInfo?.gptResponse_2,
+    highlightState.feedbackInfo?.gptQueryText_2,
   ]);
 
   const fetchExplanationData = async (text: string, attemptTime = 1) => {
@@ -75,8 +77,14 @@ export function ExplainFutherToggle() {
       error: "Failed to generate explanation",
     });
     const gptResponse = await gptStatus;
-    setQuery(text);
-    setExplanation(gptResponse);
+
+    if (attemptTime === 1) {
+      setQuery(text);
+      setExplanation(gptResponse);
+    } else {
+      setQuery_2(text);
+      setExplanation_2(gptResponse);
+    }
 
     setViewOnly(true);
   };
@@ -246,6 +254,9 @@ function RateGPTResponse({
   attemptTime?: number;
 }) {
   const [gptRating, setGptRating] = useState(rating || 0);
+  const annotationService = new AnnotationService();
+  const highlighterDispatch = useHighlighterDispatch();
+
   const colorToRating = (color: string) => {
     switch (color) {
       case "red":
@@ -260,9 +271,10 @@ function RateGPTResponse({
         return 10;
     }
   };
-  const handleEmoticonClick = (color: string) => {
+  const handleEmoticonClick = async (color: string) => {
     setGptRating(colorToRating(color));
-    const status = new AnnotationService().rateGptResponse(
+
+    const status = annotationService.rateGptResponse(
       feedbackId,
       colorToRating(color),
       attemptTime
@@ -279,6 +291,10 @@ function RateGPTResponse({
       success: "Rating saved!",
       error: "Failed to save rating",
     });
+
+    // update the feedback
+    const feedback = await annotationService.getCurrentPageFeedback();
+    highlighterDispatch({ type: "INITIALIZE", payload: feedback });
   };
 
   const highlightState: any = useHighlighterState();
