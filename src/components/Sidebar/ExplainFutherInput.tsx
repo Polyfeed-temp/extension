@@ -115,11 +115,12 @@ export function ExplainFutherToggle() {
                     {!explanation_2 && (
                       <>
                         <p className="text-left">
-                          This is your second chances to ask chat gpt for the
-                          feedback
+                          If a ChatGPT response doesn't meet your expectations,
+                          please ask again for improvement.
                         </p>
                         <GPTQueryTextBox
                           submitFunc={(text) => fetchExplanationData(text, 2)}
+                          attemptTime={2}
                         />
                       </>
                     )}
@@ -149,9 +150,11 @@ export function ExplainFutherToggle() {
 function GPTQueryTextBox({
   prevHighlight,
   submitFunc,
+  attemptTime = 1,
 }: {
   prevHighlight?: string;
   submitFunc: (text: string) => void;
+  attemptTime?: number;
 }) {
   const [highlightedText, setHighlightedText] = useState(prevHighlight || "");
   const highlighterDispatch = useHighlighterDispatch();
@@ -184,22 +187,29 @@ function GPTQueryTextBox({
 
   return (
     <>
-      <textarea
-        ref={textareaRef}
-        className="w-full p-2 border rounded-[5px] border-black"
-        onChange={(e) => setHighlightedText(e.target.value)}
-        value={highlightedText}
-        placeholder="Highlight the feedback and click on ask chat gpt please enter at least 50 characters"
-      ></textarea>
-      {highlightedText.length > 50 ? (
-        <Button
-          fullWidth
-          className="bg-black"
-          onClick={() => submitFunc(highlightedText)}
-        >
-          Ask Chat GPT
-        </Button>
-      ) : null}
+      {attemptTime === 1 && (
+        <textarea
+          ref={textareaRef}
+          className="w-full p-2 border rounded-[5px] border-black"
+          onChange={(e) => setHighlightedText(e.target.value)}
+          value={highlightedText}
+          placeholder="Highlight the feedback and click on ask chat gpt please enter at least 50 characters"
+        />
+      )}
+      <Button
+        disabled={attemptTime === 1 ? highlightedText.length < 50 : false}
+        fullWidth
+        className={`${
+          attemptTime === 1
+            ? highlightedText.length < 50
+              ? "bg-grey"
+              : "bg-black"
+            : "bg-black"
+        }`}
+        onClick={() => submitFunc(highlightedText)}
+      >
+        Ask Chat GPT{attemptTime === 2 && " AGAIN"}
+      </Button>
     </>
   );
 }
