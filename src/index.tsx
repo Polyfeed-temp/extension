@@ -17,6 +17,16 @@ function injectStyles(shadowRoot: any) {
   });
 }
 
+function injectScripts(shadowRoot: any) {
+  const styles = ["popper.min.js", "tippy-bundle.umd.min.js"];
+
+  styles.forEach((style) => {
+    const link = document.createElement("script");
+    link.src = chrome.runtime.getURL(`scripts/${style}`);
+    shadowRoot.appendChild(link);
+  });
+}
+
 function shadowHostInitailize() {
   const host = document.createElement("div");
   host.id = "sidebar-root";
@@ -25,16 +35,7 @@ function shadowHostInitailize() {
   const shadowRoot = host.attachShadow({ mode: "open" });
 
   injectStyles(shadowRoot);
-
-  // Injecting Material Tailwind CSS into the shadow root
-
-  const popper = document.createElement("script");
-  popper.src = "https://unpkg.com/@popperjs/core@2";
-  shadowRoot.appendChild(popper);
-
-  const tippy = document.createElement("script");
-  tippy.src = "https://unpkg.com/tippy.js@6";
-  shadowRoot.appendChild(tippy);
+  injectScripts(shadowRoot);
 
   const mainBodyStyle = document.createElement("style");
   mainBodyStyle.innerHTML = `.button-with-hover:hover {
