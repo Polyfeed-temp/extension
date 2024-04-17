@@ -15,7 +15,7 @@ module.exports = {
           {
             loader: "ts-loader",
             options: {
-              compilerOptions: {noEmit: false},
+              compilerOptions: { noEmit: false },
             },
           },
         ],
@@ -39,8 +39,10 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        {from: "manifest.json", to: "../manifest.json"},
-        {from: "public", to: "../public"},
+        { from: "manifest.json", to: "../manifest.json" },
+        { from: "public", to: "../public" },
+        { from: "styles", to: "../styles" }, // Copies the entire styles folder
+        { from: "scripts", to: "../scripts" }, // Copies the entire styles folder
       ],
     }),
     ...getHtmlPlugins(["index"]),

@@ -6,6 +6,17 @@ import { HighlighterProvider } from "./store/HighlightContext";
 import UserProvider from "./store/UserContext";
 import { SidebarProvider } from "./hooks/useSidebar";
 
+function injectStyles(shadowRoot: any) {
+  const styles = ["material-tailwind.css", "icon.css", "ReactToastify.min.css"];
+
+  styles.forEach((style) => {
+    const link = document.createElement("link");
+    link.href = chrome.runtime.getURL(`styles/${style}`);
+    link.rel = "stylesheet";
+    shadowRoot.appendChild(link);
+  });
+}
+
 function shadowHostInitailize() {
   const host = document.createElement("div");
   host.id = "sidebar-root";
@@ -13,24 +24,9 @@ function shadowHostInitailize() {
 
   const shadowRoot = host.attachShadow({ mode: "open" });
 
+  injectStyles(shadowRoot);
+
   // Injecting Material Tailwind CSS into the shadow root
-  const link = document.createElement("link");
-  link.href =
-    "https://unpkg.com/@material-tailwind/html@latest/styles/material-tailwind.css";
-  link.rel = "stylesheet";
-  shadowRoot.appendChild(link);
-
-  const materialIcons = document.createElement("link");
-  materialIcons.href =
-    "https://fonts.googleapis.com/icon?family=Material+Icons";
-  materialIcons.rel = "stylesheet";
-  shadowRoot.appendChild(materialIcons);
-
-  const toastify = document.createElement("link");
-  toastify.href =
-    "https://cdn.jsdelivr.net/npm/react-toastify@9.1.3/dist/ReactToastify.min.css";
-  toastify.rel = "stylesheet";
-  shadowRoot.appendChild(toastify);
 
   const popper = document.createElement("script");
   popper.src = "https://unpkg.com/@popperjs/core@2";
