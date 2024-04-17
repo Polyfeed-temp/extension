@@ -1,13 +1,6 @@
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import {
-  useState,
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useRef,
-  useEffect,
-} from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { useLayoutEffect, useRef, useEffect } from "react";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSidebar } from "./hooks/useSidebar";
 
@@ -16,11 +9,10 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithCredential,
-} from "firebase/auth";
+} from "firebase/auth/web-extension";
 import firebaseConfig from "../firebaseConfig.json";
 import { setChromeLocalStorage } from "./services/localStorage";
-import { User, Role, Faculty } from "./types";
-import { checkUserExists, register } from "./services/user.service";
+import { register } from "./services/user.service";
 import { TOKEN_KEY } from "./services/api.service";
 import { useHighlighterState } from "./store/HighlightContext";
 import { addLogs, eventType } from "./services/logs.serivce";
@@ -65,13 +57,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 export function restoreHostDom() {
   const nav = document.querySelector("nav") as HTMLElement;
-  const docs = document.querySelector("#docs-chrome") as HTMLElement;
   nav.style.marginRight = "0";
   document.body.style.marginRight = "0";
 }
 
 function App() {
-  const { collapsed, setCollapsed, location, setLocation } = useSidebar();
+  const { collapsed, setCollapsed } = useSidebar();
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
