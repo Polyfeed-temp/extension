@@ -17,7 +17,8 @@
     {
       "matches": [
         "https://learning.monash.edu/mod/assign/*",
-        "https://learning.monash.edu/mod/quiz/*"
+        "https://learning.monash.edu/mod/quiz/*",
+        "https://lms.monash.edu/mod/assign/*"
       ],
       "excludeMatches": ["http://localhost:3000/"],
       "js": ["./js/index.js"],
@@ -27,7 +28,7 @@
   "web_accessible_resources": [
     {
       "resources": ["/styles/*.css", "/scripts/*.js"],
-      "matches": ["https://learning.monash.edu/*"]
+      "matches": ["https://learning.monash.edu/*", "https://lms.monash.edu/*"]
     }
   ],
   "permissions": ["storage", "activeTab", "identity"],

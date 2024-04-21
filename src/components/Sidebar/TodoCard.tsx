@@ -145,7 +145,12 @@ function TodoCard({
           <Button className="bg-black" onClick={() => setAddToDo(true)}>
             Add Another item
           </Button>
-          <Button className="bg-black" onClick={() => saveFunc(actionItems)}>
+          <Button
+            className="bg-black"
+            onClick={() => {
+              saveFunc(actionItems);
+            }}
+          >
             Done
           </Button>
         </div>
@@ -286,7 +291,6 @@ function ToDoForm({
             cancelFunc();
           }}
         >
-          {" "}
           Cancel
         </Button>
       </div>

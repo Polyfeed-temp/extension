@@ -31,7 +31,6 @@ class AnnotationService {
   }
 
   public addAnnotations(highlight: AnnotationData) {
-    console.log("adding annotation", highlight);
     return axios.post("/api/highlight/", highlight, {
       headers: {
         "Content-Type": "application/json",
@@ -86,7 +85,7 @@ class AnnotationService {
     highlightId: string,
     actionItem: AnnotationActionPoint
   ) {
-    return axios.post(`/api/action /${highlightId}/action`, actionItem);
+    return axios.post(`/api/action/${highlightId}/action`, actionItem);
   }
 
   public async updateHighlightActionItem(

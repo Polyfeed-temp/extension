@@ -237,6 +237,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               sources.annotation.endMeta.parentTagName != "P"
             ) {
               sources = {
+                ...sources,
                 annotation: {
                   ...sources.annotation,
                   endMeta: {
@@ -381,6 +382,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         }
         break;
       case "ADD_ACTION_ITEM":
+        console.log("called");
         try {
           const status = service.addActionItem(
             action.payload.id,
@@ -411,6 +413,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         break;
       case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
         try {
+          console.log("called", action.payload);
           const status = service.updateHighlightActionItem(
             action.payload.id,
             action.payload.actionItems
@@ -511,8 +514,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     state.highlighterLib?.on(Highlighter.event.CLICK, handleClick);
     state.highlighterLib?.on(Highlighter.event.HOVER_OUT, handleHoverOut);
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
-
-    console.log("state.records", state.records);
 
     state.records.map((highlight) => {
       state.highlighterLib?.fromStore(

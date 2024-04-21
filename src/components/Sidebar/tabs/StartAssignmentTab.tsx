@@ -23,15 +23,19 @@ export function SelectUnitAssignmentTab({
   const [feedbackUsefulness, setFeedbackUsefulness] = useState("");
 
   // Options for performance dropdown
+
   const performanceOptions = [
     {
-      value: "better_than_thought",
-      label: "No, my performance was better than I thought",
+      value: "as_expected",
+      label: "  Yes, it's about what I thought.",
     },
-    { value: "as_expected", label: "Yes, it's about what I thought" },
+    {
+      value: "better_than_thought",
+      label: "No, my performance was better than I thought.",
+    },
     {
       value: "worse_than_thought",
-      label: "No, my performance was worse than I thought",
+      label: "No, my performance was worse than I thought.",
     },
   ];
 
@@ -152,7 +156,7 @@ export function SelectUnitAssignmentTab({
                   htmlFor="performance"
                   className="block text-sm font-medium text-gray-700 text-left mt-m"
                 >
-                  How did you assess your performance?
+                  Does the feedback match your belief of your performance?
                 </label>
               </div>
               <select
@@ -179,7 +183,7 @@ export function SelectUnitAssignmentTab({
                   htmlFor="feedback_usefulness"
                   className="block text-sm font-medium text-gray-700 text-left mt-m"
                 >
-                  Was the feedback useful to your learning?
+                  Is the feedback useful to your learning?
                 </label>
               </div>
               <select

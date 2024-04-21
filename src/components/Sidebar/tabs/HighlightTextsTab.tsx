@@ -39,10 +39,6 @@ function RenderTabs({
   };
 
   const addToDo = (actionItems: AnnotationActionPoint[]) => {
-    const currentActions = highlighterState.records.find(
-      (record) => record.annotation.id === currentEditing?.annotation.id
-    )?.actionItems;
-
     highlighterDispatch({
       type: "ADD_RECORD",
       payload: {

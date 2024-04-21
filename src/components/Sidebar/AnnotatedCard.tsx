@@ -6,13 +6,13 @@ import {
   IconButton,
   Button,
 } from "@material-tailwind/react";
-import {AnnotationData, AnnotationActionPoint} from "../../types";
-import {getClassForTag} from "../../types";
-import {EditIcon, DeleteIcon} from "../AnnotationIcons";
-import TodoCard, {ToDoItems} from "./TodoCard";
-import {Notes} from "./Notes";
-import {useHighlighterDispatch} from "../../store/HighlightContext";
-import {useState, useRef, useEffect} from "react";
+import { AnnotationData, AnnotationActionPoint } from "../../types";
+import { getClassForTag } from "../../types";
+import { EditIcon, DeleteIcon } from "../AnnotationIcons";
+import TodoCard from "./TodoCard";
+import { Notes } from "./Notes";
+import { useHighlighterDispatch } from "../../store/HighlightContext";
+import { useState } from "react";
 import ConfirmationModal from "../ConfirmationModal";
 interface AnnotationCardProps {
   annotationData: AnnotationData;
@@ -61,7 +61,7 @@ export default function AnnotatedCard({
           </blockquote>
           <div className=" w-full">
             {
-              // always show notes if not aciton item
+              // always show notes if not action item
               editing && (annotationData.actionItems?.length ?? 0) === 0 ? (
                 <Notes
                   key={annotationData?.annotation.id}
@@ -69,7 +69,10 @@ export default function AnnotatedCard({
                     setEditing(false);
                     highlighterDispatch({
                       type: "UPDATE_HIGHLIGHT_NOTES",
-                      payload: {id: annotationData.annotation.id, notes: input},
+                      payload: {
+                        id: annotationData.annotation.id,
+                        notes: input,
+                      },
                     });
                   }}
                   notes={annotationData.annotation.notes || ""}
