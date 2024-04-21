@@ -7,7 +7,7 @@ import {
   useHighlighterState,
   useHighlighterDispatch,
 } from "../../store/HighlightContext";
-import { Button, rating } from "@material-tailwind/react";
+import { Button } from "@material-tailwind/react";
 import {
   emoticons,
   emoticonsInversed,
@@ -281,6 +281,7 @@ function RateGPTResponse({
         return 10;
     }
   };
+
   const handleEmoticonClick = async (color: string) => {
     setGptRating(colorToRating(color));
 
@@ -296,7 +297,7 @@ function RateGPTResponse({
       eventType: eventType[0],
     });
 
-    toast.promise(status, {
+    await toast.promise(status, {
       pending: "Saving rating...",
       success: "Rating saved!",
       error: "Failed to save rating",

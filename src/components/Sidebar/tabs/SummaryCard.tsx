@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AnnotationData, AnnotationTag, Feedback, Unit } from "../../../types";
-import { IconButton, Button } from "@material-tailwind/react";
+import { Button } from "@material-tailwind/react";
 import {
   annotationTagsIcons,
   chevronIconDown,
   chevronIconUp,
-  EditIcon,
 } from "../../AnnotationIcons";
 
-import {
-  useHighlighterDispatch,
-  useHighlighterState,
-} from "../../../store/HighlightContext";
-import SearchableSelect from "../SearchableSelect";
-import { getAllUnits } from "../../../services/unit.service";
 import {
   addLogs,
   eventType,

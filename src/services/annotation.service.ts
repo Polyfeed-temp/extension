@@ -22,7 +22,7 @@ class AnnotationService {
             encodeURIComponent(window.location.href)
         )
         .then((res) => res.data);
-      console.log("retrieved highlights", highlights);
+
       return highlights as Feedback;
     } catch (error) {
       console.log(error);
