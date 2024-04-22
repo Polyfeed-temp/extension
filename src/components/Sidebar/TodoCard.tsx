@@ -181,6 +181,8 @@ function TodoCard({
               );
               newActionItems[index] = actionItem;
               setActionItems(newActionItems);
+
+              saveFunc(newActionItems);
               setSelectedActionItem(null);
             }}
             cancelFunc={() => setSelectedActionItem(null)}
@@ -205,6 +207,8 @@ function ToDoForm({
   cancelFunc: () => void;
   defaultActionItem?: AnnotationActionPoint;
 }) {
+  console.log("defaultActionItem", defaultActionItem);
+
   const [todoText, setTodoText] = useState<string>(
     defaultActionItem?.action ?? ""
   );
@@ -222,6 +226,8 @@ function ToDoForm({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    console.log("updating??????");
 
     saveFunc({
       action: todoText,
