@@ -227,9 +227,8 @@ function ToDoForm({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    console.log("updating??????");
-
     saveFunc({
+      ...defaultActionItem,
       action: todoText,
       category: selectedCategory,
       deadline: new Date(dueDate),
