@@ -7,6 +7,10 @@ module.exports = {
     index: "./src/index.tsx",
   },
   mode: "production",
+  devtool: "source-map", // Generates source maps
+  optimization: {
+    minimize: false, // Disables all minification
+  },
   module: {
     rules: [
       {
@@ -27,12 +31,11 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        loader: "url-loader",
+        use: "url-loader",
       },
       {
         test: /\.(jpg|png)$/,
-
-        loader: "url-loader",
+        use: "url-loader",
       },
     ],
   },
