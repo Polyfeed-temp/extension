@@ -109,7 +109,7 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   const annotationTags: AnnotationTag[] = [
     "Strength",
     "Weakness",
-    "Action Item",
+    "Suggestions",
     "Confused",
     "Other",
   ];
@@ -117,6 +117,8 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   const annotationDispatch = useHighlighterDispatch();
   const setAnnotationTag =
     (tag: AnnotationTag) => (sidebarAction: SideBarAction) => {
+      if (tag === "Suggestions") tag = "Action Item";
+
       addLogs({
         eventType: eventType[0],
         content: JSON.stringify({ sidebarAction, tag }),

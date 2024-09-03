@@ -16,7 +16,8 @@ export type AnnotationTag =
   | "Weakness"
   | "Action Item"
   | "Confused"
-  | "Other";
+  | "Other"
+  | "Suggestions";
 
 export type ActionPointCategory =
   | "Further Practice"

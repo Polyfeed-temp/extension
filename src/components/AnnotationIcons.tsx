@@ -1,4 +1,4 @@
-import {AnnotationTag} from "../types";
+import { AnnotationTag } from "../types";
 
 // const strengthIcon = require("../assets/tag_icons/coloured/Strength_Col_Pos.svg")
 //     .default as string;
@@ -42,10 +42,11 @@ const otherIcon = require("../assets/tag_icons/inverted/Other_Col_Inv.svg")
 // const confusedIcon = require("../assets/tag_icons/Grey/Confused_Grey_Pos.svg")
 //     .default as string;
 
-export const annotationTagsIcons: {[key in AnnotationTag]: string} = {
+export const annotationTagsIcons: { [key in AnnotationTag]: string } = {
   Strength: strengthIcon,
   Weakness: weaknessIcon,
   "Action Item": actionItemIcon,
+  Suggestions: actionItemIcon,
   Confused: confusedIcon,
   Other: otherIcon,
 };
@@ -64,7 +65,7 @@ const redGrey = require("../assets/emoticons/Grey_Red.svg").default as string;
 const orangeGrey = require("../assets/emoticons/Grey_Orange.svg")
   .default as string;
 
-export const emoticons: {[key: string]: string} = {
+export const emoticons: { [key: string]: string } = {
   red: red,
   orange: orange,
 
@@ -72,7 +73,7 @@ export const emoticons: {[key: string]: string} = {
   green: green,
 };
 
-export const emoticonsInversed: {[key: string]: string} = {
+export const emoticonsInversed: { [key: string]: string } = {
   red: redGrey,
   orange: orangeGrey,
   yellow: yellowGrey,

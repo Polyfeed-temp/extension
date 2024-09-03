@@ -70,6 +70,7 @@ export const SummaryCard: React.FC<Props> = ({ annotationData }) => {
     Strength: 0,
     Weakness: 0,
     "Action Item": 0,
+    Suggestions: 0,
     Confused: 0,
     Other: 0,
   };
