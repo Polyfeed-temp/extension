@@ -389,9 +389,9 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             action.payload.actionItem
           );
           toast.promise(status, {
-            pending: "Adding action item...",
-            success: "Added action item",
-            error: "Error adding action item please try again",
+            pending: "Adding suggestion...",
+            success: "Added suggestion",
+            error: "Error adding suggestion please try again",
           });
 
           addLogs({
@@ -419,9 +419,9 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             action.payload.actionItems
           );
           toast.promise(status, {
-            pending: "Updating action items...",
-            success: "Updated action items",
-            error: "Error updating action items please try again",
+            pending: "Updating suggestions...",
+            success: "Updated suggestions",
+            error: "Error updating suggestions please try again",
           });
 
           addLogs({

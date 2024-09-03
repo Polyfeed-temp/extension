@@ -43,9 +43,9 @@ export function ToDoItems({
               event.target.checked
             );
             toast.promise(status, {
-              pending: "Updating action item status...",
-              success: "Action item status updated!",
-              error: "Failed to update action item status",
+              pending: "Updating suggestions status...",
+              success: "Suggestions status updated!",
+              error: "Failed to update suggestions status",
             });
           }
           const newActionItems = [...actionItems];
@@ -63,7 +63,7 @@ export function ToDoItems({
             <button
               className="flex items-center space-x-2 flex-grow text-left"
               onClick={() => setSelectedActionItem(actionPointItem)}
-              title="Edit action item"
+              title="Edit suggestions"
             >
               <div className="flex-grow flex">
                 <h3 className="font-normal truncate flex-grow">
@@ -84,7 +84,7 @@ export function ToDoItems({
 
             <IconButton
               variant="text"
-              title="Delete Action Item"
+              title="Delete suggestions"
               ripple={true}
               onClick={() => {
                 if (actionItems[index].id) {
@@ -92,9 +92,9 @@ export function ToDoItems({
                     actionItems[index].id as number
                   );
                   toast.promise(status, {
-                    pending: "Deleting action item...",
-                    success: "Action item deleted!",
-                    error: "Failed to delete action item",
+                    pending: "Deleting suggestions...",
+                    success: "suggestions deleted!",
+                    error: "Failed to delete suggestions",
                   });
                 }
 
