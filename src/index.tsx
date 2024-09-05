@@ -5,6 +5,7 @@ import "./index.css";
 import { HighlighterProvider } from "./store/HighlightContext";
 import UserProvider from "./store/UserContext";
 import { SidebarProvider } from "./hooks/useSidebar";
+import { ConsentProvider } from "./hooks/useConsentStore";
 
 function injectStyles(shadowRoot: any) {
   const styles = ["material-tailwind.css", "icon.css", "ReactToastify.min.css"];
@@ -147,11 +148,13 @@ function load() {
   root.render(
     <React.StrictMode>
       <UserProvider>
-        <SidebarProvider>
-          <HighlighterProvider>
-            <App />
-          </HighlighterProvider>
-        </SidebarProvider>
+        <ConsentProvider>
+          <SidebarProvider>
+            <HighlighterProvider>
+              <App />
+            </HighlighterProvider>
+          </SidebarProvider>
+        </ConsentProvider>
       </UserProvider>
     </React.StrictMode>
   );

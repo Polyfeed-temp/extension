@@ -145,14 +145,14 @@ function TodoCard({
           <Button className="bg-black" onClick={() => setAddToDo(true)}>
             Add Another item
           </Button>
-          <Button
+          {/* <Button
             className="bg-black"
             onClick={() => {
               saveFunc(actionItems);
             }}
           >
             Done
-          </Button>
+          </Button> */}
         </div>
       )}
 
@@ -276,7 +276,7 @@ function ToDoForm({
         htmlFor="dueDate"
         className="block text-sm font-medium text-gray-700 mt-4 mb-2"
       >
-        Expected to comptete by:
+        Expected to complete by:
       </label>
       <input
         type="date"
@@ -288,7 +288,18 @@ function ToDoForm({
         required
       />
       <div className="flex justify-between mt-4">
-        <Button type="submit" className="full-width bg-black">
+        <Button
+          type="submit"
+          className="full-width bg-black"
+          onClick={() =>
+            saveFunc({
+              ...defaultActionItem,
+              action: todoText,
+              category: selectedCategory,
+              deadline: new Date(dueDate),
+            } as AnnotationActionPoint)
+          }
+        >
           Add item to the list
         </Button>
         <Button

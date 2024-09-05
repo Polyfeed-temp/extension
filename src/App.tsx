@@ -1,6 +1,6 @@
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import { useLayoutEffect, useRef, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
+import { useLayoutEffect, useRef, useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSidebar } from "./hooks/useSidebar";
 
@@ -16,6 +16,8 @@ import { register } from "./services/user.service";
 import { TOKEN_KEY } from "./services/api.service";
 import { useHighlighterState } from "./store/HighlightContext";
 import { addLogs, eventType } from "./services/logs.serivce";
+import { useConsent } from "./hooks/useConsentStore";
+
 // Your web app's Firebase configuration
 
 // Initialize Firebase
@@ -27,10 +29,24 @@ const provider = new GoogleAuthProvider();
 
 provider.addScope("https://www.googleapis.com/auth/userinfo.email");
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.action === "login") {
-    // console.log("Token here from app.tsx"+request.token);
-    const credential = GoogleAuthProvider.credential(null, request.token);
+export function restoreHostDom() {
+  const nav = document.querySelector("nav") as HTMLElement;
+  nav.style.marginRight = "0";
+  document.body.style.marginRight = "0";
+}
+
+function App() {
+  const { collapsed, setCollapsed } = useSidebar();
+  const { accept, setTokenFromBrowser, tokenFromBrowser } = useConsent();
+
+  const [isAuth, setIsAuth] = useState(false);
+
+  const firebaseLogin = (token: string) => {
+    const credential = GoogleAuthProvider.credential(null, token);
+    toast.loading("Logging in...", {
+      toastId: 2,
+    });
+
     signInWithCredential(auth, credential)
       .then(async (result) => {
         const googleUser = result.user;
@@ -43,26 +59,27 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           value: await googleUser.getIdToken(),
         });
 
+        setIsAuth(true);
+
         await addLogs({
           eventType: eventType[5],
           content: "",
           eventSource: "",
         });
+
+        toast.update(2, {
+          render: "Successfully logged in to PolyFeed student extension",
+          type: "success",
+          hideProgressBar: true,
+          autoClose: 1000,
+          isLoading: false,
+        });
       })
-      .catch((error) => {
-        console.log("Error in login");
+      .catch(() => {
+        toast.error("Error in Firebase login.");
       });
-  }
-});
+  };
 
-export function restoreHostDom() {
-  const nav = document.querySelector("nav") as HTMLElement;
-  nav.style.marginRight = "0";
-  document.body.style.marginRight = "0";
-}
-
-function App() {
-  const { collapsed, setCollapsed } = useSidebar();
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -88,6 +105,23 @@ function App() {
     highlightStateRef.current = highlightState.highlighterLib;
   }, [highlightState.highlighterLib]);
 
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(async function (request) {
+      if (!request.token) {
+        console.log("token null");
+        toast.error("Please refresh page");
+        return;
+      }
+
+      console.log("request.token", request.token);
+      setTokenFromBrowser(request.token);
+    });
+  }, [firebaseLogin, setTokenFromBrowser]);
+
+  useEffect(() => {
+    if (accept && tokenFromBrowser) firebaseLogin(tokenFromBrowser);
+  }, [accept, tokenFromBrowser]);
+
   //clean up highlight
   useLayoutEffect(() => {
     return () => {
@@ -101,7 +135,12 @@ function App() {
 
   return (
     <div>
-      <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} />
+      <Sidebar
+        isAuth={isAuth}
+        collapsed={collapsed}
+        toggleSidebar={toggleSidebar}
+        firebaseLogin={firebaseLogin}
+      />
       <ToastContainer
         position="bottom-right"
         theme="dark"
