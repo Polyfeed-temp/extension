@@ -82,18 +82,24 @@ export const SummaryCard: React.FC<Props> = ({ annotationData }) => {
   // Render the grouped data
   return (
     <div className="grid grid-cols-2 gap-4">
-      {Object.entries(annotationTagCount).map(([category, counter]) => (
-        <div key={category} className="flex items-center justify-between">
-          <div className="flex items-center">
-            <img
-              src={annotationTagsIcons[category as AnnotationTag]}
-              alt={category}
-              style={{ width: 20, height: 20, marginRight: 8 }}
-            />
-            {category + ": " + counter}
+      {Object.entries(annotationTagCount).map(([category, counter]) => {
+        if (category === "Suggestions") return null;
+
+        // rename it
+        if (category === "Action Item") category = "Suggestions";
+        return (
+          <div key={category} className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img
+                src={annotationTagsIcons[category as AnnotationTag]}
+                alt={category}
+                style={{ width: 20, height: 20, marginRight: 8 }}
+              />
+              {category + ": " + counter}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

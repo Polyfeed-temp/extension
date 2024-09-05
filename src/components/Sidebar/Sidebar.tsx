@@ -47,19 +47,17 @@ export function Sidebar({
         </div>
       )}
 
-      {accept && !isAuth && (
-        <img
-          src={Logo}
-          style={{ width: 100, margin: "20px auto", display: "block" }}
-          alt="Logo"
-        />
-      )}
-
       {!accept && !isAuth && (
-        <ConsentView onDisagree={handleDisagree} onAgree={handleAgree} />
+        <div style={{ overflowY: "auto", height: "100%" }}>
+          <ConsentView onDisagree={handleDisagree} onAgree={handleAgree} />
+        </div>
       )}
 
-      {accept && <LoginView onLogin={() => firebaseLogin(tokenFromBrowser)} />}
+      {accept && (
+        <div style={{ overflowY: "auto", height: "100%" }}>
+          <LoginView onLogin={() => firebaseLogin(tokenFromBrowser)} />
+        </div>
+      )}
     </div>
   );
 }
