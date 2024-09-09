@@ -202,13 +202,13 @@ function GPTQueryTextBox({
         className={`${
           attemptTime === 1
             ? highlightedText.length < 50
-              ? "bg-grey"
+              ? "bg-gray-500"
               : "bg-black"
             : "bg-black"
         }`}
         onClick={() => submitFunc(highlightedText)}
       >
-        Ask Chat GPT{attemptTime === 2 && " AGAIN"}
+        Ask ChatGPT{attemptTime === 2 && " AGAIN"}
       </Button>
     </>
   );

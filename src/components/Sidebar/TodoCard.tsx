@@ -160,9 +160,10 @@ function TodoCard({
         <ToDoForm
           key={addToDo ? 1 : 0}
           hideFunc={() => setAddToDo(false)}
-          saveFunc={(actionItem) =>
-            setActionItems(actionItems.concat(actionItem))
-          }
+          saveFunc={(actionItem) => {
+            setActionItems(actionItems.concat(actionItem));
+            saveFunc(actionItems.concat(actionItem));
+          }}
           cancelFunc={() => {
             actionItems.length > 0
               ? setAddToDo(false)
@@ -207,8 +208,6 @@ function ToDoForm({
   cancelFunc: () => void;
   defaultActionItem?: AnnotationActionPoint;
 }) {
-  console.log("defaultActionItem", defaultActionItem);
-
   const [todoText, setTodoText] = useState<string>(
     defaultActionItem?.action ?? ""
   );
@@ -227,12 +226,12 @@ function ToDoForm({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    saveFunc({
-      ...defaultActionItem,
-      action: todoText,
-      category: selectedCategory,
-      deadline: new Date(dueDate),
-    } as AnnotationActionPoint);
+    // saveFunc({
+    //   ...defaultActionItem,
+    //   action: todoText,
+    //   category: selectedCategory,
+    //   deadline: new Date(dueDate),
+    // } as AnnotationActionPoint);
 
     hideFunc();
   };
@@ -300,7 +299,7 @@ function ToDoForm({
             } as AnnotationActionPoint)
           }
         >
-          Add item to the list
+          {defaultActionItem ? "Modify item" : "Add item to the list"}
         </Button>
         <Button
           onClick={() => {

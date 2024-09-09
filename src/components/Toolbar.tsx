@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Popover,
-  PopoverHandler,
-  PopoverContent,
-  Button,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  IconButton,
-} from "@material-tailwind/react";
-import { createPortal } from "react-dom";
+import { Menu, MenuHandler, MenuList } from "@material-tailwind/react";
 import {
   useHighlighterState,
   useHighlighterDispatch,
@@ -21,6 +10,8 @@ import { annotationTagsIcons } from "./AnnotationIcons";
 import { useSidebar } from "../hooks/useSidebar";
 import Tippy from "@tippyjs/react";
 import { addLogs, eventSource, eventType } from "../services/logs.serivce";
+
+const cancelIcon = require("../assets/tag_icons/cancel.png").default as string;
 
 function ToolbarMenu({
   Label,
@@ -139,6 +130,8 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
         payload: { sidebarAction: sidebarAction, annotation: annotation },
       });
     };
+
+
   useEffect(() => {
     const dom = highlighter?.getDoms(highlightingID)[0];
     const onClick = () => {
@@ -175,6 +168,36 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
               setAnnotationTag={setAnnotationTag(Label)}
             />
           ))}
+
+          <Menu
+            handler={() => {
+              addLogs({
+                eventType: eventType[1],
+                content: "Cancel",
+                eventSource: eventSource[0],
+              });
+
+              annotationDispatch({
+                type: "CANCEL_HIGHLIGHTED"
+              })
+            }}
+          >
+            <MenuHandler className="p-1">
+              <button
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
+                <img src={cancelIcon} style={{ width: 25, height: 25 }} />
+                <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
+                  Cancel
+                </span>
+              </button>
+            </MenuHandler>
+          </Menu>
         </div>
       )}
       visible={visible}
