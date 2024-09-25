@@ -17,7 +17,6 @@ import { TOKEN_KEY } from "./services/api.service";
 import { useHighlighterState } from "./store/HighlightContext";
 import { addLogs, eventType } from "./services/logs.serivce";
 import { useConsent } from "./hooks/useConsentStore";
-
 // Your web app's Firebase configuration
 
 // Initialize Firebase

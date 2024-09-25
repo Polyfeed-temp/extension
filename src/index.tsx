@@ -128,6 +128,10 @@ button:hover {
 
 }
 
+.fit-menu {
+  padding: 0.4em !important;
+}
+
 
 `;
 

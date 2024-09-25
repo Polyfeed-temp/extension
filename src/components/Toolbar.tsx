@@ -131,7 +131,6 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
       });
     };
 
-
   useEffect(() => {
     const dom = highlighter?.getDoms(highlightingID)[0];
     const onClick = () => {
@@ -178,11 +177,11 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
               });
 
               annotationDispatch({
-                type: "CANCEL_HIGHLIGHTED"
-              })
+                type: "CANCEL_HIGHLIGHTED",
+              });
             }}
           >
-            <MenuHandler className="p-1">
+            <MenuHandler className="p-2">
               <button
                 style={{
                   display: "flex",
@@ -191,7 +190,7 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
                   textAlign: "center",
                 }}
               >
-                <img src={cancelIcon} style={{ width: 25, height: 25 }} />
+                <img src={cancelIcon} style={{ width: 18, height: 18 }} />
                 <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
                   Cancel
                 </span>
