@@ -166,34 +166,33 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
           ))}
 
           <Menu>
-            <MenuHandler className="p-2">
-              <button
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                  height: 59,
-                  width: 65,
-                }}
-                onClick={() => {
-                  addLogs({
-                    eventType: eventType[1],
-                    content: "Cancel",
-                    eventSource: eventSource[0],
-                  });
+            <button
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+                height: 59,
+                width: 65,
+                paddingTop: 8,
+              }}
+              onClick={() => {
+                addLogs({
+                  eventType: eventType[1],
+                  content: "Cancel",
+                  eventSource: eventSource[0],
+                });
 
-                  annotationDispatch({
-                    type: "CANCEL_HIGHLIGHTED",
-                  });
-                }}
-              >
-                <img src={cancelIcon} style={{ width: 18, height: 18 }} />
-                <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
-                  Cancel
-                </span>
-              </button>
-            </MenuHandler>
+                annotationDispatch({
+                  type: "CANCEL_HIGHLIGHTED",
+                });
+              }}
+            >
+              <img src={cancelIcon} style={{ width: 18, height: 18 }} />
+              <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
+                Cancel
+              </span>
+            </button>
           </Menu>
         </div>
       )}
