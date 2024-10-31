@@ -15,44 +15,41 @@ const cancelIcon = require("../assets/tag_icons/cancel.png").default as string;
 
 function ToolbarMenu({
   Label,
-  setAnnotationTag,
+  createHighLight,
 }: {
   Label: AnnotationTag;
-  setAnnotationTag: (sideBarAction: SideBarAction) => void;
+  createHighLight: (tag: AnnotationTag) => void;
 }) {
   //hover the index
   const [open, setOpen] = useState(false);
+
   return (
-    <Menu
-      open={open}
-      handler={() => {
-        addLogs({
-          eventType: eventType[1],
-          content: Label,
-          eventSource: eventSource[0],
-        });
-        setOpen(!open);
-      }}
-    >
-      <MenuHandler className="p-1">
-        <button
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-          }}
-        >
-          <img
-            src={annotationTagsIcons[Label]}
-            style={{ width: 50, height: 25 }}
-          />
-          <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
-            {Label}
-          </span>
-        </button>
-      </MenuHandler>
-      <MenuList>
+    <Menu open={open}>
+      <button
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+        }}
+        onClick={() => {
+          addLogs({
+            eventType: eventType[1],
+            content: Label,
+            eventSource: eventSource[0],
+          });
+          setOpen(!open);
+
+          createHighLight(Label);
+        }}
+      >
+        <img
+          src={annotationTagsIcons[Label]}
+          style={{ width: 50, height: 25 }}
+        />
+        <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>{Label}</span>
+      </button>
+      {/* <MenuList>
         <div
           style={{
             display: "flex",
@@ -80,7 +77,7 @@ function ToolbarMenu({
             Add to-do list
           </button>
         </div>
-      </MenuList>
+      </MenuList> */}
     </Menu>
   );
 }
@@ -93,10 +90,7 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   const el = document.getElementById(_id);
   const [visible, setVisible] = useState(true);
   const { setCollapsed } = useSidebar();
-  const triggers = {
-    onmouseenter: () => setVisible(true),
-    onmouseleave: () => setVisible(false),
-  };
+
   const annotationTags: AnnotationTag[] = [
     "Strength",
     "Weakness",
@@ -106,30 +100,33 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   ];
 
   const annotationDispatch = useHighlighterDispatch();
-  const setAnnotationTag =
-    (tag: AnnotationTag) => (sidebarAction: SideBarAction) => {
-      if (tag === "Suggestions") tag = "Action Item";
 
-      addLogs({
-        eventType: eventType[0],
-        content: JSON.stringify({ sidebarAction, tag }),
-        eventSource: eventSource[0],
-      });
+  const createHighLight = (tag: AnnotationTag) => {
+    if (tag === "Suggestions") tag = "Action Item";
 
-      const annotation: Annotation = {
-        feedbackId: feedbackId,
-        id: highlightingID,
-        annotationTag: tag,
-        startMeta: highlighting.startMeta,
-        endMeta: highlighting.endMeta,
-        text: highlighting.text,
-      };
-      setCollapsed(false);
-      annotationDispatch({
-        type: "SET_EDITING",
-        payload: { sidebarAction: sidebarAction, annotation: annotation },
-      });
+    console.log("called createHighLight");
+    // addLogs({
+    //   eventType: eventType[0],
+    //   content: JSON.stringify({ tag }),
+    //   eventSource: eventSource[0],
+    // });
+
+    const annotation: Annotation = {
+      feedbackId: feedbackId,
+      id: highlightingID,
+      annotationTag: tag,
+      startMeta: highlighting.startMeta,
+      endMeta: highlighting.endMeta,
+      text: highlighting.text,
     };
+
+    console.log("annotation", annotation);
+    setCollapsed(false);
+    annotationDispatch({
+      type: "ADD_RECORD",
+      payload: { annotation: annotation },
+    });
+  };
 
   useEffect(() => {
     const dom = highlighter?.getDoms(highlightingID)[0];
@@ -164,23 +161,11 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
             <ToolbarMenu
               key={Label}
               Label={Label}
-              setAnnotationTag={setAnnotationTag(Label)}
+              createHighLight={(Label) => createHighLight(Label)}
             />
           ))}
 
-          <Menu
-            handler={() => {
-              addLogs({
-                eventType: eventType[1],
-                content: "Cancel",
-                eventSource: eventSource[0],
-              });
-
-              annotationDispatch({
-                type: "CANCEL_HIGHLIGHTED",
-              });
-            }}
-          >
+          <Menu>
             <MenuHandler className="p-2">
               <button
                 style={{
@@ -188,6 +173,19 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
                   flexDirection: "column",
                   alignItems: "center",
                   textAlign: "center",
+                  height: 59,
+                  width: 65,
+                }}
+                onClick={() => {
+                  addLogs({
+                    eventType: eventType[1],
+                    content: "Cancel",
+                    eventSource: eventSource[0],
+                  });
+
+                  annotationDispatch({
+                    type: "CANCEL_HIGHLIGHTED",
+                  });
                 }}
               >
                 <img src={cancelIcon} style={{ width: 18, height: 18 }} />
