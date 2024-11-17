@@ -4,12 +4,15 @@ import {
   CardBody,
   CardFooter,
   IconButton,
+  Button,
 } from "@material-tailwind/react";
+
 import {
   AnnotationData,
   AnnotationActionPoint,
   getClassForTag,
 } from "../../types";
+
 import { EditIcon, DeleteIcon } from "../AnnotationIcons";
 import TodoCard from "./TodoCard";
 import { Notes } from "./Notes";
@@ -51,22 +54,31 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
             }}
           >
             <p className="text text-gray-700 italic">
-              <span className="block text-xl text-gray-500 mb-1">
-                {annotationData.annotation.annotationTag}
-              </span>
+              {annotationData.annotation.annotationTag}
             </p>
           </blockquote>
 
+          <div className="mt-2">
+            <p
+              className="text-black"
+              style={{
+                textAlign: "left",
+              }}
+            >
+              {annotationData.annotation.text}
+            </p>
+          </div>
+
           <div className="flex flex-row mt-2">
-            <button
-              className={`p-2 ${
+            <Button
+              className={`p-2  ${
                 activeTab === "notes" ? "bg-black text-white" : "bg-gray-300"
               }`}
               onClick={() => setActiveTab("notes")}
             >
               Notes
-            </button>
-            <button
+            </Button>
+            <Button
               className={`ml-2 p-2 ${
                 activeTab === "actionItems"
                   ? "bg-black text-white"
@@ -75,7 +87,7 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
               onClick={() => setActiveTab("actionItems")}
             >
               Action Items
-            </button>
+            </Button>
           </div>
           {activeTab === "notes" && (
             <Notes
@@ -104,26 +116,24 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
           )}
         </CardBody>
         <CardFooter className="pt-0">
-          <div className="flex justify-between">
-            <div className="flex space-x-2">
-              <IconButton
+          <div className="flex justify-end">
+            {/* <IconButton
                 variant="text"
                 title="Edit Highlight notes or Action Items"
                 ripple={true}
                 onClick={() => setEditing(!editing)}
               >
                 {EditIcon}
-              </IconButton>
+              </IconButton> */}
 
-              <IconButton
-                onClick={() => setShowModal(true)}
-                variant="text"
-                title="Delete Highlight, its notes and Action Items"
-                ripple={true}
-              >
-                {DeleteIcon}
-              </IconButton>
-            </div>
+            <IconButton
+              onClick={() => setShowModal(true)}
+              variant="text"
+              title="Delete Highlight, its notes and Action Items"
+              ripple={true}
+            >
+              {DeleteIcon}
+            </IconButton>
           </div>
         </CardFooter>
       </Card>
