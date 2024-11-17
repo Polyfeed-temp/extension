@@ -31,6 +31,7 @@ function ToolbarMenu({
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
+          backgroundColor: "#f0f0f0",
         }}
         onClick={() => {
           addLogs({
@@ -175,6 +176,7 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
                 height: 59,
                 width: 65,
                 paddingTop: 8,
+                backgroundColor: "#f0f0f0",
               }}
               onClick={() => {
                 addLogs({
