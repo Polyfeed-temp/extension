@@ -22,7 +22,8 @@ import AnnotationService from "../../services/annotation.service";
 import config from "../../config.json";
 import { ExplainFutherToggle } from "./ExplainFutherInput";
 import { addLogs, eventType, eventSource } from "../../services/logs.serivce";
-
+import { useFileStore } from "../../store/fileStore";
+const uploadIcon = require("../../assets/icons/upload.png").default as string;
 function RenderTabs({
   currentTab,
   setCurrentTab,
@@ -36,6 +37,28 @@ function RenderTabs({
 }) {
   const highlighterDispatch = useHighlighterDispatch();
   const highlighterState = useHighlighterState();
+
+  const {
+    createFile,
+    fetchFilesByFeedbackId,
+    fileList,
+    loading,
+    setSelectedFile,
+    selectedFile,
+    fetchingListLoading,
+  } = useFileStore();
+
+  useEffect(() => {
+    if (feedback) {
+      fetchFilesByFeedbackId(feedback.id);
+    }
+  }, [feedback]);
+
+  const renderLoading = () => {
+    return (
+      <div className="w-6 h-6 border-4 border-gray-300 border-t-black rounded-full animate-spin" />
+    );
+  };
 
   switch (currentTab) {
     case "Summary":
@@ -114,7 +137,7 @@ function RenderTabs({
             <>
               <CurrentFeedbackSummary
                 feedback={{ ...feedback, highlights: highlighterState.records }}
-              ></CurrentFeedbackSummary>
+              />
               <Button
                 fullWidth
                 className={`${
@@ -130,18 +153,107 @@ function RenderTabs({
                   addLogs({
                     eventType: eventType[0],
                     content: !highlighterState.isHighlighting
-                      ? "Continue Highlighting"
+                      ? "Continue Highlighting On Website"
                       : "Stop Highlighting",
                     eventSource: eventSource[0],
                   });
                 }}
               >
                 {!highlighterState.isHighlighting
-                  ? "Continue Highlighting"
+                  ? "Continue Highlighting On Website"
                   : "Stop Highlighting"}
               </Button>
+
+              <div>
+                <p className="text-lg font-bold">Manage PDF file</p>
+                <div className="flex flex-row overflow-y-hidden mt-2 justify-center items-center">
+                  <div
+                    className="flex"
+                    style={{
+                      maxWidth: "80%",
+                      marginRight: "10%",
+                      overflowX: "auto",
+                      padding: 10,
+                    }}
+                  >
+                    {fetchingListLoading && renderLoading()}
+                    {/* showing file list here */}
+
+                    {fileList.length > 0 &&
+                      fileList.map((file, index) => (
+                        <div
+                          className={`rounded-md mr-2 cursor-pointer ${
+                            selectedFile?.id === file.id
+                              ? "bg-black text-white"
+                              : "bg-gray-200"
+                          }`}
+                          style={{
+                            minWidth: 100,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: 40,
+                          }}
+                          key={file.id}
+                          onClick={() => {
+                            if (selectedFile?.id === file.id) {
+                              setSelectedFile(null);
+                              return;
+                            }
+
+                            setSelectedFile(file);
+                          }}
+                        >
+                          {`PDF - ${index + 1}`}
+                        </div>
+                      ))}
+                  </div>
+
+                  <div
+                    className="border border-black rounded-full"
+                    style={{
+                      padding: 5,
+                    }}
+                  >
+                    {loading ? (
+                      renderLoading()
+                    ) : (
+                      <img
+                        src={uploadIcon}
+                        className="w-6 h-6  cursor-pointer"
+                        onClick={() => {
+                          // Create hidden file input
+                          const fileInput = document.createElement("input");
+                          fileInput.type = "file";
+                          fileInput.accept = ".pdf";
+
+                          fileInput.onchange = (e) => {
+                            const file = (e.target as HTMLInputElement)
+                              .files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                const base64String = reader.result as string;
+
+                                createFile(
+                                  highlighterState?.feedbackInfo?.id || 0,
+                                  base64String
+                                );
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          };
+
+                          fileInput.click();
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
             </>
           )}
+
           <HighlightingTab />
           <ExplainFutherToggle />
           {highlighterState.records.map((record: AnnotationData, index) => (

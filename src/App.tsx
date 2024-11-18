@@ -17,6 +17,7 @@ import { TOKEN_KEY } from "./services/api.service";
 import { useHighlighterState } from "./store/HighlightContext";
 import { addLogs, eventType } from "./services/logs.serivce";
 import { useConsent } from "./hooks/useConsentStore";
+import { PdfReviewer } from "./components/PdfReviewer";
 // Your web app's Firebase configuration
 
 // Initialize Firebase
@@ -140,6 +141,9 @@ function App() {
         toggleSidebar={toggleSidebar}
         firebaseLogin={firebaseLogin}
       />
+
+      {PdfReviewer && <PdfReviewer />}
+
       <ToastContainer
         position="bottom-right"
         theme="dark"

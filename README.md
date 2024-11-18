@@ -1,7 +1,9 @@
 ## Description
-Polyfeed extension 
+
+Polyfeed extension
 
 ## Installation
+
 ```bash
 $ npm install
 ```
@@ -10,13 +12,13 @@ $ npm install
 
 ```bash
 # build
-$ npm run build 
+$ npm run build
 ```
+
 ```bash
 # development
 $ npm run watch
 ```
-
 
 ## Install extension on chrome
 
@@ -25,3 +27,6 @@ $ npm run watch
 3. Enable developer mode (toggle button in top right corner)
 4. Load Extension button (Top left)
 5. Choose build folder generated from running the npm commands above
+
+<!--   "backend": "https://www.polyfeed.com.au/prod/",
+ -->
