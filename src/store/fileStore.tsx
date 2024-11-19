@@ -45,6 +45,7 @@ export const useFileStore = create<FileStore>((set) => ({
       const response = await axios.get(`/api/file/list/${feedbackId}`);
       set({ fileList: response.data, fetchingListLoading: false });
     } catch (error) {
+      set({ fetchingListLoading: false });
       console.error("Error fetching files:", error);
       throw error;
     }

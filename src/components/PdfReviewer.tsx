@@ -1,100 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Document, Page } from "react-pdf";
+import React, { useState, useRef } from "react";
+import {
+  Viewer,
+  Worker,
+  Button,
+  Position,
+  Tooltip,
+} from "@react-pdf-viewer/core";
+import {
+  highlightPlugin,
+  Trigger,
+  MessageIcon,
+  RenderHighlightTargetProps,
+} from "@react-pdf-viewer/highlight";
 import { useFileStore } from "../store/fileStore";
-import { pdfjs } from "react-pdf";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
-// Update to use your correct worker path
-pdfjs.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL(
-  "/scripts/pdf.worker.mjs"
-);
-
-interface Highlight {
-  text: string;
-  pageNumber: number;
-  startOffset: number;
-  endOffset: number;
-  timestamp: number;
-}
+// Import the styles
 
 const PdfReviewer: React.FC = () => {
-  const { selectedFile } = useFileStore();
-  const [numPages, setNumPages] = useState<number>();
-  const [error, setError] = useState<string>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
-  const pdfViewerRef = useRef<HTMLDivElement>(null);
+  const { selectedFile, setSelectedFile } = useFileStore();
+  // const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const viewerRef = useRef(null);
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    console.log("PDF loaded successfully with", numPages, "pages");
-  };
-
-  const onDocumentLoadError = (error: Error) => {
-    console.error("PDF Load Error:", error);
-    setError(error.message);
-  };
-
-  const handleTextSelection = () => {
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
-
-    const selectedText = selection.toString().trim();
-    if (selectedText) {
-      const range = selection.getRangeAt(0);
-
-      const newHighlight: Highlight = {
-        text: selectedText,
-        pageNumber,
-        startOffset: range.startOffset,
-        endOffset: range.endOffset,
-        timestamp: Date.now(),
-      };
-
-      setHighlights((prev) => [...prev, newHighlight]);
-      console.log("All highlights:", [...highlights, newHighlight]);
-    }
-  };
-
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      const selection = window.getSelection();
-
-      console.log("selection", selection);
-      if (selection && !selection.isCollapsed) {
-        const selectedText = selection.toString().trim();
-        if (selectedText) {
-          const range = selection.getRangeAt(0);
-          const container = pdfViewerRef.current;
-          if (container && range.commonAncestorContainer) {
-            const isWithinPdfViewer = container.contains(
-              range.commonAncestorContainer.nodeType === 3
-                ? range.commonAncestorContainer.parentNode
-                : range.commonAncestorContainer
-            );
-
-            if (isWithinPdfViewer) {
-              const newHighlight: Highlight = {
-                text: selectedText,
-                pageNumber, // Adjust if multiple pages are rendered
-                startOffset: range.startOffset,
-                endOffset: range.endOffset,
-                timestamp: Date.now(),
-              };
-
-              setHighlights((prev) => [...prev, newHighlight]);
-              console.log("All highlights:", [...highlights, newHighlight]);
-            }
-          }
-        }
-      }
-    };
-
-    document.addEventListener("selectionchange", handleSelectionChange);
-
-    return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
-    };
-  }, [pageNumber, highlights, pdfViewerRef]);
+  const highlightPluginInstance = highlightPlugin({
+    trigger: Trigger.None,
+  });
 
   if (!selectedFile) return null;
 
@@ -102,34 +33,39 @@ const PdfReviewer: React.FC = () => {
     <div
       style={{
         position: "absolute",
-        top: "10%",
+        top: "8%",
         zIndex: 9999,
-        height: "80%",
-        width: "66%",
-        left: "1%",
+        height: "88%",
+        left: "3%",
         overflow: "auto",
+        width: "65%",
+        backgroundColor: "#f8f8f8",
+        boxShadow: "0px 0px 10px 0px rgba(0, 0, 0, 0.1)",
+        padding: "1%",
+        borderRadius: "20px",
       }}
-      ref={pdfViewerRef}
+      ref={viewerRef}
     >
-      <Document
-        file={selectedFile.file_content}
-        onLoadSuccess={onDocumentLoadSuccess}
-        onLoadError={onDocumentLoadError}
-        loading="Loading PDF..."
+      {/* Use the Worker component and set the workerUrl */}
+      {/* <Worker workerUrl={chrome.runtime.getURL("/scripts/pdf.worker.min.js")}>
+       */}
+      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+        <Viewer
+          plugins={[defaultLayoutPluginInstance, highlightPluginInstance]}
+          fileUrl={selectedFile.file_content}
+        />
+      </Worker>
+
+      <button
+        style={{
+          position: "absolute",
+          bottom: " 5%",
+          right: " 5%",
+        }}
+        onClick={() => setSelectedFile(null)}
       >
-        {numPages && (
-          <Page
-            key={`page_${pageNumber}`}
-            pageNumber={pageNumber}
-            renderMode="none"
-            renderAnnotationLayer={false}
-            renderTextLayer={true}
-            customRenderer={(textItem: any) => (
-              <span data-page-number={pageNumber}>{textItem.str}</span>
-            )}
-          />
-        )}
-      </Document>
+        Close
+      </button>
     </div>
   );
 };

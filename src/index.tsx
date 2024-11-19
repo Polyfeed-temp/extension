@@ -8,7 +8,14 @@ import { SidebarProvider } from "./hooks/useSidebar";
 import { ConsentProvider } from "./hooks/useConsentStore";
 
 function injectStyles(shadowRoot: any) {
-  const styles = ["material-tailwind.css", "icon.css", "ReactToastify.min.css"];
+  const styles = [
+    "material-tailwind.css",
+    "icon.css",
+    "ReactToastify.min.css",
+    "core.css",
+    "default-layout.css",
+    "highlights.css",
+  ];
 
   styles.forEach((style) => {
     const link = document.createElement("link");
@@ -19,7 +26,11 @@ function injectStyles(shadowRoot: any) {
 }
 
 function injectScripts(shadowRoot: any) {
-  const styles = ["popper.min.js", "tippy-bundle.umd.min.js"];
+  const styles = [
+    "popper.min.js",
+    "tippy-bundle.umd.min.js",
+    // "pdf.worker.min.js",
+  ];
 
   styles.forEach((style) => {
     const link = document.createElement("script");
