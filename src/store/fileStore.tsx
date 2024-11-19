@@ -34,12 +34,13 @@ export const useFileStore = create<FileStore>((set) => ({
   loading: false,
   fetchingListLoading: false,
   // Setters
-  setSelectedFile: (file) => set({ selectedFile: file }),
-  setFileList: (files) => set({ fileList: files }),
-  setLoading: (loading) => set({ loading }),
-  setFetchingListLoading: (loading) => set({ fetchingListLoading: loading }),
+  setSelectedFile: (file: File | null) => set({ selectedFile: file }),
+  setFileList: (files: File[]) => set({ fileList: files }),
+  setLoading: (loading: boolean) => set({ loading }),
+  setFetchingListLoading: (loading: boolean) =>
+    set({ fetchingListLoading: loading }),
   // API Actions
-  fetchFilesByFeedbackId: async (feedbackId) => {
+  fetchFilesByFeedbackId: async (feedbackId: number) => {
     try {
       set({ fetchingListLoading: true });
       const response = await axios.get(`/api/file/list/${feedbackId}`);
@@ -50,7 +51,7 @@ export const useFileStore = create<FileStore>((set) => ({
     }
   },
 
-  createFile: async (feedbackId, file) => {
+  createFile: async (feedbackId: number, file: string) => {
     try {
       set({ loading: true });
 
@@ -62,7 +63,7 @@ export const useFileStore = create<FileStore>((set) => ({
       toast("File uploaded successfully");
 
       // Update the file list after successful creation
-      set((state) => ({
+      set((state: any) => ({
         fileList: [...state.fileList, response.data],
         loading: false,
       }));
