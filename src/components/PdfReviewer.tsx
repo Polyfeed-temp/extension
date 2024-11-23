@@ -54,18 +54,18 @@ const PdfReviewer: React.FC = () => {
           plugins={[defaultLayoutPluginInstance, highlightPluginInstance]}
           fileUrl={selectedFile.file_content}
         />
-      </Worker>
 
-      <button
-        style={{
-          position: "absolute",
-          bottom: " 5%",
-          right: " 5%",
-        }}
-        onClick={() => setSelectedFile(null)}
-      >
-        Close
-      </button>
+        <button
+          style={{
+            position: "absolute",
+            bottom: " 5%",
+            right: " 5%",
+          }}
+          onClick={() => setSelectedFile(null)}
+        >
+          Close
+        </button>
+      </Worker>
     </div>
   );
 };
