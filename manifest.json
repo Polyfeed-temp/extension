@@ -1,5 +1,5 @@
 {
-  "version": "1.1.1",
+  "version": "1.1.2",
   "manifest_version": 3,
   "name": "Polyfeed",
   "icons": {
@@ -18,7 +18,8 @@
       "matches": [
         "https://learning.monash.edu/mod/assign/*",
         "https://learning.monash.edu/mod/quiz/*",
-        "https://lms.monash.edu/mod/assign/*"
+        "https://lms.monash.edu/mod/assign/*",
+        "https://www.floraengine.org/*"
       ],
       "excludeMatches": ["http://localhost:3000/"],
       "js": ["./js/index.js"],
@@ -28,7 +29,11 @@
   "web_accessible_resources": [
     {
       "resources": ["/styles/*.css", "/scripts/*.js"],
-      "matches": ["https://learning.monash.edu/*", "https://lms.monash.edu/*"]
+      "matches": [
+        "https://learning.monash.edu/*",
+        "https://lms.monash.edu/*",
+        "https://www.floraengine.org/*"
+      ]
     }
   ],
   "permissions": ["storage", "activeTab", "identity"],
