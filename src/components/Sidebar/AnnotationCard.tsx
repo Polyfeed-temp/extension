@@ -54,7 +54,9 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
             }}
           >
             <p className="text text-gray-700 italic">
-              {annotationData.annotation.annotationTag}
+              {annotationData.annotation.annotationTag === "Action Item"
+                ? "Suggestions"
+                : annotationData.annotation.annotationTag}
             </p>
           </blockquote>
 
@@ -86,7 +88,7 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
               }`}
               onClick={() => setActiveTab("actionItems")}
             >
-              Action Items
+              Suggestions
             </Button>
           </div>
           {activeTab === "notes" && (

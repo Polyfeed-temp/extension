@@ -162,7 +162,7 @@ function TodoCard({
           hideFunc={() => setAddToDo(false)}
           saveFunc={(actionItem) => {
             setActionItems(actionItems.concat(actionItem));
-            saveFunc(actionItems.concat(actionItem));
+            saveFunc([actionItem]);
           }}
           cancelFunc={() => {
             actionItems.length > 0
