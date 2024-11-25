@@ -168,6 +168,7 @@ const allowedDomains = [
   "https://lms.monash.edu/*",
   "https://learning.monash.edu/*",
   "https://docs.google.com/*",
+  "https://www.floraengine.org/*",
 ];
 let active = false;
 
