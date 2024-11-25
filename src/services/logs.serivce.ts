@@ -16,7 +16,7 @@ export const eventType: string[] = [
 export const eventSource: string[] = [
   "highlights", //0
   "chatgpt", //1
-  "myMotes", //2
+  "myNotes", //2
   "notes", //3
   "rating", //4
   "dashboard", //5

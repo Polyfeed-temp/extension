@@ -250,7 +250,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             }
 
             addLogs({
-              eventType: eventType[1],
+              eventType: eventType[2],
               content: JSON.stringify(sources),
               eventSource: eventSource[0],
             });
@@ -316,7 +316,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
           addLogs({
             eventType: eventType[3],
             content: JSON.stringify(action.payload),
-            eventSource: eventSource[0],
+            eventSource: eventSource[3],
           });
 
           baseDispatch({
@@ -400,7 +400,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               id: action.payload.id,
               actionItem: action.payload.actionItem,
             }),
-            eventSource: eventSource[10],
+            eventSource: eventSource[9],
           });
 
           const res = await status;
@@ -413,7 +413,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         break;
       case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
         try {
-          console.log("called", action.payload);
           const status = service.updateHighlightActionItem(
             action.payload.id,
             action.payload.actionItems
@@ -425,12 +424,12 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
           });
 
           addLogs({
-            eventType: eventType[8],
+            eventType: eventType[3],
             content: JSON.stringify({
               id: action.payload.id,
               actionItem: action.payload.actionItems,
             }),
-            eventSource: eventSource[10],
+            eventSource: eventSource[9],
           });
 
           const res = await status;
