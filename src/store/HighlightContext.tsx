@@ -418,9 +418,9 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             action.payload.actionItems
           );
           toast.promise(status, {
-            pending: "Updating suggestions...",
-            success: "Updated suggestions",
-            error: "Error updating suggestions please try again",
+            pending: "Updating action plans...",
+            success: "Updated action plans",
+            error: "Error updating action plans please try again",
           });
 
           addLogs({

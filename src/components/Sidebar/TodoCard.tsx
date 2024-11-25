@@ -9,6 +9,8 @@ import {
   deleteActionItem,
 } from "../../services/actionItem.service";
 import { toast } from "react-toastify";
+import { addLogs, eventSource, eventType } from "../../services/logs.serivce";
+
 const ToDoActions: ActionPointCategory[] = [
   "Further Practice",
   "Contact Tutor",
@@ -43,9 +45,9 @@ export function ToDoItems({
               event.target.checked
             );
             toast.promise(status, {
-              pending: "Updating suggestions status...",
-              success: "Suggestions status updated!",
-              error: "Failed to update suggestions status",
+              pending: "Updating action plans status...",
+              success: "Action plans status updated!",
+              error: "Failed to update action plans status",
             });
           }
           const newActionItems = [...actionItems];
@@ -86,11 +88,17 @@ export function ToDoItems({
               variant="text"
               title="Delete suggestions"
               ripple={true}
-              onClick={() => {
+              onClick={async () => {
                 if (actionItems[index].id) {
                   const status = deleteActionItem(
                     actionItems[index].id as number
                   );
+                  await addLogs({
+                    eventType: eventType[8],
+                    content: JSON.stringify({ id: actionItems[index].id }),
+                    eventSource: eventSource[9],
+                  });
+
                   toast.promise(status, {
                     pending: "Deleting suggestions...",
                     success: "suggestions deleted!",

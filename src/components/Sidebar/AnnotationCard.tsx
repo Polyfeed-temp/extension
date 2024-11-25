@@ -88,7 +88,7 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
               }`}
               onClick={() => setActiveTab("actionItems")}
             >
-              Suggestions
+              Action Plans
             </Button>
           </div>
           {activeTab === "notes" && (
