@@ -100,9 +100,9 @@ export function ToDoItems({
                   });
 
                   toast.promise(status, {
-                    pending: "Deleting suggestions...",
-                    success: "suggestions deleted!",
-                    error: "Failed to delete suggestions",
+                    pending: "Deleting action plans...",
+                    success: "Action plans deleted!",
+                    error: "Failed to delete action plans",
                   });
                 }
 
@@ -139,6 +139,10 @@ function TodoCard({
 
   const showAddAndDoneButtons =
     actionItems.length > 0 && !addToDo && !selectedActionItem;
+
+  useEffect(() => {
+    setActionItems(todoitems ? todoitems : []);
+  }, [todoitems]);
 
   return (
     <div className="p-2 mb-4 bg-white shadow-md rounded-md">

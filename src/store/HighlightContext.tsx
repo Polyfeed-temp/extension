@@ -215,6 +215,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     unlabledHighlights: [],
     feedbackInfo: null,
   };
+
   const { setCollapsed } = useSidebar();
   const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const [selectedHighlightElement, setSelectedHighlightElement] =
@@ -417,6 +418,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             action.payload.id,
             action.payload.actionItems
           );
+
           toast.promise(status, {
             pending: "Updating action plans...",
             success: "Updated action plans",
@@ -438,6 +440,10 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               type: "UPDATE_HIGHLIGHT_ACTION_ITEMS",
               payload: action.payload,
             });
+
+            const feedback = await service.getCurrentPageFeedback();
+
+            baseDispatch({ type: "INITIALIZE", payload: feedback });
           }
         } catch (err) {
           console.log(err);
