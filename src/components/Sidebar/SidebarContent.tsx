@@ -13,7 +13,7 @@ type SidebarTab =
 
 import { SummaryCard, UnitAssignmentSummary } from "./tabs/SummaryCard";
 import { CurrentFeedbackSummary } from "../MyNotesSummaryCard";
-import AnnotatedCard from "./AnnotatedCard";
+import AnnotationCard from "./AnnotationCard";
 import { SelectUnitAssignmentTab } from "./tabs/StartAssignmentTab";
 import { HighlightingTab } from "./tabs/HighlightTextsTab";
 import { RateFeedbackTab } from "./tabs/RateFeedbackTab";
@@ -125,12 +125,6 @@ function RenderTabs({
     //drop down for summary of feedback the tags
     //assignemnt drop down add a other option from teacher
     case "Highlight Texts":
-      const currentUrl = window.location.pathname;
-
-      const enableBtn =
-        currentUrl === "/mod/assign/view.php" ||
-        currentUrl === "/mod/quiz/view.php";
-
       return (
         <div className="mb-4">
           {feedback && (
@@ -140,10 +134,7 @@ function RenderTabs({
               />
               <Button
                 fullWidth
-                className={`${
-                  enableBtn ? "bg-black" : "!bg-grey"
-                } my-4 shadow-md`}
-                disabled={!enableBtn}
+                className="bg-black my-4 shadow-md"
                 onClick={() => {
                   highlighterDispatch({
                     type: "SET_IS_HIGHLIGHTING",
@@ -255,27 +246,36 @@ function RenderTabs({
           )}
 
           <HighlightingTab />
-          <ExplainFutherToggle />
-          {highlighterState.records.map((record: AnnotationData, index) => (
-            <div key={index} className="mb-4">
-              <AnnotatedCard
-                key={index}
-                annotationData={record}
-                onDelete={() => {
-                  highlighterDispatch({
-                    type: "DELETE_RECORD",
-                    payload: record.annotation.id,
-                  });
+          {highlighterState.records &&
+            highlighterState.records.length > 0 &&
+            highlighterState.records
+              .sort((a, b) =>
+                a.annotation.annotationTag.localeCompare(
+                  b.annotation.annotationTag
+                )
+              )
+              .map((record: AnnotationData, index) => (
+                <div key={index} className="mb-4">
+                  <AnnotationCard
+                    key={index}
+                    annotationData={record}
+                    onDelete={() => {
+                      highlighterDispatch({
+                        type: "DELETE_RECORD",
+                        payload: record.annotation.id,
+                      });
 
-                  addLogs({
-                    eventType: eventType[8],
-                    content: record.annotation.id,
-                    eventSource: eventSource[0],
-                  });
-                }}
-              ></AnnotatedCard>
-            </div>
-          ))}
+                      addLogs({
+                        eventType: eventType[8],
+                        content: record.annotation.id,
+                        eventSource: eventSource[0],
+                      });
+                    }}
+                  ></AnnotationCard>
+                </div>
+              ))}
+
+          <ExplainFutherToggle />
           <hr className="my-4 pb-2" />
           <RateFeedbackTab
             feedbackId={feedback?.id || 0}

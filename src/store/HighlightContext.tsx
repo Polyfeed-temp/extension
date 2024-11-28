@@ -215,6 +215,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     unlabledHighlights: [],
     feedbackInfo: null,
   };
+
   const { setCollapsed } = useSidebar();
   const [state, baseDispatch] = useReducer(highlighterReducer, initialState);
   const [selectedHighlightElement, setSelectedHighlightElement] =
@@ -250,7 +251,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             }
 
             addLogs({
-              eventType: eventType[1],
+              eventType: eventType[2],
               content: JSON.stringify(sources),
               eventSource: eventSource[0],
             });
@@ -316,7 +317,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
           addLogs({
             eventType: eventType[3],
             content: JSON.stringify(action.payload),
-            eventSource: eventSource[0],
+            eventSource: eventSource[3],
           });
 
           baseDispatch({
@@ -400,7 +401,7 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               id: action.payload.id,
               actionItem: action.payload.actionItem,
             }),
-            eventSource: eventSource[10],
+            eventSource: eventSource[9],
           });
 
           const res = await status;
@@ -413,24 +414,24 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         break;
       case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
         try {
-          console.log("called", action.payload);
           const status = service.updateHighlightActionItem(
             action.payload.id,
             action.payload.actionItems
           );
+
           toast.promise(status, {
-            pending: "Updating suggestions...",
-            success: "Updated suggestions",
-            error: "Error updating suggestions please try again",
+            pending: "Updating action plans...",
+            success: "Updated action plans",
+            error: "Error updating action plans please try again",
           });
 
           addLogs({
-            eventType: eventType[8],
+            eventType: eventType[3],
             content: JSON.stringify({
               id: action.payload.id,
               actionItem: action.payload.actionItems,
             }),
-            eventSource: eventSource[10],
+            eventSource: eventSource[9],
           });
 
           const res = await status;
@@ -439,6 +440,10 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               type: "UPDATE_HIGHLIGHT_ACTION_ITEMS",
               payload: action.payload,
             });
+
+            const feedback = await service.getCurrentPageFeedback();
+
+            baseDispatch({ type: "INITIALIZE", payload: feedback });
           }
         } catch (err) {
           console.log(err);

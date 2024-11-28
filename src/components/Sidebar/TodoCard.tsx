@@ -9,6 +9,8 @@ import {
   deleteActionItem,
 } from "../../services/actionItem.service";
 import { toast } from "react-toastify";
+import { addLogs, eventSource, eventType } from "../../services/logs.serivce";
+
 const ToDoActions: ActionPointCategory[] = [
   "Further Practice",
   "Contact Tutor",
@@ -43,9 +45,9 @@ export function ToDoItems({
               event.target.checked
             );
             toast.promise(status, {
-              pending: "Updating suggestions status...",
-              success: "Suggestions status updated!",
-              error: "Failed to update suggestions status",
+              pending: "Updating action plans status...",
+              success: "Action plans status updated!",
+              error: "Failed to update action plans status",
             });
           }
           const newActionItems = [...actionItems];
@@ -86,15 +88,21 @@ export function ToDoItems({
               variant="text"
               title="Delete suggestions"
               ripple={true}
-              onClick={() => {
+              onClick={async () => {
                 if (actionItems[index].id) {
                   const status = deleteActionItem(
                     actionItems[index].id as number
                   );
+                  await addLogs({
+                    eventType: eventType[8],
+                    content: JSON.stringify({ id: actionItems[index].id }),
+                    eventSource: eventSource[9],
+                  });
+
                   toast.promise(status, {
-                    pending: "Deleting suggestions...",
-                    success: "suggestions deleted!",
-                    error: "Failed to delete suggestions",
+                    pending: "Deleting action plans...",
+                    success: "Action plans deleted!",
+                    error: "Failed to delete action plans",
                   });
                 }
 
@@ -132,6 +140,10 @@ function TodoCard({
   const showAddAndDoneButtons =
     actionItems.length > 0 && !addToDo && !selectedActionItem;
 
+  useEffect(() => {
+    setActionItems(todoitems ? todoitems : []);
+  }, [todoitems]);
+
   return (
     <div className="p-2 mb-4 bg-white shadow-md rounded-md">
       <ToDoItems
@@ -162,7 +174,7 @@ function TodoCard({
           hideFunc={() => setAddToDo(false)}
           saveFunc={(actionItem) => {
             setActionItems(actionItems.concat(actionItem));
-            saveFunc(actionItems.concat(actionItem));
+            saveFunc([actionItem]);
           }}
           cancelFunc={() => {
             actionItems.length > 0
