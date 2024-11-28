@@ -102,12 +102,6 @@ function RenderTabs({
     //drop down for summary of feedback the tags
     //assignemnt drop down add a other option from teacher
     case "Highlight Texts":
-      const currentUrl = window.location.pathname;
-
-      const enableBtn =
-        currentUrl === "/mod/assign/view.php" ||
-        currentUrl === "/mod/quiz/view.php";
-
       return (
         <div className="mb-4">
           {feedback && (
@@ -117,10 +111,7 @@ function RenderTabs({
               ></CurrentFeedbackSummary>
               <Button
                 fullWidth
-                className={`${
-                  enableBtn ? "bg-black" : "!bg-grey"
-                } my-4 shadow-md`}
-                disabled={!enableBtn}
+                className="bg-black my-4 shadow-md"
                 onClick={() => {
                   highlighterDispatch({
                     type: "SET_IS_HIGHLIGHTING",
