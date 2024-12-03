@@ -18,6 +18,7 @@ import { useHighlighterState } from "./store/HighlightContext";
 import { addLogs, eventType } from "./services/logs.serivce";
 import { useConsent } from "./hooks/useConsentStore";
 import { PdfReviewer } from "./components/PdfReviewer";
+import { Worker } from "@react-pdf-viewer/core";
 // Your web app's Firebase configuration
 
 // Initialize Firebase
@@ -134,22 +135,24 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <Sidebar
-        isAuth={isAuth}
-        collapsed={collapsed}
-        toggleSidebar={toggleSidebar}
-        firebaseLogin={firebaseLogin}
-      />
+    <Worker workerUrl={chrome.runtime.getURL("/scripts/pdf.worker.min.js")}>
+      <div>
+        <Sidebar
+          isAuth={isAuth}
+          collapsed={collapsed}
+          toggleSidebar={toggleSidebar}
+          firebaseLogin={firebaseLogin}
+        />
 
-      {PdfReviewer && <PdfReviewer />}
+        {PdfReviewer && <PdfReviewer />}
 
-      <ToastContainer
-        position="bottom-right"
-        theme="dark"
-        style={{ zIndex: 999999 }}
-      />
-    </div>
+        <ToastContainer
+          position="bottom-right"
+          theme="dark"
+          style={{ zIndex: 999999 }}
+        />
+      </div>
+    </Worker>
   );
 }
 

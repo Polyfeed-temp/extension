@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "../services/api.service";
 import { toast } from "react-toastify";
+import { AnnotationData } from "../types";
 
 interface File {
   id: string;
@@ -10,6 +11,12 @@ interface File {
   created_at: string;
 }
 
+interface FlagKeyword {
+  keyword: string;
+  matchCase: boolean;
+  wholeWords: boolean;
+}
+
 interface FileStore {
   // State
   selectedFile: File | null;
@@ -17,11 +24,19 @@ interface FileStore {
   loading: boolean;
 
   fetchingListLoading: boolean;
+  selectedText: string;
+  currentKeyword: FlagKeyword;
+
+  associatedHighlights: AnnotationData[];
   // Setters
   setSelectedFile: (file: File | null) => void;
   setFileList: (files: File[]) => void;
   setLoading: (loading: boolean) => void;
   setFetchingListLoading: (loading: boolean) => void;
+  setSelectedText: (text: string) => void;
+  setCurrentKeyword: (keyword: FlagKeyword) => void;
+  setAssociatedHighlights: (associatedHighlights: AnnotationData[]) => void;
+
   // API Actions
   fetchFilesByFeedbackId: (feedbackId: number) => Promise<void>;
   createFile: (feedbackId: number, fileData: string) => Promise<void>;
@@ -33,12 +48,21 @@ export const useFileStore = create<FileStore>((set) => ({
   fileList: [],
   loading: false,
   fetchingListLoading: false,
+  selectedText: "",
+  currentKeyword: { keyword: "", matchCase: false, wholeWords: false },
+  associatedHighlights: [],
+
   // Setters
   setSelectedFile: (file: File | null) => set({ selectedFile: file }),
   setFileList: (files: File[]) => set({ fileList: files }),
   setLoading: (loading: boolean) => set({ loading }),
   setFetchingListLoading: (loading: boolean) =>
     set({ fetchingListLoading: loading }),
+  setSelectedText: (text: string) => set({ selectedText: text }),
+  setCurrentKeyword: (keyword: FlagKeyword) => set({ currentKeyword: keyword }),
+  setAssociatedHighlights: (associatedHighlights: AnnotationData[]) =>
+    set({ associatedHighlights }),
+
   // API Actions
   fetchFilesByFeedbackId: async (feedbackId: number) => {
     try {

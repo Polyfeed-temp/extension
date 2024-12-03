@@ -26,6 +26,7 @@ export const eventSource: string[] = [
   "todoList", //9
   "feedback", //10
   "menuBar", //11
+  "pdf", // 12
 ];
 
 export async function addLogs(params: {
