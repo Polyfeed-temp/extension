@@ -18,6 +18,7 @@ import {
 // Import CSS styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import "@react-pdf-viewer/search/lib/styles/index.css";
 
 const PdfReviewer: React.FC = () => {
   const {
@@ -46,13 +47,12 @@ const PdfReviewer: React.FC = () => {
     };
   }, [selectedFile]);
 
-  useEffect(() => {
-    const { highlight } = searchPluginInstance;
-
-    console.log("associatedHighlights", associatedHighlights);
-  }, [associatedHighlights]);
-
-  const searchPluginInstance = searchPlugin();
+  const searchPluginInstance = searchPlugin({
+    keyword: associatedHighlights.map(({ annotation }) => ({
+      keyword: annotation.text,
+      matchCase: true,
+    })),
+  });
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin({});
 
@@ -77,7 +77,9 @@ const PdfReviewer: React.FC = () => {
       <Viewer
         fileUrl={selectedFile.file_content}
         plugins={[defaultLayoutPluginInstance, searchPluginInstance]}
-        onDocumentLoad={() => {}}
+        onDocumentLoad={() => {
+          console.log("Document loaded");
+        }}
       />
 
       <button

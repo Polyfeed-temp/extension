@@ -84,10 +84,38 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     });
   };
 
+  const uploadFile = () => {
+    // Create hidden file input
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".pdf";
+
+    fileInput.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+
+          createFile(highlighterState?.feedbackInfo?.id || 0, base64String);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    fileInput.click();
+  };
+
   return (
-    <div>
+    <div
+      style={{
+        border: "1px solid black",
+        padding: "20px",
+        borderRadius: "20px",
+      }}
+    >
       <p className="text-lg font-bold">Manage PDF file</p>
-      <div className="flex flex-row overflow-y-hidden mt-2 justify-center items-center">
+      <div className="flex flex-col overflow-y-hidden mt-2 justify-center items-center">
         <div
           className="flex"
           style={{
@@ -150,42 +178,15 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
         </div>
 
         <div
-          className="border border-black rounded-full"
           style={{
             padding: 5,
+            marginTop: 20,
           }}
         >
           {loading ? (
             renderLoading()
           ) : (
-            <img
-              src={uploadIcon}
-              className="w-6 h-6  cursor-pointer"
-              onClick={() => {
-                // Create hidden file input
-                const fileInput = document.createElement("input");
-                fileInput.type = "file";
-                fileInput.accept = ".pdf";
-
-                fileInput.onchange = (e) => {
-                  const file = (e.target as HTMLInputElement).files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      const base64String = reader.result as string;
-
-                      createFile(
-                        highlighterState?.feedbackInfo?.id || 0,
-                        base64String
-                      );
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                };
-
-                fileInput.click();
-              }}
-            />
+            <Button onClick={() => uploadFile()}>Upload PDF</Button>
           )}
         </div>
 
