@@ -1,5 +1,5 @@
 {
-  "backend": "http://localhost:8002/",
+  "backend": "https://www.polyfeed.com.au/prod/",
   "server": "https://www.polyfeed.com.au/",
   "dashboard": "https://www.polyfeed.com.au/dashboard/"
 }
