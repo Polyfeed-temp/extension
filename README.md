@@ -30,3 +30,13 @@ $ npm run watch
 
 <!--   "backend": "https://www.polyfeed.com.au/prod/",
  -->
+
+<!-- path -->
+
+<!-- production -->
+
+"backend": "https://www.polyfeed.com.au/prod/",
+
+<!-- development -->
+
+"backend": "http://localhost:8002/",

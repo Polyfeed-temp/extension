@@ -105,7 +105,6 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
   const createHighLight = (tag: AnnotationTag) => {
     if (tag === "Suggestions") tag = "Action Item";
 
-    console.log("called createHighLight");
     // addLogs({
     //   eventType: eventType[0],
     //   content: JSON.stringify({ tag }),
@@ -121,7 +120,6 @@ export function RenderPop({ highlighting }: { highlighting: HighlightSource }) {
       text: highlighting.text,
     };
 
-    console.log("annotation", annotation);
     setCollapsed(false);
     annotationDispatch({
       type: "ADD_RECORD",

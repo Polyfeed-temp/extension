@@ -1,19 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  Icon,
-  MinimalButton,
-  Position,
-  Tooltip,
-  Viewer,
-} from "@react-pdf-viewer/core";
+import React, { useRef, useEffect, useState } from "react";
+import { Viewer } from "@react-pdf-viewer/core";
 import { useFileStore } from "../store/fileStore";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import {
-  FlagKeyword,
-  NextIcon,
-  PreviousIcon,
-  searchPlugin,
-} from "@react-pdf-viewer/search";
+import { searchPlugin } from "@react-pdf-viewer/search";
 
 // Import CSS styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -26,8 +15,12 @@ const PdfReviewer: React.FC = () => {
     setSelectedFile,
     setSelectedText,
     associatedHighlights,
+    documentLoaded,
+    setDocumentLoaded,
   } = useFileStore();
   const viewerRef = useRef<HTMLDivElement>(null);
+  const searchPluginInstance = searchPlugin();
+  const { highlight, clearHighlights } = searchPluginInstance;
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -45,14 +38,25 @@ const PdfReviewer: React.FC = () => {
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange);
     };
-  }, [selectedFile]);
+  }, [selectedFile, associatedHighlights]);
 
-  const searchPluginInstance = searchPlugin({
-    keyword: associatedHighlights.map(({ annotation }) => ({
-      keyword: annotation.text,
-      matchCase: true,
-    })),
-  });
+  useEffect(() => {
+    if (!documentLoaded) return;
+
+    if (associatedHighlights.length > 0) {
+      console.log("going to update the highlights");
+      clearHighlights();
+      const highlightKeywords = associatedHighlights.map(({ annotation }) => {
+        return annotation.text;
+      });
+      highlight(highlightKeywords);
+    }
+
+    return () => {
+      clearHighlights();
+      setDocumentLoaded(false);
+    };
+  }, [associatedHighlights, documentLoaded]);
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin({});
 
@@ -79,6 +83,7 @@ const PdfReviewer: React.FC = () => {
         plugins={[defaultLayoutPluginInstance, searchPluginInstance]}
         onDocumentLoad={() => {
           console.log("Document loaded");
+          setDocumentLoaded(true);
         }}
       />
 

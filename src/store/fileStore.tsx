@@ -23,6 +23,9 @@ interface FileStore {
   fileList: File[];
   loading: boolean;
 
+  documentLoaded: boolean;
+  setDocumentLoaded: (documentLoaded: boolean) => void;
+
   fetchingListLoading: boolean;
   selectedText: string;
   currentKeyword: FlagKeyword;
@@ -51,6 +54,9 @@ export const useFileStore = create<FileStore>((set) => ({
   selectedText: "",
   currentKeyword: { keyword: "", matchCase: false, wholeWords: false },
   associatedHighlights: [],
+  documentLoaded: false,
+  setDocumentLoaded: (documentLoaded: boolean) =>
+    set({ documentLoaded: documentLoaded }),
 
   // Setters
   setSelectedFile: (file: File | null) => set({ selectedFile: file }),
@@ -80,7 +86,7 @@ export const useFileStore = create<FileStore>((set) => ({
     try {
       set({ loading: true });
 
-      const response = await axios.post(`/api/file`, {
+      const response = await axios.post(`/api/file/`, {
         feedback_id: feedbackId,
         file_content: file,
       });

@@ -7,11 +7,10 @@ import {
 import { useFileStore } from "../../store/fileStore";
 import { Annotation, AnnotationTag, Feedback } from "../../types";
 import { annotationTagsIcons } from "../AnnotationIcons";
-import { Button } from "@material-tailwind/react";
+import { Button, collapse } from "@material-tailwind/react";
 import { v4 as uuidv4 } from "uuid";
 import { addLogs, eventSource, eventType } from "../../services/logs.serivce";
-
-const uploadIcon = require("../../assets/icons/upload.png").default as string;
+import AnnotationService from "../../services/annotation.service";
 
 const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
   const highlighterState = useHighlighterState();
@@ -26,6 +25,8 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     fetchingListLoading,
     selectedText,
     setAssociatedHighlights,
+    setSelectedText,
+    setDocumentLoaded,
   } = useFileStore();
 
   useEffect(() => {
@@ -33,6 +34,17 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       fetchFilesByFeedbackId(feedback.id);
     }
   }, [feedback]);
+
+  useEffect(() => {
+    if (selectedFile && feedback.highlights) {
+      const associatedHighlights = feedback.highlights.filter(
+        (highlight) =>
+          highlight?.annotation?.startMeta?.parentTagName ===
+          selectedFile.id.toString()
+      );
+      setAssociatedHighlights(associatedHighlights);
+    }
+  }, [feedback, selectedFile]);
 
   const renderLoading = () => {
     return (
@@ -50,8 +62,9 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
 
   const [selectedTag, setSelectedTag] = useState<AnnotationTag>("Strength");
   const annotationDispatch = useHighlighterDispatch();
+  const annotationService = new AnnotationService();
 
-  const createHighLight = () => {
+  const createHighLight = async () => {
     let tag = selectedTag;
     if (tag === "Suggestions") tag = "Action Item";
 
@@ -82,6 +95,33 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       type: "ADD_RECORD",
       payload: { annotation: annotation },
     });
+
+    setTimeout(async () => {
+      const newFeedback = await annotationService.getCurrentPageFeedback();
+      annotationDispatch({ type: "INITIALIZE", payload: newFeedback });
+
+      // Update associated highlights after creating new highlight
+      if (selectedFile && newFeedback?.highlights) {
+        const newAssociatedHighlights = newFeedback.highlights.filter(
+          (highlight) =>
+            highlight?.annotation?.startMeta?.parentTagName ===
+            selectedFile.id.toString()
+        );
+
+        // Store current file
+        const currentFile = selectedFile;
+
+        // Temporarily clear selected file
+        setSelectedFile(null);
+
+        // Reset selected file after a brief delay to trigger reload
+        setTimeout(() => {
+          setSelectedFile(currentFile);
+          setAssociatedHighlights(newAssociatedHighlights);
+        }, 100);
+      }
+      setSelectedText("");
+    }, 1000);
   };
 
   const uploadFile = () => {
@@ -114,83 +154,110 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
         borderRadius: "20px",
       }}
     >
-      <p className="text-lg font-bold">Manage PDF file</p>
-      <div className="flex flex-col overflow-y-hidden mt-2 justify-center items-center">
-        <div
-          className="flex"
-          style={{
-            maxWidth: "80%",
-            marginRight: "10%",
-            overflowX: "auto",
-            padding: 10,
-          }}
-        >
-          {fetchingListLoading && renderLoading()}
-          {/* showing file list here */}
+      <p className="text-lg font-bold">Manage PDF Feedback file</p>
+      <div
+        className="flex flex-col overflow-y-hidden  mt-2 justify-center items-center"
+        style={{
+          overflowX: "hidden",
+        }}
+      >
+        <div style={{ width: "100%" }}>
+          <div className="flex items-center gap-2">
+            <p
+              style={{
+                textAlign: "left",
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              1.
+            </p>
+            <p
+              style={{
+                textAlign: "left",
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              Click to upload the PDF file
+            </p>
+          </div>
+          <div
+            style={{
+              padding: 5,
+            }}
+          >
+            {loading ? (
+              renderLoading()
+            ) : (
+              <Button onClick={() => uploadFile()}>Upload PDF</Button>
+            )}
+          </div>
+        </div>
 
-          {fileList.length > 0 &&
-            fileList.map((file, index) => (
-              <div
-                className={`rounded-md mr-2 cursor-pointer ${
-                  selectedFile?.id === file.id
-                    ? "bg-black text-white"
-                    : "bg-gray-200"
-                }`}
-                style={{
-                  minWidth: 100,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: 40,
-                }}
-                key={file.id}
-                onClick={() => {
-                  if (selectedFile?.id === file.id) {
-                    setSelectedFile(null);
-                    return;
-                  }
-                  // set the file
-                  setSelectedFile(file);
+        <div style={{ width: "100%" }}>
+          <div className="flex items-center gap-2">
+            <p
+              style={{
+                textAlign: "left",
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              2.
+            </p>
+            <p
+              style={{
+                textAlign: "left",
+                whiteSpace: "nowrap",
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              Click to open the PDF file to be highlighted
+            </p>
+          </div>
+          <div
+            className="flex"
+            style={{
+              marginRight: "10%",
+              overflowX: "auto",
+              padding: 10,
+            }}
+          >
+            {fetchingListLoading && renderLoading()}
+            {/* showing file list here */}
 
-                  // find the highlights associated with this file
-                  const highlights = feedback.highlights;
-                  const associatedHighlights = [];
-                  if (highlights && highlights.length > 0) {
-                    for (const highlight of highlights) {
-                      if (
-                        highlight &&
-                        highlight.annotation &&
-                        highlight.annotation.startMeta &&
-                        highlight.annotation.startMeta.parentTagName ===
-                          file.id.toString()
-                      ) {
-                        associatedHighlights.push(highlight);
-                      }
+            {fileList.length > 0 &&
+              fileList.map((file, index) => (
+                <div
+                  className={`rounded-md mr-2 cursor-pointer ${
+                    selectedFile?.id === file.id
+                      ? "bg-black text-white"
+                      : "bg-gray-200"
+                  }`}
+                  style={{
+                    minWidth: 100,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: 40,
+                  }}
+                  key={file.id}
+                  onClick={() => {
+                    if (selectedFile?.id === file.id) {
+                      setSelectedFile(null);
+                      return;
                     }
-                  }
-
-                  setAssociatedHighlights(associatedHighlights);
-                }}
-              >
-                {`PDF - ${index + 1}`}
-              </div>
-            ))}
+                    // set the file
+                    setSelectedFile(file);
+                  }}
+                >
+                  {`PDF - ${index + 1}`}
+                </div>
+              ))}
+          </div>
         </div>
-
-        <div
-          style={{
-            padding: 5,
-            marginTop: 20,
-          }}
-        >
-          {loading ? (
-            renderLoading()
-          ) : (
-            <Button onClick={() => uploadFile()}>Upload PDF</Button>
-          )}
-        </div>
-
-        {/* showing the selected text */}
       </div>
 
       {selectedText && (
@@ -240,16 +307,35 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
             })}
           </div>
 
-          <Button
-            className="bg-black"
+          <div
             style={{
+              display: "flex",
+              justifyContent: "space-between",
               marginTop: 20,
             }}
-            disabled={!selectedText && !selectedTag}
-            onClick={() => createHighLight()}
           >
-            Create Highlight
-          </Button>
+            <Button
+              className="bg-black"
+              style={{
+                marginTop: 20,
+              }}
+              disabled={!selectedText && !selectedTag}
+              onClick={() => createHighLight()}
+            >
+              Create Highlight
+            </Button>
+
+            <Button
+              className="bg-black"
+              style={{
+                marginTop: 20,
+              }}
+              disabled={!selectedText && !selectedTag}
+              onClick={() => setSelectedText("")}
+            >
+              Clear Highlight
+            </Button>
+          </div>
         </div>
       )}
     </div>
