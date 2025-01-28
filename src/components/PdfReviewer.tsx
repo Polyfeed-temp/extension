@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Viewer } from "@react-pdf-viewer/core";
+import React, { useRef, useEffect } from "react";
+import { Viewer, PageChangeEvent } from "@react-pdf-viewer/core";
 import { useFileStore } from "../store/fileStore";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import { searchPlugin, RenderHighlightsProps } from "@react-pdf-viewer/search";
+import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 
 // Import CSS styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -17,10 +18,11 @@ const PdfReviewer: React.FC = () => {
     associatedHighlights,
     documentLoaded,
     setDocumentLoaded,
+    currentPage,
+    setCurrentPage,
   } = useFileStore();
   const viewerRef = useRef<HTMLDivElement>(null);
 
-  console.log("associatedHighlights", associatedHighlights);
   const renderHighlights = React.useCallback(
     (props: RenderHighlightsProps) => (
       <>
@@ -29,14 +31,12 @@ const PdfReviewer: React.FC = () => {
           const annotation = associatedHighlights.find(
             ({ annotation }) =>
               area.keywordStr &&
-              annotation.text.includes(area.keywordStr.toString())
+              annotation.text.trim().includes(area.keywordStr.toString().trim())
           )?.annotation;
 
           // Determine color based on annotation tag
           let backgroundColor = "rgba(135, 135, 135, 0.4)";
 
-          console.log("area", area);
-          console.log("annotation", annotation);
           if (annotation) {
             switch (annotation.annotationTag) {
               case "Strength":
@@ -76,18 +76,33 @@ const PdfReviewer: React.FC = () => {
     [associatedHighlights]
   );
 
+  // Move plugin initialization after renderHighlights
+  const pageNavigationPluginInstance = pageNavigationPlugin();
+  const { jumpToPage } = pageNavigationPluginInstance;
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const searchPluginInstance = searchPlugin({
     renderHighlights,
   });
 
-  const { highlight, clearHighlights } = searchPluginInstance;
+  // Function to handle page jumping
+  const handleJumpToPage = (pageNumber: number) => {
+    if (jumpToPage && documentLoaded) {
+      jumpToPage(pageNumber);
+    }
+  };
+
+  useEffect(() => {
+    if (documentLoaded && currentPage > 0) {
+      handleJumpToPage(currentPage);
+    }
+  }, [currentPage, documentLoaded, handleJumpToPage]);
 
   useEffect(() => {
     const handleSelectionChange = () => {
       const selection = window.getSelection();
 
       if (selection && selection.toString().length > 0) {
-        setSelectedText(selection.toString());
+        setSelectedText(selection.toString().trim());
       }
     };
 
@@ -104,33 +119,35 @@ const PdfReviewer: React.FC = () => {
     if (!documentLoaded) return;
 
     if (associatedHighlights.length > 0) {
-      clearHighlights();
+      searchPluginInstance.clearHighlights();
 
-      // Extract the full text from each annotation
-      const highlightTexts = associatedHighlights.map(
-        ({ annotation }) => annotation.text.trim() // Just trim whitespace but keep the full text
-      );
+      // Extract and clean the text from each annotation
+      const highlightTexts = associatedHighlights.flatMap(({ annotation }) => {
+        // Split by newlines and process each part
+        return annotation.text
+          .split("\n")
+          .map((text) => text.trim())
+          .filter((text) => text.length > 0); // Remove empty strings
+      });
 
       // Apply highlights
-      highlight(highlightTexts);
+      searchPluginInstance.highlight(highlightTexts);
     }
 
     return () => {
-      clearHighlights();
+      searchPluginInstance.clearHighlights();
       setDocumentLoaded(false);
     };
   }, [associatedHighlights, documentLoaded]);
 
-  const defaultLayoutPluginInstance = defaultLayoutPlugin({});
-
   if (!selectedFile) return null;
-
+  console.log("currentPage", currentPage);
   return (
     <div
       style={{
         position: "absolute",
         top: "8%",
-        zIndex: 9999,
+        zIndex: 9990,
         height: "88%",
         left: "3%",
         overflow: "auto",
@@ -143,11 +160,18 @@ const PdfReviewer: React.FC = () => {
     >
       <Viewer
         fileUrl={selectedFile.file_content}
-        plugins={[defaultLayoutPluginInstance, searchPluginInstance]}
+        plugins={[
+          defaultLayoutPluginInstance,
+          searchPluginInstance,
+          pageNavigationPluginInstance,
+        ]}
         onDocumentLoad={() => {
-          console.log("Document loaded");
           setDocumentLoaded(true);
         }}
+        onPageChange={(e: PageChangeEvent) => {
+          setCurrentPage(e.currentPage);
+        }}
+        initialPage={currentPage}
       />
 
       <button

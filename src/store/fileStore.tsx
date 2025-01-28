@@ -31,6 +31,10 @@ interface FileStore {
   currentKeyword: FlagKeyword;
 
   associatedHighlights: AnnotationData[];
+
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+
   // Setters
   setSelectedFile: (file: File | null) => void;
   setFileList: (files: File[]) => void;
@@ -55,6 +59,7 @@ export const useFileStore = create<FileStore>((set) => ({
   currentKeyword: { keyword: "", matchCase: false, wholeWords: false },
   associatedHighlights: [],
   documentLoaded: false,
+  currentPage: 0,
   setDocumentLoaded: (documentLoaded: boolean) =>
     set({ documentLoaded: documentLoaded }),
 
@@ -68,6 +73,7 @@ export const useFileStore = create<FileStore>((set) => ({
   setCurrentKeyword: (keyword: FlagKeyword) => set({ currentKeyword: keyword }),
   setAssociatedHighlights: (associatedHighlights: AnnotationData[]) =>
     set({ associatedHighlights }),
+  setCurrentPage: (page: number) => set({ currentPage: page }),
 
   // API Actions
   fetchFilesByFeedbackId: async (feedbackId: number) => {
