@@ -21,6 +21,8 @@ import {
 import { toast } from "react-toastify";
 import { useSidebar } from "../hooks/useSidebar";
 import { addLogs, eventSource, eventType } from "../services/logs.serivce";
+import { useFileStore } from "./fileStore";
+
 interface HighlightState {
   highlighterLib: Highlighter | null;
   feedbackInfo: Feedback | null;
@@ -87,6 +89,10 @@ interface UpdateActionItems {
   type: "UPDATE_HIGHLIGHT_ACTION_ITEMS";
   payload: { id: string; actionItems: AnnotationActionPoint[] };
 }
+interface SyncWithServerAction {
+  type: "SYNC_WITH_SERVER";
+  payload: Feedback | null;
+}
 type Action =
   | AddRecordAction
   | SetEditingAction
@@ -100,10 +106,16 @@ type Action =
   | DeleteFeedback
   | AddActionItem
   | CancelHighlighted
-  | UpdateActionItems;
+  | UpdateActionItems
+  | SyncWithServerAction;
 
 const HighlighterContext = createContext<
-  { state: HighlightState; dispatch: React.Dispatch<Action> } | undefined
+  | {
+      state: HighlightState;
+      dispatch: React.Dispatch<Action>;
+      handleDelete: (id: string) => Promise<void>;
+    }
+  | undefined
 >(undefined);
 
 const highlighterReducer = (
@@ -164,6 +176,37 @@ const highlighterReducer = (
         (record) => record.annotation.id !== action.payload
       );
       state.highlighterLib?.remove(action.payload);
+
+      // Update PDF viewer
+      const { selectedFile, setSelectedFile, setAssociatedHighlights } =
+        useFileStore.getState();
+      if (selectedFile) {
+        // Store current file
+        const currentFile = selectedFile;
+
+        // Get the updated feedback to ensure we have the latest highlights
+        const annotationService = new AnnotationService();
+        annotationService.getCurrentPageFeedback().then((newFeedback) => {
+          if (newFeedback?.highlights) {
+            // Filter highlights for current file
+            const newAssociatedHighlights = newFeedback.highlights.filter(
+              (highlight) =>
+                highlight?.annotation?.startMeta?.parentTagName ===
+                currentFile.id.toString()
+            );
+
+            // Temporarily clear selected file and update highlights
+            setAssociatedHighlights(newAssociatedHighlights);
+            setSelectedFile(null);
+
+            // Reset selected file after a brief delay to trigger reload
+            setTimeout(() => {
+              setSelectedFile(currentFile);
+            }, 100);
+          }
+        });
+      }
+
       return { ...state, records: newRecords };
     case "ADD_FEEDBACK":
       return { ...state, feedbackInfo: action.payload };
@@ -200,6 +243,12 @@ const highlighterReducer = (
         recordToUpdateAction.actionItems = action.payload.actionItems;
       }
       return { ...state, editing: null, drafting: null };
+    case "SYNC_WITH_SERVER":
+      return {
+        ...state,
+        feedbackInfo: action.payload,
+        records: action.payload?.highlights || [],
+      };
     default:
       return state;
   }
@@ -449,6 +498,8 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
           console.log(err);
         }
         break;
+      case "SYNC_WITH_SERVER":
+        return { ...state, feedbackInfo: action.payload };
       default:
         baseDispatch(action);
     }
@@ -618,8 +669,18 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [state]);
 
+  const handleDelete = async (id: string) => {
+    // First delete locally
+    dispatch({ type: "DELETE_RECORD", payload: id });
+
+    // Then sync with server
+    const annotationService = new AnnotationService();
+    const newFeedback = await annotationService.getCurrentPageFeedback();
+    dispatch({ type: "SYNC_WITH_SERVER", payload: newFeedback });
+  };
+
   return (
-    <HighlighterContext.Provider value={{ state, dispatch }}>
+    <HighlighterContext.Provider value={{ state, dispatch, handleDelete }}>
       {children}
       {state.drafting && <RenderPop highlighting={state.drafting}></RenderPop>}
     </HighlighterContext.Provider>
@@ -644,4 +705,14 @@ export const useHighlighterDispatch = () => {
     );
   }
   return context.dispatch;
+};
+
+export const useHighlighterDelete = () => {
+  const context = useContext(HighlighterContext);
+  if (!context) {
+    throw new Error(
+      "useHighlighterDelete must be used within a HighlighterProvider"
+    );
+  }
+  return context.handleDelete;
 };

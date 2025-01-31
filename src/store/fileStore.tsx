@@ -47,9 +47,12 @@ interface FileStore {
   // API Actions
   fetchFilesByFeedbackId: (feedbackId: number) => Promise<void>;
   createFile: (feedbackId: number, fileData: string) => Promise<void>;
+
+  // Add a new method to remove highlight and update viewer
+  removeHighlightAndUpdate: (highlightId: string) => void;
 }
 
-export const useFileStore = create<FileStore>((set) => ({
+export const useFileStore = create<FileStore>((set, get) => ({
   // Initial state
   selectedFile: null,
   fileList: [],
@@ -108,6 +111,32 @@ export const useFileStore = create<FileStore>((set) => ({
       toast("Error uploading file");
       console.error("Error creating file:", error);
       throw error;
+    }
+  },
+
+  // Add a new method to remove highlight and update viewer
+  removeHighlightAndUpdate: (highlightId: string) => {
+    const { selectedFile, associatedHighlights } = get();
+
+    if (selectedFile) {
+      // First filter out the deleted highlight
+      const updatedHighlights = associatedHighlights.filter(
+        (highlight) => highlight.annotation.id !== highlightId
+      );
+
+      // Store current file
+      const currentFile = selectedFile;
+
+      // Temporarily clear selected file
+      set({ selectedFile: null });
+
+      // Reset selected file after a brief delay to trigger reload
+      setTimeout(() => {
+        set({
+          selectedFile: currentFile,
+          associatedHighlights: updatedHighlights,
+        });
+      }, 100);
     }
   },
 }));

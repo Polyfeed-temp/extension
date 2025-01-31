@@ -35,17 +35,6 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     }
   }, [feedback]);
 
-  useEffect(() => {
-    if (selectedFile && feedback.highlights) {
-      const associatedHighlights = feedback.highlights.filter(
-        (highlight) =>
-          highlight?.annotation?.startMeta?.parentTagName ===
-          selectedFile.id.toString()
-      );
-      setAssociatedHighlights(associatedHighlights);
-    }
-  }, [feedback, selectedFile]);
-
   const renderLoading = () => {
     return (
       <div className="w-6 h-6 border-4 border-gray-300 border-t-black rounded-full animate-spin" />
@@ -250,6 +239,15 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                       return;
                     }
                     // set the file
+
+                    if (feedback.highlights) {
+                      const associatedHighlights = feedback.highlights.filter(
+                        (highlight) =>
+                          highlight?.annotation?.startMeta?.parentTagName ===
+                          file.id.toString()
+                      );
+                      setAssociatedHighlights(associatedHighlights);
+                    }
                     setSelectedFile(file);
                   }}
                 >

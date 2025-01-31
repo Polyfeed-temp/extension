@@ -113,32 +113,39 @@ const PdfReviewer: React.FC = () => {
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange);
     };
-  }, [selectedFile, associatedHighlights]);
+  }, [selectedFile]);
 
   useEffect(() => {
     if (!documentLoaded) return;
 
+    // Always clear highlights first
+    searchPluginInstance.clearHighlights();
+
     if (associatedHighlights.length > 0) {
-      searchPluginInstance.clearHighlights();
+      // Force a re-render of highlights by clearing and re-applying after a brief delay
+      setTimeout(() => {
+        // Extract and clean the text from each annotation
+        const highlightTexts = associatedHighlights.flatMap(
+          ({ annotation }) => {
+            return annotation.text
+              .split("\n")
+              .map((text) => text.trim())
+              .filter((text) => text.length > 0);
+          }
+        );
 
-      // Extract and clean the text from each annotation
-      const highlightTexts = associatedHighlights.flatMap(({ annotation }) => {
-        // Split by newlines and process each part
-        return annotation.text
-          .split("\n")
-          .map((text) => text.trim())
-          .filter((text) => text.length > 0); // Remove empty strings
-      });
-
-      // Apply highlights
-      searchPluginInstance.highlight(highlightTexts);
+        // Apply highlights if we have any texts to highlight
+        if (highlightTexts.length > 0) {
+          searchPluginInstance.highlight(highlightTexts);
+        }
+      }, 50);
     }
 
     return () => {
       searchPluginInstance.clearHighlights();
       setDocumentLoaded(false);
     };
-  }, [associatedHighlights, documentLoaded]);
+  }, [associatedHighlights, documentLoaded, selectedFile?.id]);
 
   if (!selectedFile) return null;
   console.log("currentPage", currentPage);
