@@ -26,7 +26,6 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     selectedText,
     setAssociatedHighlights,
     setSelectedText,
-    setDocumentLoaded,
   } = useFileStore();
 
   useEffect(() => {
@@ -114,7 +113,6 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
   };
 
   const uploadFile = () => {
-    // Create hidden file input
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = ".pdf";
@@ -122,10 +120,15 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     fileInput.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
+        addLogs({
+          eventType: eventType[2],
+          content: `Uploaded new PDF file: ${file.name}`,
+          eventSource: eventSource[12],
+        });
+
         const reader = new FileReader();
         reader.onload = () => {
           const base64String = reader.result as string;
-
           createFile(highlighterState?.feedbackInfo?.id || 0, base64String);
         };
         reader.readAsDataURL(file);
@@ -133,6 +136,33 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     };
 
     fileInput.click();
+  };
+
+  const handleFileSelection = (file: any) => {
+    if (selectedFile?.id === file.id) {
+      addLogs({
+        eventType: eventType[6],
+        content: `Closed PDF file: ${file.id}`,
+        eventSource: eventSource[12],
+      });
+      setSelectedFile(null);
+      return;
+    }
+
+    addLogs({
+      eventType: eventType[1],
+      content: `Selected PDF file: ${file.id}`,
+      eventSource: eventSource[12],
+    });
+
+    if (feedback.highlights) {
+      const associatedHighlights = feedback.highlights.filter(
+        (highlight) =>
+          highlight?.annotation?.startMeta?.parentTagName === file.id.toString()
+      );
+      setAssociatedHighlights(associatedHighlights);
+    }
+    setSelectedFile(file);
   };
 
   return (
@@ -233,23 +263,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                     height: 40,
                   }}
                   key={file.id}
-                  onClick={() => {
-                    if (selectedFile?.id === file.id) {
-                      setSelectedFile(null);
-                      return;
-                    }
-                    // set the file
-
-                    if (feedback.highlights) {
-                      const associatedHighlights = feedback.highlights.filter(
-                        (highlight) =>
-                          highlight?.annotation?.startMeta?.parentTagName ===
-                          file.id.toString()
-                      );
-                      setAssociatedHighlights(associatedHighlights);
-                    }
-                    setSelectedFile(file);
-                  }}
+                  onClick={() => handleFileSelection(file)}
                 >
                   {`PDF - ${index + 1}`}
                 </div>
@@ -282,6 +296,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
             {annotationTags.map((tag) => {
               return (
                 <div
+                  key={tag}
                   style={{
                     border: "1px solid black",
                     display: "flex",
@@ -293,11 +308,19 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                     backgroundColor:
                       selectedTag === tag ? "lightblue" : "white",
                   }}
-                  onClick={() => setSelectedTag(tag)}
+                  onClick={() => {
+                    setSelectedTag(tag);
+                    addLogs({
+                      eventType: eventType[0], // click
+                      content: `Selected annotation tag: ${tag}`,
+                      eventSource: eventSource[12], // pdf
+                    });
+                  }}
                 >
                   <img
                     src={annotationTagsIcons[tag]}
                     style={{ width: 50, height: 25 }}
+                    alt={tag}
                   />
                   <p style={{ textAlign: "center" }}>{tag}</p>
                 </div>
@@ -318,7 +341,14 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                 marginTop: 20,
               }}
               disabled={!selectedText && !selectedTag}
-              onClick={() => createHighLight()}
+              onClick={() => {
+                addLogs({
+                  eventType: eventType[2], // create
+                  content: `Created highlight with tag ${selectedTag}`,
+                  eventSource: eventSource[12], // pdf
+                });
+                createHighLight();
+              }}
             >
               Create Highlight
             </Button>
@@ -329,7 +359,14 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                 marginTop: 20,
               }}
               disabled={!selectedText && !selectedTag}
-              onClick={() => setSelectedText("")}
+              onClick={() => {
+                addLogs({
+                  eventType: eventType[8], // delete
+                  content: "Cleared highlight selection",
+                  eventSource: eventSource[12], // pdf
+                });
+                setSelectedText("");
+              }}
             >
               Clear Highlight
             </Button>

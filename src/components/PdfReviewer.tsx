@@ -4,6 +4,7 @@ import { useFileStore } from "../store/fileStore";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import { searchPlugin, RenderHighlightsProps } from "@react-pdf-viewer/search";
 import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
+import { addLogs, eventType, eventSource } from "../services/logs.serivce";
 
 // Import CSS styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -97,12 +98,52 @@ const PdfReviewer: React.FC = () => {
     }
   }, [currentPage, documentLoaded, handleJumpToPage]);
 
+  // Add logging when PDF is opened
+  useEffect(() => {
+    if (selectedFile && documentLoaded) {
+      addLogs({
+        eventType: eventType[1], // "open"
+        content: `Opened PDF file: ${selectedFile.id}`,
+        eventSource: eventSource[12], // "pdf"
+      });
+    }
+  }, [selectedFile, documentLoaded]);
+
+  // Modify the page change handler to include logging
+  const handlePageChange = (e: PageChangeEvent) => {
+    setCurrentPage(e.currentPage);
+    addLogs({
+      eventType: eventType[7], // "navigate"
+      content: `Navigated to page ${e.currentPage} in PDF ${selectedFile?.id}`,
+      eventSource: eventSource[12], // "pdf"
+    });
+  };
+
+  // Modify the close handler to include logging
+  const handleClose = () => {
+    addLogs({
+      eventType: eventType[6], // "close"
+      content: `Closed PDF file: ${selectedFile?.id}`,
+      eventSource: eventSource[12], // "pdf"
+    });
+    setSelectedFile(null);
+  };
+
+  // Modify the selection change handler to include logging
   useEffect(() => {
     const handleSelectionChange = () => {
       const selection = window.getSelection();
+      const selectedStr = selection?.toString().trim();
 
-      if (selection && selection.toString().length > 0) {
-        setSelectedText(selection.toString().trim());
+      if (selection && selectedStr && selectedStr.length > 0) {
+        setSelectedText(selectedStr);
+        addLogs({
+          eventType: eventType[4], // "typing"
+          content: `Selected text in PDF ${
+            selectedFile?.id
+          }: ${selectedStr.substring(0, 100)}...`,
+          eventSource: eventSource[12], // "pdf"
+        });
       }
     };
 
@@ -175,9 +216,7 @@ const PdfReviewer: React.FC = () => {
         onDocumentLoad={() => {
           setDocumentLoaded(true);
         }}
-        onPageChange={(e: PageChangeEvent) => {
-          setCurrentPage(e.currentPage);
-        }}
+        onPageChange={handlePageChange}
         initialPage={currentPage}
       />
 
@@ -190,7 +229,7 @@ const PdfReviewer: React.FC = () => {
           borderRadius: "10px",
           padding: "1%",
         }}
-        onClick={() => setSelectedFile(null)}
+        onClick={handleClose}
       >
         Close
       </button>
