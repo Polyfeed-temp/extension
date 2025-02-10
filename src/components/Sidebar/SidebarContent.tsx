@@ -9,7 +9,8 @@ type SidebarTab =
   | "Summary"
   | "My Notes"
   | "Highlight Texts"
-  | "Select Assignment";
+  | "Select Assignment"
+  | "Request Feedback";
 
 import { SummaryCard, UnitAssignmentSummary } from "./tabs/SummaryCard";
 import { CurrentFeedbackSummary } from "../MyNotesSummaryCard";
@@ -23,6 +24,7 @@ import config from "../../config.json";
 import { ExplainFutherToggle } from "./ExplainFutherInput";
 import { addLogs, eventType, eventSource } from "../../services/logs.serivce";
 import { PdfManagement } from "./PdfManagement";
+import { RequestFeedbackTab } from "./tabs/RequestFeedbackTab";
 
 function RenderTabs({
   currentTab,
@@ -181,6 +183,8 @@ function RenderTabs({
           ></RateFeedbackTab>
         </div>
       );
+    case "Request Feedback":
+      return <RequestFeedbackTab />;
   }
 }
 
@@ -215,71 +219,95 @@ const SidebarPanel = () => {
     <>
       {userState.login && (
         <div style={{ width: "100%", boxSizing: "border-box" }}>
-          <div id="content" className="p-6 text-center gap-x-4 relative">
-            <div className="flex">
-              <Button
-                className={`${
-                  currentTab != "Summary"
-                    ? "bg-black text-white"
-                    : "bg-gray text-black"
-                } flex-1`}
-                onClick={() => {
-                  setCurrentTab("My Notes");
+          <div id="content" className="p-6 text-center relative">
+            <div className="overflow-x-auto pb-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 min-w-[600px]">
+                <Button
+                  className={`${
+                    currentTab === "Request Feedback"
+                      ? "bg-black text-white"
+                      : "bg-gray text-black"
+                  }`}
+                  onClick={() => {
+                    setCurrentTab("Request Feedback");
+                    addLogs({
+                      eventType: eventType[7],
+                      content: JSON.stringify({
+                        currentTab,
+                        navigateTo: "Request Feedback",
+                      }),
+                      eventSource: eventSource[11],
+                    });
+                  }}
+                >
+                  Request Feedback
+                </Button>
 
-                  addLogs({
-                    eventType: eventType[7],
-                    content: JSON.stringify({
-                      currentTab,
-                      navigateTo: "My Notes",
-                    }),
-                    eventSource: eventSource[11],
-                  });
-                }}
-              >
-                My Notes
-              </Button>
-              <Button
-                className={`${
-                  currentTab === "Summary"
-                    ? "bg-black text-white"
-                    : "bg-gray text-black"
-                } flex-1 ml-2`}
-                onClick={() => {
-                  setCurrentTab("Summary");
-                  highlighterDispatch({
-                    type: "SET_IS_HIGHLIGHTING",
-                    payload: false,
-                  });
+                <Button
+                  className={`${
+                    currentTab != "Summary" && currentTab != "Request Feedback"
+                      ? "bg-black text-white"
+                      : "bg-gray text-black"
+                  }`}
+                  onClick={() => {
+                    setCurrentTab("My Notes");
+                    addLogs({
+                      eventType: eventType[7],
+                      content: JSON.stringify({
+                        currentTab,
+                        navigateTo: "My Notes",
+                      }),
+                      eventSource: eventSource[11],
+                    });
+                  }}
+                >
+                  My Notes
+                </Button>
 
-                  addLogs({
-                    eventType: eventType[7],
-                    content: JSON.stringify({
-                      currentTab,
-                      navigateTo: "Summery",
-                    }),
-                    eventSource: eventSource[11],
-                  });
-                }}
-              >
-                Summary
-              </Button>
-              <Button
-                className="bg-gray text-black flex-1 ml-2"
-                onClick={() => {
-                  window.open(config.dashboard, "_blank");
-                  addLogs({
-                    eventType: eventType[7],
-                    content: JSON.stringify({
-                      currentTab,
-                      navigateTo: "Dashboard",
-                    }),
-                    eventSource: eventSource[11],
-                  });
-                }}
-              >
-                Dashboard
-              </Button>
+                <Button
+                  className={`${
+                    currentTab === "Summary"
+                      ? "bg-black text-white"
+                      : "bg-gray text-black"
+                  }`}
+                  onClick={() => {
+                    setCurrentTab("Summary");
+                    highlighterDispatch({
+                      type: "SET_IS_HIGHLIGHTING",
+                      payload: false,
+                    });
+                    addLogs({
+                      eventType: eventType[7],
+                      content: JSON.stringify({
+                        currentTab,
+                        navigateTo: "Summary",
+                      }),
+                      eventSource: eventSource[11],
+                    });
+                  }}
+                >
+                  Summary
+                </Button>
+
+                <Button
+                  className="bg-gray text-black"
+                  onClick={() => {
+                    window.open(config.dashboard, "_blank");
+                    addLogs({
+                      eventType: eventType[7],
+                      content: JSON.stringify({
+                        currentTab,
+                        navigateTo: "Dashboard",
+                      }),
+                      eventSource: eventSource[11],
+                    });
+                  }}
+                >
+                  Dashboard
+                </Button>
+              </div>
             </div>
+
             <hr className="my-4" />
             {loading ? (
               <div className="center animate-spin rounded-full border-t-4 border-black border-b-4 border-black-500 border-opacity-25 h-12 w-12"></div>
