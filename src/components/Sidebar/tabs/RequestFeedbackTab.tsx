@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 import { getAllUnits } from "../../../services/unit.service";
 import { Assessment, Unit } from "../../../types";
 import SearchableSelect from "../SearchableSelect";
+import { useFeedbackRequestStore } from "../../../store/feedbackRequestStore";
+import { toast } from "react-toastify";
 
 export interface RubricItem {
   id: string;
@@ -181,6 +183,9 @@ export const RequestFeedbackTab = () => {
     previousFeedbackUsage: "",
   });
 
+  // Add store
+  const { submitFeedbackRequest, loading } = useFeedbackRequestStore();
+
   // Fetch units on component mount
   useEffect(() => {
     getAllUnits().then((res) => {
@@ -220,8 +225,30 @@ export const RequestFeedbackTab = () => {
 
   const handleSubmit = async () => {
     try {
-      // TODO: Add your API call here
-      console.log("Submitting feedback request:", feedbackRequest);
+      if (!feedbackRequest.assignmentId) {
+        toast.error("Please select an assignment");
+        return;
+      }
+
+      if (feedbackRequest.rubricItems.length === 0) {
+        toast.error("Please add at least one rubric item");
+        return;
+      }
+
+      await submitFeedbackRequest({
+        assignmentId: feedbackRequest.assignmentId,
+        rubricItems: feedbackRequest.rubricItems,
+        previousFeedbackUsage: feedbackRequest.previousFeedbackUsage,
+      });
+
+      // Reset form after successful submission
+      setFeedbackRequest({
+        assignmentId: 0,
+        rubricItems: [],
+        previousFeedbackUsage: "",
+      });
+
+      setSelectedUnit(null);
     } catch (error) {
       console.error("Error submitting feedback request:", error);
     }
@@ -372,8 +399,16 @@ export const RequestFeedbackTab = () => {
 
       {/* Footer */}
       <div style={styles.footer}>
-        <button style={styles.submitButton} onClick={handleSubmit}>
-          Submit Request
+        <button
+          style={{
+            ...styles.submitButton,
+            opacity: loading ? 0.7 : 1,
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Submitting..." : "Submit Request"}
         </button>
       </div>
     </div>
