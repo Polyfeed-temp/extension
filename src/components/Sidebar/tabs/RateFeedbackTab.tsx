@@ -25,9 +25,11 @@ export const RateFeedbackTab = ({
     useState(rating.evaluativeJudgement);
   const [feedbackUsability, setFeedbackUsability] = useState(rating.usability);
   const [feedbackEmotion, setFeedbackEmotion] = useState(rating.emotion);
+  const [feedbackQuestion, setFeedbackQuestion] = useState("");
+  const [feedbackComment, setFeedbackComment] = useState("");
 
   const rateFeedbackStatements = [
-    "is easy to understand",
+    "matches my belief of my own performance",
     "relates to my work",
     "helps me to critically evaluate my work",
     "can be used even after this unit",
@@ -119,6 +121,8 @@ export const RateFeedbackTab = ({
         evaluativeJudgement: feedbackEvaluativeJudgement,
         usability: feedbackUsability,
         emotion: feedbackEmotion,
+        furtherQuestions: feedbackQuestion,
+        comment: feedbackComment,
       };
       const submission = new AnnotationService().rateFeedback(
         feedbackId,
@@ -157,43 +161,84 @@ export const RateFeedbackTab = ({
     feedbackEmotion,
   ]);
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-xl shadow-sm my-6">
       <button
         onClick={toggleDropdown}
-        className="flex justify-between items-center bg-gray-200 font-medium text-xl p-2 w-full text-left"
+        className="flex justify-between items-center bg-gray-100 hover:bg-gray-200 transition-colors font-medium text-xl p-4 w-full text-left rounded-t-xl"
       >
         <span>{!isDropdownOpen ? "Rate this feedback" : "This Feedback"}</span>
         {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
-      {isDropdownOpen &&
-        rateFeedbackStatements.map((feedback, index) => (
-          <div
-            key={index}
-            className="flex justify-between items-center mb-2 p-2 text-left"
-          >
-            <span className="flex-1">{feedback}</span>
-            <div className="flex items-center">
-              {Object.entries(emoticons).map(([color, icon]) => (
-                <button
-                  key={color}
-                  className="ml-2"
-                  onClick={() => handleEmoticonClick(index, color)}
-                >
-                  <img
-                    src={
-                      ratingArray[index] === colorToRating(color) ||
-                      ratingArray[index] === 0
-                        ? icon
-                        : emoticonsInversed[color]
-                    }
-                    alt={color}
-                    style={{ width: 40, height: 40 }}
-                  />
-                </button>
-              ))}
+      {isDropdownOpen && (
+        <div className="p-6">
+          {rateFeedbackStatements.map((feedback, index) => (
+            <div
+              key={index}
+              className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 text-left hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <span className="flex-1">{feedback}</span>
+              <div className="flex items-center">
+                {Object.entries(emoticons).map(([color, icon]) => (
+                  <button
+                    key={color}
+                    className="ml-2"
+                    onClick={() => handleEmoticonClick(index, color)}
+                  >
+                    <img
+                      src={
+                        ratingArray[index] === colorToRating(color) ||
+                        ratingArray[index] === 0
+                          ? icon
+                          : emoticonsInversed[color]
+                      }
+                      alt={color}
+                      style={{ width: 40, height: 40 }}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
+          ))}
+
+          <div className="space-y-6 pt-6 border-t mt-2">
+            <div>
+              <p className="mb-3 font-medium text-gray-700">
+                Ask further questions?
+              </p>
+              <textarea
+                placeholder="Type your question/s here"
+                className="w-full p-3 border rounded-lg min-h-[80px] resize-y focus:ring-2 focus:ring-blue-100 focus:border-blue-300 focus:outline-none transition-all"
+                value={feedbackQuestion}
+                onChange={(e) => setFeedbackQuestion(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <p className="mb-3 font-medium text-gray-700">
+                Share further comments?
+              </p>
+              <textarea
+                placeholder="Type your comment here"
+                className="w-full p-3 border rounded-lg min-h-[80px] resize-y focus:ring-2 focus:ring-blue-100 focus:border-blue-300 focus:outline-none transition-all"
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+              />
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mt-4"
+            >
+              SAVE
+            </button>
+
+            <p className="text-sm text-gray-500 italic text-center mt-4">
+              Disclaimer: These ratings and comments may be used by teachers to
+              improve their feedback in future
+            </p>
           </div>
-        ))}
+        </div>
+      )}
     </div>
   );
 };

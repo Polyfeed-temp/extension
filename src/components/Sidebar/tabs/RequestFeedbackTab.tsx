@@ -16,7 +16,6 @@ export interface RubricItem {
 export interface FeedbackRequest {
   assignmentId: number;
   rubricItems: RubricItem[];
-  previousFeedbackUsage: string;
 }
 
 const styles = {
@@ -180,7 +179,6 @@ export const RequestFeedbackTab = () => {
   const [feedbackRequest, setFeedbackRequest] = useState<FeedbackRequest>({
     assignmentId: 0,
     rubricItems: [],
-    previousFeedbackUsage: "",
   });
 
   // Add store
@@ -238,14 +236,12 @@ export const RequestFeedbackTab = () => {
       await submitFeedbackRequest({
         assignmentId: feedbackRequest.assignmentId,
         rubricItems: feedbackRequest.rubricItems,
-        previousFeedbackUsage: feedbackRequest.previousFeedbackUsage,
       });
 
       // Reset form after successful submission
       setFeedbackRequest({
         assignmentId: 0,
         rubricItems: [],
-        previousFeedbackUsage: "",
       });
 
       setSelectedUnit(null);
@@ -378,22 +374,6 @@ export const RequestFeedbackTab = () => {
               )}
             </tbody>
           </table>
-        </div>
-
-        {/* Previous Feedback */}
-        <div style={styles.section}>
-          <label style={styles.label}>Previous Feedback Usage</label>
-          <textarea
-            placeholder="Describe how you used your previous feedback..."
-            value={feedbackRequest.previousFeedbackUsage}
-            onChange={(e) =>
-              setFeedbackRequest((prev) => ({
-                ...prev,
-                previousFeedbackUsage: e.target.value,
-              }))
-            }
-            style={styles.textarea}
-          />
         </div>
       </div>
 

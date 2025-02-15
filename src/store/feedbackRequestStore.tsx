@@ -11,7 +11,6 @@ interface RubricItemRequest {
 interface FeedbackRequest {
   assignmentId: number;
   rubricItems: RubricItemRequest[];
-  previousFeedbackUsage: string;
 }
 
 interface FeedbackRequestResponse extends FeedbackRequest {
