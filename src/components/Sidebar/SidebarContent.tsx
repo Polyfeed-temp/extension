@@ -179,6 +179,8 @@ function RenderTabs({
               evaluativeJudgement: feedback?.evaluativeJudgement || 0,
               usability: feedback?.usability || 0,
               emotion: feedback?.emotion || 0,
+              furtherQuestions: feedback?.furtherQuestions || "",
+              comment: feedback?.comment || "",
             }}
           ></RateFeedbackTab>
         </div>

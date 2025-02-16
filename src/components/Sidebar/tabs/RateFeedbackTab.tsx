@@ -16,6 +16,7 @@ export const RateFeedbackTab = ({
   feedbackId: number;
   rating: FeedbackRating;
 }) => {
+  console.log("rating", rating);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [feedbackClarity, setFeedbackClarity] = useState(rating.clarity);
   const [feedbackPersonalised, setFeedbackPersonalised] = useState(
@@ -25,8 +26,10 @@ export const RateFeedbackTab = ({
     useState(rating.evaluativeJudgement);
   const [feedbackUsability, setFeedbackUsability] = useState(rating.usability);
   const [feedbackEmotion, setFeedbackEmotion] = useState(rating.emotion);
-  const [feedbackQuestion, setFeedbackQuestion] = useState("");
-  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackQuestion, setFeedbackQuestion] = useState(
+    rating.furtherQuestions || ""
+  );
+  const [feedbackComment, setFeedbackComment] = useState(rating.comment || "");
 
   const rateFeedbackStatements = [
     "matches my belief of my own performance",
@@ -145,6 +148,7 @@ export const RateFeedbackTab = ({
       });
     }
   };
+
   const firstRender = useRef(true);
   useEffect(() => {
     //do not submitt after first render
@@ -160,6 +164,7 @@ export const RateFeedbackTab = ({
     feedbackUsability,
     feedbackEmotion,
   ]);
+
   return (
     <div className="border rounded-xl shadow-sm my-6">
       <button
