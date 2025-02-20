@@ -18,6 +18,10 @@ export const RateFeedbackTab = ({
 }) => {
   console.log("rating", rating);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const [feedbackPerformance, setFeedbackPerformance] = useState(
+    rating.performance
+  );
   const [feedbackClarity, setFeedbackClarity] = useState(rating.clarity);
   const [feedbackPersonalised, setFeedbackPersonalised] = useState(
     rating.personalise
@@ -33,12 +37,14 @@ export const RateFeedbackTab = ({
 
   const rateFeedbackStatements = [
     "matches my belief of my own performance",
-    "relates to my work",
+    "is easy to understand",
+    "related to my work",
     "helps me to critically evaluate my work",
-    "can be used even after this unit",
+    "can be used in my current and future studies",
     "makes me feel positive",
   ];
   const rateFeedbackStatmentsFunction = [
+    setFeedbackPerformance,
     setFeedbackClarity,
     setFeedbackPersonalised,
     setFeedbackEvaluativeJudgement,
@@ -46,6 +52,7 @@ export const RateFeedbackTab = ({
     setFeedbackEmotion,
   ];
   const ratingArray = [
+    feedbackPerformance,
     feedbackClarity,
     feedbackPersonalised,
     feedbackEvaluativeJudgement,
@@ -63,7 +70,7 @@ export const RateFeedbackTab = ({
       case "green":
         return 4;
       default:
-        return 10;
+        return 1;
     }
   };
   const handleEmoticonClick = (ratingIndex: number, color: string) => {
@@ -112,6 +119,7 @@ export const RateFeedbackTab = ({
   );
   const handleSubmit = () => {
     if (
+      feedbackPerformance &&
       feedbackClarity &&
       feedbackPersonalised &&
       feedbackEvaluativeJudgement &&
@@ -119,6 +127,7 @@ export const RateFeedbackTab = ({
       feedbackEmotion
     ) {
       const feedback = {
+        performance: feedbackPerformance,
         clarity: feedbackClarity,
         personalise: feedbackPersonalised,
         evaluativeJudgement: feedbackEvaluativeJudgement,

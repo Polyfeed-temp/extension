@@ -62,7 +62,7 @@ export interface Feedback {
   gptQueryText?: string;
   gptResponse?: string;
   gptResponseRating?: number;
-  performance?: string;
+  performance?: number;
   feedbackUseful?: string;
   furtherQuestions?: string;
   comment?: string;
@@ -76,6 +76,7 @@ export interface FeedbackRating {
   emotion: number;
   furtherQuestions?: string;
   comment?: string;
+  performance?: number;
 }
 export interface Assessment {
   id: number;
