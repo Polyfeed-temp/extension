@@ -16,36 +16,8 @@ export function SelectUnitAssignmentTab({
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assessment | null>(null);
-  const [mark, setMark] = useState<number | null>(null);
-  // const [marker, setMarker] = useState<string | null>("");
-
-  const [performance, setPerformance] = useState("");
-  const [feedbackUsefulness, setFeedbackUsefulness] = useState("");
-
-  // Options for performance dropdown
-
-  const performanceOptions = [
-    {
-      value: "as_expected",
-      label: "  Yes, it's about what I thought.",
-    },
-    {
-      value: "better_than_thought",
-      label: "No, my performance was better than I thought.",
-    },
-    {
-      value: "worse_than_thought",
-      label: "No, my performance was worse than I thought.",
-    },
-  ];
-
-  // Options for feedback usefulness dropdown
-  const feedbackUsefulnessOptions = [
-    { value: "very_useful", label: "Very Useful" },
-    { value: "moderately_useful", label: "Moderately Useful" },
-    { value: "slightly_useful", label: "Slightly Useful" },
-    { value: "not_useful_at_all", label: "Not Useful At All" },
-  ];
+  const [yourMark, setYourMark] = useState<number | null>(null);
+  const [totalMark, setTotalMark] = useState<number | null>(null);
 
   const highlightterDispatch = useHighlighterDispatch();
   const user = useUserState().user;
@@ -69,160 +41,119 @@ export function SelectUnitAssignmentTab({
     setSelectedAssignment(selectedAssignment || null);
   };
 
-  const handleMarksChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(event.target.value);
-    setMark(isNaN(value) ? null : value);
-  };
-
   return (
-    <div className="flex flex-col h-full">
-      <h1 className="text-xl font-semibold">Select assessment feedback</h1>
-      <div className="relative mt-2 rounded-md shadow-sm">
-        <SearchableSelect
-          options={units}
-          displayFunction={(option) =>
-            `${option.unitCode} - Year: ${option.year}, Semester: ${option.semester}`
-          }
-          filterFunction={(option, searchTerm) =>
-            `${option.unitCode} ${option.year} S${option.semester}`
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
-          }
-          onSelectFunction={(selectedUnit: Unit) =>
-            setSelectedUnit(selectedUnit)
-          }
-        ></SearchableSelect>
-      </div>
+    <div className="flex flex-col h-full p-4 space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900">
+        Select Assessment Feedback
+      </h1>
 
-      {selectedUnit && (
-        <div className="relative mt-2 rounded-md shadow-sm">
-          {selectedUnit.assessments ? (
-            <select
-              id="assignment"
-              name="assignment"
-              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              onChange={handleAssignmentChange}
-            >
-              <option value="" disabled selected>
-                Select an assignment
-              </option>
-              {selectedUnit.assessments.map((assignment) => (
-                <option key={assignment.id} value={assignment.id}>
-                  {assignment.assessmentName}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="flex justify-center items-center h-10">
-              <span className="font-medium">No assignments found</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {selectedUnit && selectedAssignment && (
-        <div className="relative mt-2 rounded-md shadow-sm">
-          <input
-            type="number"
-            min="0"
-            max={100}
-            id="marks"
-            name="marks"
-            value={mark || ""}
-            onChange={handleMarksChange}
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder="Enter marks"
-            required
-          />
-          {/* <input
-            id="markers"
-            name="markers"
-            value={marker || ""}
-            onChange={handleMarkerChange}
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            placeholder="Marker"
-          /> */}
-
-          <div
-            className="flex flex-col space-y-4"
-            style={{
-              marginTop: 20,
-            }}
+      <div className="space-y-4">
+        {/* Unit Selection */}
+        <div>
+          <label
+            htmlFor="unit"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
-            {/* Performance Evaluation */}
-            <div>
-              <div className="mb-2">
-                <label
-                  htmlFor="performance"
-                  className="block text-sm font-medium text-gray-700 text-left mt-m"
-                >
-                  Does the feedback match your belief of your performance?
-                </label>
-              </div>
-              <select
-                id="performance"
-                className="w-full bg-gray-200 border border-gray-200 text-gray-700 py-2 px-3 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                value={performance}
-                onChange={(e) => setPerformance(e.target.value)}
-              >
-                <option key={"default-performance"} disabled value={""}>
-                  Please Select
-                </option>
-                {performanceOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            Select Unit
+          </label>
+          <SearchableSelect
+            options={units}
+            displayFunction={(option) =>
+              `${option.unitCode} - Year: ${option.year}, Semester: ${option.semester}`
+            }
+            filterFunction={(option, searchTerm) =>
+              `${option.unitCode} ${option.year} S${option.semester}`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+            }
+            onSelectFunction={(selectedUnit: Unit) =>
+              setSelectedUnit(selectedUnit)
+            }
+          />
+        </div>
 
-            {/* Feedback Usefulness */}
-            <div>
-              <div className="mb-2">
-                <label
-                  htmlFor="feedback_usefulness"
-                  className="block text-sm font-medium text-gray-700 text-left mt-m"
-                >
-                  Is the feedback useful to your learning?
-                </label>
-              </div>
+        {/* Assignment Selection */}
+        {selectedUnit && (
+          <div>
+            <label
+              htmlFor="assignment"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Select Assignment
+            </label>
+            {selectedUnit.assessments ? (
               <select
-                id="feedback_usefulness"
-                className="w-full bg-gray-200 border border-gray-200 text-gray-700 py-2 px-3 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                value={feedbackUsefulness}
-                onChange={(e) => setFeedbackUsefulness(e.target.value)}
+                id="assignment"
+                name="assignment"
+                className="block w-full rounded-md border-gray-300 shadow-sm py-2 pl-3 pr-10 text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 sm:text-sm"
+                onChange={handleAssignmentChange}
               >
-                <option key={"default-feedbackUsefulness"} disabled value={""}>
-                  Please Select
+                <option value="" disabled selected>
+                  Select an assignment
                 </option>
-                {feedbackUsefulnessOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                {selectedUnit.assessments.map((assignment) => (
+                  <option key={assignment.id} value={assignment.id}>
+                    {assignment.assessmentName}
                   </option>
                 ))}
               </select>
+            ) : (
+              <div className="flex justify-center items-center h-10 bg-gray-50 rounded-md">
+                <span className="text-gray-500">No assignments found</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Marks Input */}
+        {selectedUnit && selectedAssignment && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Enter Marks
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={yourMark || ""}
+                onChange={(e) =>
+                  setYourMark(e.target.value ? Number(e.target.value) : null)
+                }
+                placeholder="Your mark"
+                className="p-2 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
+                style={{ width: "100%" }}
+                min="0"
+              />
+              <span className="text-gray-700 font-medium">/</span>
+              <input
+                type="number"
+                value={totalMark || ""}
+                onChange={(e) =>
+                  setTotalMark(e.target.value ? Number(e.target.value) : null)
+                }
+                placeholder="Total"
+                className="p-2 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
+                style={{ width: "100%" }}
+                min="1"
+              />
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {selectedUnit && selectedAssignment && (
-        <div className="relative mt-5 rounded-md shadow-sm">
+        {/* Start Button */}
+        {selectedUnit && selectedAssignment && (
           <Button
             fullWidth
-            className="bg-black"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-md transition-colors duration-200"
             onClick={async () => {
               const feedback: Feedback = {
                 id: 0, //temp id
                 assessmentId: selectedAssignment.id,
                 assessmentName: selectedAssignment.assessmentName,
                 unitCode: selectedUnit.unitCode,
-                mark: mark || 0,
+                mark: yourMark || 0,
                 studentEmail: user?.email || "",
-                performance: performance,
-                feedbackUseful: feedbackUsefulness,
-                // marker: marker || "",
                 url: window.location.href,
+                totalMark: totalMark || 0,
               };
               try {
                 const status = new AnnotationService().createFeedback(feedback);
@@ -245,16 +176,17 @@ export function SelectUnitAssignmentTab({
               } catch (error) {}
             }}
           >
-            Start highlighting
+            Start Highlighting
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
-      <div className="mt-10 text-sm">
-        <h5>
+      {/* Help Text */}
+      <div className="mt-auto pt-4 border-t border-gray-200">
+        <p className="text-sm text-gray-600">
           Start highlighting the feedback you received to create your own
           learning plan.
-        </h5>
+        </p>
       </div>
     </div>
   );
