@@ -24,24 +24,30 @@ interface FeedbackRequestStore {
   // State
   loading: boolean;
   currentRequest: FeedbackRequestResponse | null;
+  feedbackRequests: FeedbackRequestResponse[];
 
   // Setters
   setLoading: (loading: boolean) => void;
   setCurrentRequest: (request: FeedbackRequestResponse | null) => void;
+  setFeedbackRequests: (requests: FeedbackRequestResponse[]) => void;
 
   // API Actions
   submitFeedbackRequest: (request: FeedbackRequest) => Promise<void>;
+  getFeedbackRequestByAssignment: (assignmentId: number) => Promise<void>;
 }
 
 export const useFeedbackRequestStore = create<FeedbackRequestStore>((set) => ({
   // Initial state
   loading: false,
   currentRequest: null,
+  feedbackRequests: [],
 
   // Setters
   setLoading: (loading: boolean) => set({ loading }),
   setCurrentRequest: (request: FeedbackRequestResponse | null) =>
     set({ currentRequest: request }),
+  setFeedbackRequests: (requests: FeedbackRequestResponse[]) =>
+    set({ feedbackRequests: requests }),
 
   // API Actions
   submitFeedbackRequest: async (request: FeedbackRequest) => {
@@ -72,6 +78,29 @@ export const useFeedbackRequestStore = create<FeedbackRequestStore>((set) => ({
       set({ loading: false });
       toast.error("Error submitting feedback request");
       console.error("Error submitting feedback request:", error);
+      throw error;
+    }
+  },
+
+  // Get feedback request by assignment ID
+  getFeedbackRequestByAssignment: async (assignmentId: number) => {
+    try {
+      set({ loading: true });
+
+      const response = await axios.get(
+        `/api/feedback-requests/${assignmentId}`
+      );
+
+      set({
+        currentRequest: response.data,
+        loading: false,
+      });
+
+      return response.data;
+    } catch (error) {
+      set({ loading: false });
+      toast.error("Error fetching feedback request");
+      console.error("Error fetching feedback request:", error);
       throw error;
     }
   },

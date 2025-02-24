@@ -173,7 +173,13 @@ const styles = {
   },
 };
 
-export const RequestFeedbackTab = () => {
+interface RequestFeedbackTabProps {
+  assignmentId?: number;
+}
+
+export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
+  assignmentId,
+}) => {
   const [units, setUnits] = useState<Unit[]>([]);
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [feedbackRequest, setFeedbackRequest] = useState<FeedbackRequest>({
@@ -181,8 +187,14 @@ export const RequestFeedbackTab = () => {
     rubricItems: [],
   });
 
-  // Add store
-  const { submitFeedbackRequest, loading } = useFeedbackRequestStore();
+  // Add store hooks
+  const {
+    submitFeedbackRequest,
+    getFeedbackRequestByAssignment,
+    loading,
+    currentRequest,
+    feedbackRequests,
+  } = useFeedbackRequestStore();
 
   // Fetch units on component mount
   useEffect(() => {
@@ -190,6 +202,35 @@ export const RequestFeedbackTab = () => {
       setUnits(res);
     });
   }, []);
+
+  // Load existing request if assignmentId is provided
+  useEffect(() => {
+    console.log("currentRequest,currentRequest", currentRequest);
+    if (currentRequest?.assignmentId) {
+      getFeedbackRequestByAssignment(currentRequest.assignmentId);
+    }
+  }, [currentRequest?.assignmentId, getFeedbackRequestByAssignment]);
+
+  // Update form when currentRequest changes
+  useEffect(() => {
+    if (currentRequest) {
+      // Find and set the unit based on the assignment
+      const unit = units.find((u) =>
+        u.assessments?.some((a) => a.id === currentRequest.assignmentId)
+      );
+      setSelectedUnit(unit || null);
+
+      // Update feedback request state
+      setFeedbackRequest({
+        assignmentId: currentRequest.assignmentId,
+        rubricItems: currentRequest.rubricItems.map((item) => ({
+          id: uuidv4(),
+          item: item.item,
+          comments: item.comments,
+        })),
+      });
+    }
+  }, [currentRequest, units]);
 
   const addRubricItem = () => {
     setFeedbackRequest((prev) => ({
@@ -237,17 +278,18 @@ export const RequestFeedbackTab = () => {
         assignmentId: feedbackRequest.assignmentId,
         rubricItems: feedbackRequest.rubricItems,
       });
-
-      // Reset form after successful submission
-      setFeedbackRequest({
-        assignmentId: 0,
-        rubricItems: [],
-      });
-
-      setSelectedUnit(null);
     } catch (error) {
       console.error("Error submitting feedback request:", error);
     }
+  };
+
+  // Add assignment selection handler
+  const handleAssignmentSelect = (assignmentId: number) => {
+    setFeedbackRequest((prev) => ({
+      ...prev,
+      assignmentId,
+    }));
+    getFeedbackRequestByAssignment(assignmentId);
   };
 
   return (
@@ -286,11 +328,9 @@ export const RequestFeedbackTab = () => {
                 style={styles.input}
                 onChange={(e) => {
                   const assignmentId = parseInt(e.target.value);
-                  setFeedbackRequest((prev) => ({
-                    ...prev,
-                    assignmentId: assignmentId,
-                  }));
+                  handleAssignmentSelect(assignmentId);
                 }}
+                value={feedbackRequest.assignmentId || ""}
               >
                 <option value="" disabled selected>
                   Select an assignment
@@ -375,6 +415,35 @@ export const RequestFeedbackTab = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Optional: Display existing feedback requests if any */}
+        {feedbackRequests.length > 0 && (
+          <div style={styles.section}>
+            <h3
+              style={{ fontSize: "14px", fontWeight: 500, marginBottom: "8px" }}
+            >
+              Existing Feedback Requests
+            </h3>
+            <div style={{ marginBottom: "16px" }}>
+              {feedbackRequests.map((request) => (
+                <div
+                  key={request.id}
+                  style={{
+                    padding: "12px",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "6px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <div style={{ fontWeight: 500 }}>Request #{request.id}</div>
+                  <div style={{ color: "#6b7280", fontSize: "14px" }}>
+                    {request.rubricItems.length} items
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
@@ -382,13 +451,21 @@ export const RequestFeedbackTab = () => {
         <button
           style={{
             ...styles.submitButton,
-            opacity: loading ? 0.7 : 1,
-            cursor: loading ? "not-allowed" : "pointer",
+            opacity:
+              loading || feedbackRequest.rubricItems.length === 0 ? 0.7 : 1,
+            cursor:
+              loading || feedbackRequest.rubricItems.length === 0
+                ? "not-allowed"
+                : "pointer",
           }}
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || feedbackRequest.rubricItems.length === 0}
         >
-          {loading ? "Submitting..." : "Submit Request"}
+          {loading
+            ? "Submitting..."
+            : feedbackRequest.rubricItems.length === 0
+            ? "Add rubric items to submit"
+            : "Submit Request"}
         </button>
       </div>
     </div>
