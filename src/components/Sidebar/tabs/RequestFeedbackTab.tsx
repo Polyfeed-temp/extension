@@ -229,6 +229,12 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
           comments: item.comments,
         })),
       });
+    } else {
+      // Clear rubric items when no data is found
+      setFeedbackRequest((prev) => ({
+        ...prev,
+        rubricItems: [],
+      }));
     }
   }, [currentRequest, units]);
 

@@ -43,9 +43,7 @@ export function SelectUnitAssignmentTab({
 
   return (
     <div className="flex flex-col h-full p-4 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">
-        Select Assessment Feedback
-      </h1>
+      <h1 className="text-2xl font-bold text-gray-900">Select Assessment</h1>
 
       <div className="space-y-4">
         {/* Unit Selection */}
