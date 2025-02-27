@@ -54,9 +54,12 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
             }}
           >
             <p className="text text-gray-700 italic">
-              {annotationData.annotation.annotationTag === "Action Item"
-                ? "Suggestions"
-                : annotationData.annotation.annotationTag}
+              {(() => {
+                const tag = annotationData.annotation.annotationTag;
+                if (tag === "Action Item") return "Suggestions";
+                if (tag.toLowerCase() === "confused") return "Confusion";
+                return tag;
+              })()}
             </p>
           </blockquote>
 
@@ -119,19 +122,10 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
         </CardBody>
         <CardFooter className="pt-0">
           <div className="flex justify-end">
-            {/* <IconButton
-                variant="text"
-                title="Edit Highlight notes or Action Items"
-                ripple={true}
-                onClick={() => setEditing(!editing)}
-              >
-                {EditIcon}
-              </IconButton> */}
-
             <IconButton
               onClick={() => setShowModal(true)}
               variant="text"
-              title="Delete Highlight, its notes and Action Items"
+              title="Delete Highlight, its notes and Suggestions"
               ripple={true}
             >
               {DeleteIcon}
@@ -147,7 +141,7 @@ const AnnotationCard = ({ annotationData, onDelete }: AnnotationCardProps) => {
           onDelete();
           setShowModal(false);
         }}
-        message="Deleting Highlight, its notes and Action Items. This action cannot be undone."
+        message="Deleting Highlight, its notes and Suggestions. This action cannot be undone."
       ></ConfirmationModal>
     </div>
   );

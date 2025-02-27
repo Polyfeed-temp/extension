@@ -48,7 +48,9 @@ function ToolbarMenu({
           src={annotationTagsIcons[Label]}
           style={{ width: 50, height: 25 }}
         />
-        <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>{Label}</span>
+        <span style={{ marginTop: "5px", whiteSpace: "nowrap" }}>
+          {Label === "Confused" ? "Confusion" : Label}
+        </span>
       </button>
       {/* <MenuList>
         <div

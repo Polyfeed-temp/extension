@@ -322,7 +322,9 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                     style={{ width: 50, height: 25 }}
                     alt={tag}
                   />
-                  <p style={{ textAlign: "center" }}>{tag}</p>
+                  <p style={{ textAlign: "center" }}>
+                    {tag === "Confused" ? "Confusion" : tag}
+                  </p>
                 </div>
               );
             })}
