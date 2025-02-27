@@ -371,7 +371,7 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
             <thead>
               <tr style={styles.tableHeader}>
                 <th style={styles.th}>Rubric Item</th>
-                <th style={styles.th}>Comments</th>
+                <th style={styles.th}>Feedback Requests</th>
                 <th style={{ ...styles.th, width: "40px" }}></th>
               </tr>
             </thead>
@@ -392,7 +392,7 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
                   <td style={styles.tableCell}>
                     <input
                       type="text"
-                      placeholder="Enter comments"
+                      placeholder="Enter requests"
                       value={item.comments}
                       onChange={(e) =>
                         updateRubricItem(item.id, "comments", e.target.value)
