@@ -96,8 +96,8 @@ export const SummaryCard: React.FC<Props> = ({ annotationData }) => {
                 style={{ width: 20, height: 20, marginRight: 8 }}
               />
               {category === "Confused"
-                ? "Confusion"
-                : category + ": " + counter}
+                ? `Confusion: ${counter}`
+                : `${category}: ${counter}`}
             </div>
           </div>
         );

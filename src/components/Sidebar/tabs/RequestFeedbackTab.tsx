@@ -285,7 +285,7 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
         rubricItems: feedbackRequest.rubricItems,
       });
     } catch (error) {
-      console.error("Error submitting feedback request:", error);
+      // console.error("Error submitting feedback request:", error);
     }
   };
 

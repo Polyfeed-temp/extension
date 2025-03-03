@@ -99,9 +99,9 @@ export const useFeedbackRequestStore = create<FeedbackRequestStore>((set) => ({
       return response.data;
     } catch (error) {
       set({ loading: false, currentRequest: null });
-      toast.error("Error fetching feedback request");
-      console.error("Error fetching feedback request:", error);
-      throw error;
+      // toast.error("Error fetching feedback request");
+      // console.error("Error fetching feedback request:", error);
+      // throw error;
     }
   },
 }));

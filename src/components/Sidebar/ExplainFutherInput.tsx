@@ -234,9 +234,12 @@ function ViewOnlyGPTResponse({
   ));
   return (
     <div className="mt-2">
-      <p className="underline">Submitted Highlights:</p>
-      <p className="text-left text-gray-700 italic">{query}</p>
-
+      {!attemptTime && (
+        <>
+          <p className="underline">Submitted Highlights:</p>
+          <p className="text-left text-gray-700 italic">{query}</p>
+        </>
+      )}
       <div className="border-2 bg-gray-100 p-4 text-left">
         <p className="font-bold">
           {"Explanation from Chat GPT"} {attemptTime && " (Second time)"}
