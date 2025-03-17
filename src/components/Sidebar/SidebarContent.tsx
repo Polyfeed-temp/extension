@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { Button } from "@material-tailwind/react";
+import React, { useEffect, useState } from 'react';
+import { Button } from '@material-tailwind/react';
 import {
   useHighlighterDispatch,
   useHighlighterState,
-} from "../../store/HighlightContext";
-import { AnnotationData, Feedback } from "../../types";
+} from '../../store/HighlightContext';
+import { AnnotationData, Feedback } from '../../types';
 type SidebarTab =
-  | "Summary"
-  | "My Notes"
-  | "Highlight Texts"
-  | "Select Assignment"
-  | "Request Feedback";
+  | 'Summary'
+  | 'My Notes'
+  | 'Highlight Texts'
+  | 'Select Assignment'
+  | 'Request Feedback';
 
-import { SummaryCard, UnitAssignmentSummary } from "./tabs/SummaryCard";
-import { CurrentFeedbackSummary } from "../MyNotesSummaryCard";
-import AnnotationCard from "./AnnotationCard";
-import { SelectUnitAssignmentTab } from "./tabs/StartAssignmentTab";
-import { HighlightingTab } from "./tabs/HighlightTextsTab";
-import { RateFeedbackTab } from "./tabs/RateFeedbackTab";
-import { useUserState } from "../../store/UserContext";
-import AnnotationService from "../../services/annotation.service";
-import config from "../../config.json";
-import { ExplainFutherToggle } from "./ExplainFutherInput";
-import { addLogs, eventType, eventSource } from "../../services/logs.serivce";
-import { PdfManagement } from "./PdfManagement";
-import { RequestFeedbackTab } from "./tabs/RequestFeedbackTab";
+import { SummaryCard, UnitAssignmentSummary } from './tabs/SummaryCard';
+import { CurrentFeedbackSummary } from '../MyNotesSummaryCard';
+import AnnotationCard from './AnnotationCard';
+import { SelectUnitAssignmentTab } from './tabs/StartAssignmentTab';
+import { HighlightingTab } from './tabs/HighlightTextsTab';
+import { RateFeedbackTab } from './tabs/RateFeedbackTab';
+import { useUserState } from '../../store/UserContext';
+import AnnotationService from '../../services/annotation.service';
+import config from '../../config.json';
+import { ExplainFutherToggle } from './ExplainFutherInput';
+import { addLogs, eventType, eventSource } from '../../services/logs.serivce';
+import { PdfManagement } from './PdfManagement';
+import { RequestFeedbackTab } from './tabs/RequestFeedbackTab';
 
 function RenderTabs({
   currentTab,
@@ -41,7 +41,7 @@ function RenderTabs({
   const highlighterState = useHighlighterState();
 
   switch (currentTab) {
-    case "Summary":
+    case 'Summary':
       return (
         <div className="flex flex-col gap-y-5">
           {feedbacks.map((feedback, index) => (
@@ -52,7 +52,7 @@ function RenderTabs({
           ))}
         </div>
       );
-    case "My Notes":
+    case 'My Notes':
       return (
         <>
           <hr className="my-4" />
@@ -65,11 +65,11 @@ function RenderTabs({
                 onClick={async () => {
                   await addLogs({
                     eventType: eventType[0],
-                    content: "Start Highlight",
+                    content: 'Start Highlight',
                     eventSource: eventSource[2],
                   });
 
-                  setCurrentTab("Select Assignment");
+                  setCurrentTab('Select Assignment');
                 }}
               >
                 Start Highlight
@@ -79,13 +79,13 @@ function RenderTabs({
                 {highlighterState.records && (
                   <SummaryCard annotationData={highlighterState.records} />
                 )}
-                {setCurrentTab("Highlight Texts")}
+                {setCurrentTab('Highlight Texts')}
               </>
             )}
           </div>
         </>
       );
-    case "Select Assignment":
+    case 'Select Assignment':
       return (
         <div className="mb-4">
           <SelectUnitAssignmentTab
@@ -93,18 +93,18 @@ function RenderTabs({
             switchTabFunc={() => {
               {
                 highlighterDispatch({
-                  type: "SET_IS_HIGHLIGHTING",
+                  type: 'SET_IS_HIGHLIGHTING',
                   payload: true,
                 });
               }
-              setCurrentTab("Highlight Texts");
+              setCurrentTab('Highlight Texts');
             }}
           ></SelectUnitAssignmentTab>
         </div>
       );
     //drop down for summary of feedback the tags
     //assignemnt drop down add a other option from teacher
-    case "Highlight Texts":
+    case 'Highlight Texts':
       return (
         <div className="mb-4">
           {feedback && (
@@ -117,22 +117,22 @@ function RenderTabs({
                 className="bg-black my-4 shadow-md"
                 onClick={() => {
                   highlighterDispatch({
-                    type: "SET_IS_HIGHLIGHTING",
+                    type: 'SET_IS_HIGHLIGHTING',
                     payload: !highlighterState.isHighlighting,
                   });
 
                   addLogs({
                     eventType: eventType[0],
                     content: !highlighterState.isHighlighting
-                      ? "Continue Highlighting On Website"
-                      : "Stop Highlighting",
+                      ? 'Continue Highlighting'
+                      : 'Stop Highlighting',
                     eventSource: eventSource[0],
                   });
                 }}
               >
                 {!highlighterState.isHighlighting
-                  ? "Continue Highlighting On Website"
-                  : "Stop Highlighting"}
+                  ? 'Continue Highlighting'
+                  : 'Stop Highlighting'}
               </Button>
 
               <PdfManagement feedback={feedback} />
@@ -155,7 +155,7 @@ function RenderTabs({
                     annotationData={record}
                     onDelete={() => {
                       highlighterDispatch({
-                        type: "DELETE_RECORD",
+                        type: 'DELETE_RECORD',
                         payload: record.annotation.id,
                       });
 
@@ -179,20 +179,20 @@ function RenderTabs({
               evaluativeJudgement: feedback?.evaluativeJudgement || 0,
               usability: feedback?.usability || 0,
               emotion: feedback?.emotion || 0,
-              furtherQuestions: feedback?.furtherQuestions || "",
-              comment: feedback?.comment || "",
+              furtherQuestions: feedback?.furtherQuestions || '',
+              comment: feedback?.comment || '',
               performance: feedback?.performance || 0,
             }}
           ></RateFeedbackTab>
         </div>
       );
-    case "Request Feedback":
+    case 'Request Feedback':
       return <RequestFeedbackTab />;
   }
 }
 
 const SidebarPanel = () => {
-  const [currentTab, setCurrentTab] = useState("My Notes" as SidebarTab);
+  const [currentTab, setCurrentTab] = useState('My Notes' as SidebarTab);
   const [feedbacks, setAllFeedbacks] = useState<Feedback[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -205,7 +205,7 @@ const SidebarPanel = () => {
     const fetchAnnotations = async () => {
       const feedback = await annotationService.getCurrentPageFeedback();
 
-      highlighterDispatch({ type: "INITIALIZE", payload: feedback });
+      highlighterDispatch({ type: 'INITIALIZE', payload: feedback });
       setLoading(false);
     };
     const fetchFeedbacks = async () => {
@@ -221,23 +221,23 @@ const SidebarPanel = () => {
   return (
     <>
       {userState.login && (
-        <div style={{ width: "100%", boxSizing: "border-box" }}>
+        <div style={{ width: '100%', boxSizing: 'border-box' }}>
           <div id="content" className="p-6 text-center relative">
             <div className="overflow-x-auto pb-2">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 min-w-[600px]">
                 <Button
                   className={`${
-                    currentTab === "Request Feedback"
-                      ? "bg-black text-white"
-                      : "bg-gray text-black"
+                    currentTab === 'Request Feedback'
+                      ? 'bg-black text-white'
+                      : 'bg-gray text-black'
                   }`}
                   onClick={() => {
-                    setCurrentTab("Request Feedback");
+                    setCurrentTab('Request Feedback');
                     addLogs({
                       eventType: eventType[7],
                       content: JSON.stringify({
                         currentTab,
-                        navigateTo: "Request Feedback",
+                        navigateTo: 'Request Feedback',
                       }),
                       eventSource: eventSource[11],
                     });
@@ -248,17 +248,17 @@ const SidebarPanel = () => {
 
                 <Button
                   className={`${
-                    currentTab != "Summary" && currentTab != "Request Feedback"
-                      ? "bg-black text-white"
-                      : "bg-gray text-black"
+                    currentTab != 'Summary' && currentTab != 'Request Feedback'
+                      ? 'bg-black text-white'
+                      : 'bg-gray text-black'
                   }`}
                   onClick={() => {
-                    setCurrentTab("My Notes");
+                    setCurrentTab('My Notes');
                     addLogs({
                       eventType: eventType[7],
                       content: JSON.stringify({
                         currentTab,
-                        navigateTo: "My Notes",
+                        navigateTo: 'My Notes',
                       }),
                       eventSource: eventSource[11],
                     });
@@ -269,21 +269,21 @@ const SidebarPanel = () => {
 
                 <Button
                   className={`${
-                    currentTab === "Summary"
-                      ? "bg-black text-white"
-                      : "bg-gray text-black"
+                    currentTab === 'Summary'
+                      ? 'bg-black text-white'
+                      : 'bg-gray text-black'
                   }`}
                   onClick={() => {
-                    setCurrentTab("Summary");
+                    setCurrentTab('Summary');
                     highlighterDispatch({
-                      type: "SET_IS_HIGHLIGHTING",
+                      type: 'SET_IS_HIGHLIGHTING',
                       payload: false,
                     });
                     addLogs({
                       eventType: eventType[7],
                       content: JSON.stringify({
                         currentTab,
-                        navigateTo: "Summary",
+                        navigateTo: 'Summary',
                       }),
                       eventSource: eventSource[11],
                     });
@@ -295,12 +295,12 @@ const SidebarPanel = () => {
                 <Button
                   className="bg-gray text-black"
                   onClick={() => {
-                    window.open(config.dashboard, "_blank");
+                    window.open(config.dashboard, '_blank');
                     addLogs({
                       eventType: eventType[7],
                       content: JSON.stringify({
                         currentTab,
-                        navigateTo: "Dashboard",
+                        navigateTo: 'Dashboard',
                       }),
                       eventSource: eventSource[11],
                     });

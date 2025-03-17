@@ -1,13 +1,13 @@
-import { emoticons, emoticonsInversed } from "../../AnnotationIcons";
-import { toast } from "react-toastify";
-import React, { useRef, useEffect, useState } from "react";
-import AnnotationService from "../../../services/annotation.service";
-import { FeedbackRating } from "../../../types";
+import { emoticons, emoticonsInversed } from '../../AnnotationIcons';
+import { toast } from 'react-toastify';
+import React, { useRef, useEffect, useState } from 'react';
+import AnnotationService from '../../../services/annotation.service';
+import { FeedbackRating } from '../../../types';
 import {
   addLogs,
   eventType,
   eventSource,
-} from "../../../services/logs.serivce";
+} from '../../../services/logs.serivce';
 
 export const RateFeedbackTab = ({
   feedbackId,
@@ -16,7 +16,7 @@ export const RateFeedbackTab = ({
   feedbackId: number;
   rating: FeedbackRating;
 }) => {
-  console.log("rating", rating);
+  console.log('rating', rating);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [feedbackPerformance, setFeedbackPerformance] = useState(
@@ -31,17 +31,17 @@ export const RateFeedbackTab = ({
   const [feedbackUsability, setFeedbackUsability] = useState(rating.usability);
   const [feedbackEmotion, setFeedbackEmotion] = useState(rating.emotion);
   const [feedbackQuestion, setFeedbackQuestion] = useState(
-    rating.furtherQuestions || ""
+    rating.furtherQuestions || ''
   );
-  const [feedbackComment, setFeedbackComment] = useState(rating.comment || "");
+  const [feedbackComment, setFeedbackComment] = useState(rating.comment || '');
 
   const rateFeedbackStatements = [
-    "matches my belief of my own performance",
-    "is easy to understand",
-    "related to my work",
-    "helps me to critically evaluate my work",
-    "can be used in my current and future studies",
-    "makes me feel positive",
+    'matches my belief of my own performance',
+    'is easy to understand',
+    'related to my work',
+    'helps me to critically evaluate my work',
+    'can be used in my current and future studies',
+    'makes me feel positive',
   ];
   const rateFeedbackStatmentsFunction = [
     setFeedbackPerformance,
@@ -61,13 +61,13 @@ export const RateFeedbackTab = ({
   ];
   const colorToRating = (color: string) => {
     switch (color) {
-      case "red":
+      case 'red':
         return 1;
-      case "orange":
+      case 'orange':
         return 2;
-      case "yellow":
+      case 'yellow':
         return 3;
-      case "green":
+      case 'green':
         return 4;
       default:
         return 1;
@@ -80,7 +80,7 @@ export const RateFeedbackTab = ({
   const toggleDropdown = () => {
     addLogs({
       eventType: eventType[0],
-      content: !isDropdownOpen ? "Rate this feedback" : "This Feedback ",
+      content: !isDropdownOpen ? 'Rate this feedback' : 'This Feedback ',
       eventSource: eventSource[4],
     });
     setIsDropdownOpen(!isDropdownOpen);
@@ -151,9 +151,9 @@ export const RateFeedbackTab = ({
       });
 
       toast.promise(submission, {
-        pending: "Submitting Rating...",
-        success: "Submitted Rating!",
-        error: "Submission failed, please try again.",
+        pending: 'Submitting Rating...',
+        success: 'Submitted Rating!',
+        error: 'Submission failed, please try again.',
       });
     }
   };
@@ -180,7 +180,7 @@ export const RateFeedbackTab = ({
         onClick={toggleDropdown}
         className="flex justify-between items-center bg-gray-100 hover:bg-gray-200 transition-colors font-medium text-xl p-4 w-full text-left rounded-t-xl"
       >
-        <span>{!isDropdownOpen ? "Rate this feedback" : "This Feedback"}</span>
+        <span>{!isDropdownOpen ? 'Rate this feedback' : 'This Feedback'}</span>
         {isDropdownOpen ? chevronIconUp : chevronIconDown}
       </button>
       {isDropdownOpen && (
@@ -217,18 +217,6 @@ export const RateFeedbackTab = ({
           <div className="space-y-6 pt-6 border-t mt-2">
             <div>
               <p className="mb-3 font-medium text-gray-700">
-                Ask further questions?
-              </p>
-              <textarea
-                placeholder="Type your question/s here"
-                className="w-full p-3 border rounded-lg min-h-[80px] resize-y focus:ring-2 focus:ring-blue-100 focus:border-blue-300 focus:outline-none transition-all"
-                value={feedbackQuestion}
-                onChange={(e) => setFeedbackQuestion(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <p className="mb-3 font-medium text-gray-700">
                 Share further comments?
               </p>
               <textarea
@@ -236,6 +224,18 @@ export const RateFeedbackTab = ({
                 className="w-full p-3 border rounded-lg min-h-[80px] resize-y focus:ring-2 focus:ring-blue-100 focus:border-blue-300 focus:outline-none transition-all"
                 value={feedbackComment}
                 onChange={(e) => setFeedbackComment(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <p className="mb-3 font-medium text-gray-700">
+                Ask further questions?
+              </p>
+              <textarea
+                placeholder="Type your question/s here"
+                className="w-full p-3 border rounded-lg min-h-[80px] resize-y focus:ring-2 focus:ring-blue-100 focus:border-blue-300 focus:outline-none transition-all"
+                value={feedbackQuestion}
+                onChange={(e) => setFeedbackQuestion(e.target.value)}
               />
             </div>
 
