@@ -1,12 +1,12 @@
-import SidebarPanel from "./SidebarContent";
+import SidebarPanel from './SidebarContent';
 
-import { SidebarHeader } from "./SidebarHeader";
-const Logo = require("../../assets/logo/PolyFeed_Social_White.png")
+import { SidebarHeader } from './SidebarHeader';
+const Logo = require('../../assets/logo/PolyFeed_Social_White.png')
   .default as string;
-import { leftChevron, rightChevron } from "../AnnotationIcons";
-import { useConsent } from "../../hooks/useConsentStore";
-import { LoginView } from "../Consent/LoginView";
-import { ConsentView } from "../Consent/Consent";
+import { leftChevron, rightChevron } from '../AnnotationIcons';
+import { useConsent } from '../../hooks/useConsentStore';
+import { LoginView } from '../Consent/LoginView';
+import { ConsentView } from '../Consent/Consent';
 
 export function Sidebar({
   collapsed,
@@ -26,10 +26,10 @@ export function Sidebar({
     <div
       className="fixed top-0 right-0 h-full border-solid border-4 border-sky-500"
       style={{
-        width: collapsed ? "0" : "428px",
-        transition: "width 0.3s",
+        width: collapsed ? '0' : '428px',
+        transition: 'width 0.3s',
         zIndex: 9999,
-        backgroundColor: "white",
+        backgroundColor: 'white',
       }}
     >
       <div
@@ -41,21 +41,35 @@ export function Sidebar({
       </div>
 
       {isAuth && (
-        <div style={{ overflowY: "auto", height: "100%" }}>
+        <div style={{ overflowY: 'auto', height: '100%' }}>
           <SidebarHeader></SidebarHeader>
           <SidebarPanel></SidebarPanel>
         </div>
       )}
 
       {!accept && !isAuth && (
-        <div style={{ overflowY: "auto", height: "100%" }}>
+        <div style={{ overflowY: 'auto', height: '100%' }}>
           <ConsentView onDisagree={handleDisagree} onAgree={handleAgree} />
         </div>
       )}
 
-      {accept && (
-        <div style={{ overflowY: "auto", height: "100%" }}>
-          <LoginView onLogin={() => firebaseLogin(tokenFromBrowser)} />
+      {accept && !isAuth && (
+        <div style={{ overflowY: 'auto', height: '100%' }}>
+          {tokenFromBrowser ? (
+            <LoginView onLogin={() => firebaseLogin(tokenFromBrowser)} />
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: 20,
+              }}
+            >
+              <p>Getting ready for login...</p>
+              <div style={{ marginTop: 16 }}>Please wait a moment.</div>
+            </div>
+          )}
         </div>
       )}
     </div>

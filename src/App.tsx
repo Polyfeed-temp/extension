@@ -1,24 +1,24 @@
-import { Sidebar } from "./components/Sidebar/Sidebar";
-import { useLayoutEffect, useRef, useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useSidebar } from "./hooks/useSidebar";
+import { Sidebar } from './components/Sidebar/Sidebar';
+import { useLayoutEffect, useRef, useEffect, useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useSidebar } from './hooks/useSidebar';
 
-import { initializeApp } from "firebase/app";
+import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithCredential,
-} from "firebase/auth/web-extension";
-import firebaseConfig from "../firebaseConfig.json";
-import { setChromeLocalStorage } from "./services/localStorage";
-import { register } from "./services/user.service";
-import { TOKEN_KEY } from "./services/api.service";
-import { useHighlighterState } from "./store/HighlightContext";
-import { addLogs, eventType } from "./services/logs.serivce";
-import { useConsent } from "./hooks/useConsentStore";
-import { PdfReviewer } from "./components/PdfReviewer";
-import { Worker } from "@react-pdf-viewer/core";
+} from 'firebase/auth/web-extension';
+import firebaseConfig from '../firebaseConfig.json';
+import { setChromeLocalStorage } from './services/localStorage';
+import { register } from './services/user.service';
+import { TOKEN_KEY } from './services/api.service';
+import { useHighlighterState } from './store/HighlightContext';
+import { addLogs, eventType } from './services/logs.serivce';
+import { useConsent } from './hooks/useConsentStore';
+import { PdfReviewer } from './components/PdfReviewer';
+import { Worker } from '@react-pdf-viewer/core';
 // Your web app's Firebase configuration
 
 // Initialize Firebase
@@ -28,12 +28,12 @@ export const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
 
-provider.addScope("https://www.googleapis.com/auth/userinfo.email");
+provider.addScope('https://www.googleapis.com/auth/userinfo.email');
 
 export function restoreHostDom() {
-  const nav = document.querySelector("nav") as HTMLElement;
-  nav.style.marginRight = "0";
-  document.body.style.marginRight = "0";
+  const nav = document.querySelector('nav') as HTMLElement;
+  nav.style.marginRight = '0';
+  document.body.style.marginRight = '0';
 }
 
 function App() {
@@ -44,7 +44,7 @@ function App() {
 
   const firebaseLogin = (token: string) => {
     const credential = GoogleAuthProvider.credential(null, token);
-    toast.loading("Logging in...", {
+    toast.loading('Logging in...', {
       toastId: 2,
     });
 
@@ -53,7 +53,7 @@ function App() {
         const googleUser = result.user;
         const displayName: any = googleUser.displayName || googleUser.email;
 
-        await register(googleUser.email ?? "", displayName);
+        await register(googleUser.email ?? '', displayName);
 
         setChromeLocalStorage({
           key: TOKEN_KEY,
@@ -64,40 +64,47 @@ function App() {
 
         await addLogs({
           eventType: eventType[5],
-          content: "",
-          eventSource: "",
+          content: '',
+          eventSource: '',
         });
 
         toast.update(2, {
-          render: "Successfully logged in to PolyFeed student extension",
-          type: "success",
+          render: 'Successfully logged in to PolyFeed student extension',
+          type: 'success',
           hideProgressBar: true,
           autoClose: 1000,
           isLoading: false,
         });
       })
-      .catch(() => {
-        toast.error("Error in Firebase login.");
+      .catch((error) => {
+        console.error('Firebase login error:', error);
+        toast.update(2, {
+          render: `Login failed: ${error.message || 'Please try again'}`,
+          type: 'error',
+          hideProgressBar: true,
+          autoClose: 3000,
+          isLoading: false,
+        });
       });
   };
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
-  const sidebarWidth = "428px";
-  const nav = document.querySelector("nav") as HTMLElement;
-  const docs = document.querySelector("#docs-chrome") as HTMLElement;
+  const sidebarWidth = '428px';
+  const nav = document.querySelector('nav') as HTMLElement;
+  const docs = document.querySelector('#docs-chrome') as HTMLElement;
   if (nav) {
-    nav.style.marginRight = collapsed ? "40px" : sidebarWidth;
+    nav.style.marginRight = collapsed ? '40px' : sidebarWidth;
   }
   if (docs) {
     const docContainer = document.querySelector(
-      ".kix-appview-editor-container"
+      '.kix-appview-editor-container'
     ) as HTMLElement;
-    docContainer.style.width = "calc(100% - 428px)";
-    docContainer.style.width = collapsed ? "" : "calc(100% - 428px)";
+    docContainer.style.width = 'calc(100% - 428px)';
+    docContainer.style.width = collapsed ? '' : 'calc(100% - 428px)';
   }
-  document.body.style.marginRight = collapsed ? "40px" : sidebarWidth;
+  document.body.style.marginRight = collapsed ? '40px' : sidebarWidth;
 
   const highlightState = useHighlighterState();
   const highlightStateRef = useRef(highlightState.highlighterLib);
@@ -108,13 +115,19 @@ function App() {
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener(async function (request) {
-      if (!request.token) {
-        console.log("token null");
-        toast.error("Please refresh page");
+      if (request.action === 'loginError') {
+        console.error('Login error:', request.error);
+        toast.error(`Login failed: ${request.error}`);
         return;
       }
 
-      console.log("request.token", request.token);
+      if (!request.token) {
+        console.log('token null');
+        toast.error('Please refresh page and try again');
+        return;
+      }
+
+      console.log('request.token', request.token);
       setTokenFromBrowser(request.token);
     });
   }, [firebaseLogin, setTokenFromBrowser]);
@@ -135,7 +148,7 @@ function App() {
   }, []);
 
   return (
-    <Worker workerUrl={chrome.runtime.getURL("/scripts/pdf.worker.min.js")}>
+    <Worker workerUrl={chrome.runtime.getURL('/scripts/pdf.worker.min.js')}>
       <div>
         <Sidebar
           isAuth={isAuth}
