@@ -1,62 +1,62 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App, { restoreHostDom } from "./App";
-import "./index.css";
-import { HighlighterProvider } from "./store/HighlightContext";
-import UserProvider from "./store/UserContext";
-import { SidebarProvider } from "./hooks/useSidebar";
-import { ConsentProvider } from "./hooks/useConsentStore";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App, { restoreHostDom } from './App';
+import './index.css';
+import { HighlighterProvider } from './store/HighlightContext';
+import UserProvider from './store/UserContext';
+import { SidebarProvider } from './hooks/useSidebar';
+import { ConsentProvider } from './hooks/useConsentStore';
 
 function injectStyles(shadowRoot: any) {
   const styles = [
-    "material-tailwind.css",
-    "icon.css",
-    "ReactToastify.min.css",
-    "core.css",
-    "default-layout.css",
-    "highlights.css",
+    'material-tailwind.css',
+    'icon.css',
+    'ReactToastify.min.css',
+    'core.css',
+    'default-layout.css',
+    'highlights.css',
   ];
 
   styles.forEach((style) => {
-    const link = document.createElement("link");
+    const link = document.createElement('link');
     link.href = chrome.runtime.getURL(`styles/${style}`);
-    link.rel = "stylesheet";
+    link.rel = 'stylesheet';
     shadowRoot.appendChild(link);
   });
 }
 
 function injectScripts(shadowRoot: any) {
-  const styles = [
-    "popper.min.js",
-    "tippy-bundle.umd.min.js",
-    // "pdf.worker.min.js",
+  // Removed popper.min.js and tippy-bundle.umd.min.js to prevent AMD module conflicts
+  // These libraries are now imported as npm packages in components that need them
+  const scripts: string[] = [
+    // "pdf.worker.min.js", // Only include if needed
   ];
 
-  styles.forEach((style) => {
-    const link = document.createElement("script");
-    link.src = chrome.runtime.getURL(`scripts/${style}`);
+  scripts.forEach((script) => {
+    const link = document.createElement('script');
+    link.src = chrome.runtime.getURL(`scripts/${script}`);
     shadowRoot.appendChild(link);
   });
 }
 
 function shadowHostInitailize() {
-  const host = document.createElement("div");
-  host.id = "sidebar-root";
+  const host = document.createElement('div');
+  host.id = 'sidebar-root';
   document.body.appendChild(host);
 
-  const shadowRoot = host.attachShadow({ mode: "open" });
+  const shadowRoot = host.attachShadow({ mode: 'open' });
 
   injectStyles(shadowRoot);
   injectScripts(shadowRoot);
 
-  const mainBodyStyle = document.createElement("style");
+  const mainBodyStyle = document.createElement('style');
   mainBodyStyle.innerHTML = `.button-with-hover:hover {
   background-color: #f0f0f0; /* Example hover color */
   cursor: pointer;
 }`;
   document.head.appendChild(mainBodyStyle);
 
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.textContent = `
 .border-Strength {
   border-color: #3a70b7 !important;
@@ -154,7 +154,7 @@ button:hover {
 let root: ReactDOM.Root | null = null;
 function load() {
   const shadowRoot = shadowHostInitailize();
-  const reactRootDiv = document.createElement("div");
+  const reactRootDiv = document.createElement('div');
 
   shadowRoot.appendChild(reactRootDiv);
 
@@ -176,28 +176,28 @@ function load() {
 }
 
 const allowedDomains = [
-  "https://lms.monash.edu/*",
-  "https://learning.monash.edu/*",
-  "https://docs.google.com/*",
-  "https://www.floraengine.org/*",
+  'https://lms.monash.edu/*',
+  'https://learning.monash.edu/*',
+  'https://docs.google.com/*',
+  'https://www.floraengine.org/*',
 ];
 let active = false;
 
 if (allowedDomains.some((domain) => window.location.href.match(domain))) {
-  chrome.runtime.sendMessage({ action: "contentScriptActive" });
+  chrome.runtime.sendMessage({ action: 'contentScriptActive' });
 
   active = true;
   load();
 } else {
-  chrome.runtime.sendMessage({ action: "contentScriptInActive" });
+  chrome.runtime.sendMessage({ action: 'contentScriptInActive' });
 }
 
 chrome.runtime.onMessage.addListener(function (response, sendResponse) {
-  if (response.action === "contentScriptOn" && !active) {
+  if (response.action === 'contentScriptOn' && !active) {
     active = true;
     load();
   }
-  if (response.action === "contentScriptOff" && active) {
+  if (response.action === 'contentScriptOff' && active) {
     root ? root.unmount() : null;
     root = null;
     active = false;
