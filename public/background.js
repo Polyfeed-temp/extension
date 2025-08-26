@@ -1,7 +1,7 @@
 // background.js（service-worker）
 
-const ICON_ON = chrome.runtime.getURL('public/Polyfeed_Social_On.png');
-const ICON_OFF = chrome.runtime.getURL('public/Polyfeed_Social_Off.png');
+const ICON_ON = 'Polyfeed_Social_On.png';
+const ICON_OFF = 'Polyfeed_Social_Off.png';
 const BADGE_ON = { text: 'On' };
 const BADGE_OFF = { text: '' };
 
@@ -19,6 +19,29 @@ async function setEnabled(enabled) {
 function tellTab(tabId, action, extra = {}) {
   chrome.tabs.sendMessage(tabId, { action, ...extra });
 }
+
+// Auto-inject on all new tabs
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (
+    changeInfo.status === 'complete' &&
+    tab.url &&
+    !tab.url.startsWith('chrome://')
+  ) {
+    const enabled = await getEnabled();
+    if (enabled) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tabId, allFrames: true },
+          files: ['js/index.js'],
+          world: 'ISOLATED',
+        });
+        tellTab(tabId, 'contentScriptOn');
+      } catch (error) {
+        console.log('Failed to inject script:', error);
+      }
+    }
+  }
+});
 
 chrome.action.onClicked.addListener(async (tab) => {
   const next = !(await getEnabled());
@@ -41,21 +64,6 @@ chrome.runtime.onMessage.addListener((req, sender) => {
 
   switch (req.action) {
     case 'contentScriptActive':
-      chrome.identity.getAuthToken({ interactive: true }, (token) => {
-        if (chrome.runtime.lastError) {
-          console.error('Auth token error:', chrome.runtime.lastError);
-          tellTab(sender.tab.id, 'loginError', {
-            error: chrome.runtime.lastError.message,
-          });
-          return;
-        }
-        if (token) {
-          tellTab(sender.tab.id, 'login', { token });
-        } else {
-          console.error('No token received');
-          tellTab(sender.tab.id, 'loginError', { error: 'No token received' });
-        }
-      });
       setEnabled(true); // 順便更新 icon/badge
       break;
 

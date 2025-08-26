@@ -4,31 +4,13 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSidebar } from './hooks/useSidebar';
 
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithCredential,
-} from 'firebase/auth/web-extension';
-import firebaseConfig from '../firebaseConfig.json';
 import { setChromeLocalStorage } from './services/localStorage';
-import { register } from './services/user.service';
 import { TOKEN_KEY } from './services/api.service';
 import { useHighlighterState } from './store/HighlightContext';
 import { addLogs, eventType } from './services/logs.serivce';
 import { useConsent } from './hooks/useConsentStore';
 import { PdfReviewer } from './components/PdfReviewer';
 import { Worker } from '@react-pdf-viewer/core';
-// Your web app's Firebase configuration
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-export const auth = getAuth(app);
-
-const provider = new GoogleAuthProvider();
-
-provider.addScope('https://www.googleapis.com/auth/userinfo.email');
 
 export function restoreHostDom() {
   const nav = document.querySelector('nav') as HTMLElement;
@@ -38,54 +20,12 @@ export function restoreHostDom() {
 
 function App() {
   const { collapsed, setCollapsed } = useSidebar();
-  const { accept, setTokenFromBrowser, tokenFromBrowser } = useConsent();
+  const { accept } = useConsent();
 
   const [isAuth, setIsAuth] = useState(false);
 
-  const firebaseLogin = (token: string) => {
-    const credential = GoogleAuthProvider.credential(null, token);
-    toast.loading('Logging in...', {
-      toastId: 2,
-    });
-
-    signInWithCredential(auth, credential)
-      .then(async (result) => {
-        const googleUser = result.user;
-        const displayName: any = googleUser.displayName || googleUser.email;
-
-        await register(googleUser.email ?? '', displayName);
-
-        setChromeLocalStorage({
-          key: TOKEN_KEY,
-          value: await googleUser.getIdToken(),
-        });
-
-        setIsAuth(true);
-
-        await addLogs({
-          eventType: eventType[5],
-          content: '',
-          eventSource: '',
-        });
-
-        toast.update(2, {
-          render: 'Successfully logged in to PolyFeed student extension',
-          type: 'success',
-          hideProgressBar: true,
-          autoClose: 1000,
-          isLoading: false,
-        });
-      })
-      .catch((error) => {
-        console.error('Firebase login error:', error);
-        toast.update(2, {
-          render: `Login failed: ${error.message || 'Please try again'}`,
-          type: 'error',
-          hideProgressBar: true,
-          autoClose: 3000,
-          isLoading: false,
-        });
-      });
+  const handleLogin = () => {
+    setIsAuth(true);
   };
 
   const toggleSidebar = () => {
@@ -113,29 +53,6 @@ function App() {
     highlightStateRef.current = highlightState.highlighterLib;
   }, [highlightState.highlighterLib]);
 
-  useEffect(() => {
-    chrome.runtime.onMessage.addListener(async function (request) {
-      if (request.action === 'loginError') {
-        console.error('Login error:', request.error);
-        toast.error(`Login failed: ${request.error}`);
-        return;
-      }
-
-      if (!request.token) {
-        console.log('token null');
-        toast.error('Please refresh page and try again');
-        return;
-      }
-
-      console.log('request.token', request.token);
-      setTokenFromBrowser(request.token);
-    });
-  }, [firebaseLogin, setTokenFromBrowser]);
-
-  useEffect(() => {
-    if (accept && tokenFromBrowser) firebaseLogin(tokenFromBrowser);
-  }, [accept, tokenFromBrowser]);
-
   //clean up highlight
   useLayoutEffect(() => {
     return () => {
@@ -154,7 +71,7 @@ function App() {
           isAuth={isAuth}
           collapsed={collapsed}
           toggleSidebar={toggleSidebar}
-          firebaseLogin={firebaseLogin}
+          onLogin={handleLogin}
         />
 
         {PdfReviewer && <PdfReviewer />}

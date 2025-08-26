@@ -48,12 +48,27 @@ export async function logout() {
   await setChromeLocalStorage({ key: USER_KEY, value: null });
 }
 
-// export async function register(user: User) {
-//     const response = await axios.post("api/user/signup", user, { withCredentials: true, headers: { 'Content-Type': 'application/json', "Authorization": 'Bearer ' + localStorage.getItem('token') }, });
-//     return response
-// }
+export async function register(user: User) {
+  const registrationData = {
+    email: user.email,
+    password: user.password || "",
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role.toLowerCase(),
+    faculty: user.faculty.toLowerCase(),
+    authcate: "local",
+    monashId: user.monashObjectId || ""
+  };
 
-export async function register(email: string, displayName: string) {
+  const response = await axios.post("api/user/signup", registrationData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response;
+}
+
+export async function registerWithGoogle(email: string, displayName: string) {
   const nameParts: string[] = displayName.split(" ");
 
   let firstName: string = "",

@@ -116,6 +116,7 @@ export interface User {
   lastName: string;
   role: Role;
   faculty: Faculty;
+  password?: string;
 }
 
 export interface UserState {

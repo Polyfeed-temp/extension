@@ -1,58 +1,33 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.3",
   "manifest_version": 3,
   "name": "Polyfeed",
   "icons": {
-    "128": "./public/Polyfeed_Social_On.png"
+    "128": "public/Polyfeed_Social_On.png"
   },
   "action": {
     "default_icon": {
-      "32": "./public/Polyfeed_Social_On.png"
+      "32": "public/Polyfeed_Social_On.png"
     }
   },
   "background": {
-    "service_worker": "./public/background.js"
+    "service_worker": "public/background.js"
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://learning.monash.edu/mod/assign/*",
-        "https://learning.monash.edu/mod/quiz/*",
-        "https://lms.monash.edu/mod/assign/*",
-        "https://www.floraengine.org/*"
-      ],
-      "excludeMatches": [
-        "http://localhost:3000/"
-      ],
-      "js": [
-        "./js/index.js"
-      ],
+      "matches": ["<all_urls>"],
+      "excludeMatches": ["http://localhost:3000/"],
+      "js": ["js/index.js"],
       "runAt": "document_end"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "/styles/*.css",
-        "/scripts/*.js"
-      ],
-      "matches": [
-        "https://learning.monash.edu/*",
-        "https://lms.monash.edu/*",
-        "https://www.floraengine.org/*"
-      ]
+      "resources": ["styles/*.css", "scripts/*.js"],
+      "matches": ["<all_urls>"]
     }
   ],
-  "permissions": [
-    "storage",
-    "activeTab",
-    "identity"
-  ],
-  "oauth2": {
-    "client_id": "838168997555-c2comdje7instc0k6dptdribmkln9t67.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/userinfo.email"
-    ]
-  },
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApNC374RYLgJ3Xyr+5opKAMiPOdSKikOMyYJrG90fTro+uDw+QK0FO+/3T7D/np2okNmkf7kaAKqPvm/+mMijux/S7vM6qXHU6ubo7NqY4uOKWHtndGMir7sVuKlzk8UXaOBAazmHdKPtgFblyhfT9Yemul8damKIpZQScNkQO/mVEQxF0JV3gH354p5p9mt69dy1wWAU7Gviu9J19e1l85msjhJf5A7d54xSVYy+FfhKAO1ju5B+ef0/Oxe2cprxi8+ul+81oRDnT0wl4sKjNmC5DHm9+garX+J64U0Y5yvm3/Thj0eTERthPrNis7rXQw06+IU0efaonW/bTlrCjwIDAQAB"
 }

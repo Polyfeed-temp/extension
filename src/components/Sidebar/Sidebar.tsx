@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import SidebarPanel from './SidebarContent';
 
 import { SidebarHeader } from './SidebarHeader';
@@ -7,20 +8,29 @@ import { leftChevron, rightChevron } from '../AnnotationIcons';
 import { useConsent } from '../../hooks/useConsentStore';
 import { LoginView } from '../Consent/LoginView';
 import { ConsentView } from '../Consent/Consent';
+import SignUpPopup from '../SignUpPopUp';
 
 export function Sidebar({
   collapsed,
   toggleSidebar,
-  firebaseLogin,
+  onLogin,
   isAuth,
 }: {
   collapsed: boolean;
   toggleSidebar: () => void;
-  firebaseLogin: (token: string) => void;
+  onLogin: () => void;
   isAuth: boolean;
 }) {
-  const { accept, handleDisagree, handleAgree, tokenFromBrowser } =
-    useConsent();
+  const { accept, handleDisagree, handleAgree } = useConsent();
+  const [showSignUp, setShowSignUp] = useState(false);
+
+  const handleSignUp = () => {
+    setShowSignUp(true);
+  };
+
+  const closeSignUp = () => {
+    setShowSignUp(false);
+  };
 
   return (
     <div
@@ -55,23 +65,11 @@ export function Sidebar({
 
       {accept && !isAuth && (
         <div style={{ overflowY: 'auto', height: '100%' }}>
-          {tokenFromBrowser ? (
-            <LoginView onLogin={() => firebaseLogin(tokenFromBrowser)} />
-          ) : (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: 20,
-              }}
-            >
-              <p>Getting ready for login...</p>
-              <div style={{ marginTop: 16 }}>Please wait a moment.</div>
-            </div>
-          )}
+          <LoginView onLogin={onLogin} onSignUp={handleSignUp} />
         </div>
       )}
+
+      <SignUpPopup isOpen={showSignUp} setIsOpen={setShowSignUp} />
     </div>
   );
 }

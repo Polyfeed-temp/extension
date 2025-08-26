@@ -8,6 +8,7 @@ import React, {
 import { User, UserState, Unit } from "../types";
 
 import { login, logout, getUser } from "../services/user.service";
+import { toast } from "react-toastify";
 
 interface UserAction {
   type: "LOGIN";
@@ -73,6 +74,7 @@ function UserProvider({ children }: { children: ReactNode }) {
     switch (action.type) {
       case "LOGOUT":
         logout();
+        toast.success("Logged out successfully");
         baseDispatch(action);
         break;
 

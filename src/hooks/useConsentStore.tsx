@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
   getChromeLocalStorage,
   setChromeLocalStorage,
-} from "../services/localStorage";
+} from '../services/localStorage';
 
 // Define the key used in localStorage
-const CONSENT_STORAGE_KEY = "consent-storage";
+const CONSENT_STORAGE_KEY = 'consent-storage';
 
 interface ConsentContextValue {
   accept: boolean;
@@ -18,8 +18,6 @@ interface ConsentContextValue {
   setCollapsed: (collapsed: boolean) => void;
   handleDisagree: () => void;
   handleAgree: () => void;
-  setTokenFromBrowser: (token: string) => void;
-  tokenFromBrowser: string;
 }
 
 // Create a context for the consent state
@@ -59,7 +57,6 @@ export const ConsentProvider = ({
   const [hideLogo, setHideLogo] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [tokenFromBrowser, setFirebaseToken] = useState<string>("");
 
   useEffect(() => {
     const initializeConsentData = async () => {
@@ -76,7 +73,7 @@ export const ConsentProvider = ({
   }, []);
 
   const handleDisagree = () => {
-    toast("See you next time");
+    toast('See you next time');
     setHideLogo(true);
     setCollapsed(false);
     setStoredConsent({ hideLogo: true, collapsed: false });
@@ -85,11 +82,6 @@ export const ConsentProvider = ({
   const handleAgree = () => {
     setAccept(true);
     setStoredConsent({ accept: true });
-  };
-
-  const setTokenFromBrowser = (token: string) => {
-    setFirebaseToken(token);
-    setStoredConsent({ token });
   };
 
   return (
@@ -104,8 +96,6 @@ export const ConsentProvider = ({
         setCollapsed,
         handleDisagree,
         handleAgree,
-        setTokenFromBrowser,
-        tokenFromBrowser,
       }}
     >
       {children}
@@ -117,7 +107,7 @@ export const ConsentProvider = ({
 export const useConsent = () => {
   const context = useContext(ConsentContext);
   if (!context) {
-    throw new Error("useConsent must be used within a ConsentProvider");
+    throw new Error('useConsent must be used within a ConsentProvider');
   }
   return context;
 };
