@@ -74,6 +74,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignUp }) => {
             marginBottom: '10px',
             border: '1px solid #ccc',
             borderRadius: '8px',
+            color: 'black',
+            backgroundColor: 'white',
           }}
           required
         />
@@ -88,6 +90,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignUp }) => {
             marginBottom: '10px',
             border: '1px solid #ccc',
             borderRadius: '8px',
+            color: 'black',
+            backgroundColor: 'white',
           }}
           required
         />

@@ -123,6 +123,7 @@ export interface UserState {
   login: boolean;
   access_token?: string;
   user?: User;
+  loading?: boolean;
 }
 
 export function getColorForTag(tag: AnnotationTag | undefined) {

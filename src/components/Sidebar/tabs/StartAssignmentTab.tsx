@@ -117,7 +117,7 @@ export function SelectUnitAssignmentTab({
                   setYourMark(e.target.value ? Number(e.target.value) : null)
                 }
                 placeholder="Your mark"
-                className="p-2 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
+                className="p-2 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-black bg-white"
                 style={{ width: "100%" }}
                 min="0"
               />
@@ -129,7 +129,7 @@ export function SelectUnitAssignmentTab({
                   setTotalMark(e.target.value ? Number(e.target.value) : null)
                 }
                 placeholder="Total"
-                className="p-2 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
+                className="p-2 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 text-black bg-white"
                 style={{ width: "100%" }}
                 min="1"
               />

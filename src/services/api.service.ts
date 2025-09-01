@@ -12,9 +12,13 @@ const commonAxios = axios.create({
 commonAxios.get("/healthcheck").then((response) => {});
 commonAxios.interceptors.request.use(
   async (config) => {
-    const token = await getToken();
-    if (token) {
-      config.headers.Authorization = `${token}`;
+    try {
+      const token = await getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.warn('Failed to retrieve token from storage:', error);
     }
     return config;
   },

@@ -153,6 +153,11 @@ button:hover {
 
 let root: ReactDOM.Root | null = null;
 function load() {
+  // Prevent duplicate loading
+  if (document.getElementById('sidebar-root')) {
+    return;
+  }
+
   const shadowRoot = shadowHostInitailize();
   const reactRootDiv = document.createElement('div');
 
@@ -161,17 +166,15 @@ function load() {
   root = ReactDOM.createRoot(reactRootDiv);
 
   root.render(
-    <React.StrictMode>
-      <UserProvider>
-        <ConsentProvider>
-          <SidebarProvider>
-            <HighlighterProvider>
-              <App />
-            </HighlighterProvider>
-          </SidebarProvider>
-        </ConsentProvider>
-      </UserProvider>
-    </React.StrictMode>
+    <UserProvider>
+      <ConsentProvider>
+        <SidebarProvider>
+          <HighlighterProvider>
+            <App />
+          </HighlighterProvider>
+        </SidebarProvider>
+      </ConsentProvider>
+    </UserProvider>
   );
 }
 

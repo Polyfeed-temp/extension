@@ -1,16 +1,13 @@
 import { Sidebar } from './components/Sidebar/Sidebar';
-import { useLayoutEffect, useRef, useEffect, useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import { useLayoutEffect, useRef, useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSidebar } from './hooks/useSidebar';
 
-import { setChromeLocalStorage } from './services/localStorage';
-import { TOKEN_KEY } from './services/api.service';
 import { useHighlighterState } from './store/HighlightContext';
-import { addLogs, eventType } from './services/logs.serivce';
-import { useConsent } from './hooks/useConsentStore';
 import { PdfReviewer } from './components/PdfReviewer';
 import { Worker } from '@react-pdf-viewer/core';
+import { useUserState } from './store/UserContext';
 
 export function restoreHostDom() {
   const nav = document.querySelector('nav') as HTMLElement;
@@ -20,31 +17,18 @@ export function restoreHostDom() {
 
 function App() {
   const { collapsed, setCollapsed } = useSidebar();
-  const { accept } = useConsent();
+  const userState = useUserState();
 
-  const [isAuth, setIsAuth] = useState(false);
+  // Use UserContext login state instead of local state
+  const isAuth = userState.login && !userState.loading;
 
   const handleLogin = () => {
-    setIsAuth(true);
+    // Login is now handled by UserContext, this is just for callback
   };
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
-  const sidebarWidth = '428px';
-  const nav = document.querySelector('nav') as HTMLElement;
-  const docs = document.querySelector('#docs-chrome') as HTMLElement;
-  if (nav) {
-    nav.style.marginRight = collapsed ? '40px' : sidebarWidth;
-  }
-  if (docs) {
-    const docContainer = document.querySelector(
-      '.kix-appview-editor-container'
-    ) as HTMLElement;
-    docContainer.style.width = 'calc(100% - 428px)';
-    docContainer.style.width = collapsed ? '' : 'calc(100% - 428px)';
-  }
-  document.body.style.marginRight = collapsed ? '40px' : sidebarWidth;
 
   const highlightState = useHighlighterState();
   const highlightStateRef = useRef(highlightState.highlighterLib);
@@ -63,6 +47,11 @@ function App() {
       }
     };
   }, []);
+
+  // Don't render anything during initial loading to prevent flash
+  if (userState.loading) {
+    return null;
+  }
 
   return (
     <Worker workerUrl={chrome.runtime.getURL('/scripts/pdf.worker.min.js')}>

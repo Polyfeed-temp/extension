@@ -56,14 +56,14 @@ const LoginPopup = ({
             <div className="mt-2 px-7 py-3">
               <input
                 type="text"
-                className="mb-3 px-3 py-2 border rounded-md w-full"
+                className="mb-3 px-3 py-2 border rounded-md w-full text-black bg-white"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Email "
               />
               <input
                 type="password"
-                className="px-3 py-2 border rounded-md w-full"
+                className="px-3 py-2 border rounded-md w-full text-black bg-white"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"

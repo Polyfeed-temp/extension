@@ -129,7 +129,7 @@ const SignUpPopup = ({
               <input
                 type="text"
                 name="firstName"
-                className="mb-3 px-3 py-2 border rounded-md w-full"
+                className="mb-3 px-3 py-2 border rounded-md w-full text-black bg-white"
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="First Name"
@@ -138,7 +138,7 @@ const SignUpPopup = ({
               <input
                 type="text"
                 name="lastName"
-                className="mb-3 px-3 py-2 border rounded-md w-full"
+                className="mb-3 px-3 py-2 border rounded-md w-full text-black bg-white"
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Last Name"
@@ -147,7 +147,7 @@ const SignUpPopup = ({
               <input
                 type="email"
                 name="email"
-                className="mb-3 px-3 py-2 border rounded-md w-full"
+                className="mb-3 px-3 py-2 border rounded-md w-full text-black bg-white"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Email"
@@ -157,7 +157,7 @@ const SignUpPopup = ({
               <input
                 type="password"
                 name="password"
-                className="mb-3 px-3 py-2 border rounded-md w-full"
+                className="mb-3 px-3 py-2 border rounded-md w-full text-black bg-white"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Password"
@@ -166,7 +166,7 @@ const SignUpPopup = ({
               <input
                 type="password"
                 name="confirmPassword"
-                className={`mb-3 px-3 py-2 border rounded-md w-full ${
+                className={`mb-3 px-3 py-2 border rounded-md w-full text-black bg-white ${
                   formData.confirmPassword && formData.password !== formData.confirmPassword
                     ? 'border-red-500 bg-red-50'
                     : 'border-gray-300'

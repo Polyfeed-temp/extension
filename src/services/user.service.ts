@@ -15,8 +15,9 @@ export async function login(username: string, password: string) {
   });
   const userData = response.data as UserState;
   const access_token = userData.access_token;
+  
   await setChromeLocalStorage({ key: TOKEN_KEY, value: access_token });
-  await setChromeLocalStorage({ key: USER_KEY, value: userData });
+  await setChromeLocalStorage({ key: USER_KEY, value: userData.user });
 
   return userData;
 }
@@ -26,15 +27,19 @@ export async function verifyToken(token: string) {
 }
 
 export async function getUser() {
-  // const currentUser = await getChromeLocalStorage(USER_KEY) as UserState
-  // setChromeLocalStorage({ key: TOKEN_KEY, value: currentUser.access_token })
   const token = await getChromeLocalStorage(TOKEN_KEY);
-
-  // const response = await axios.get("/api/login/verifyToken")
-  // const user = response.data as User
   const user = (await getChromeLocalStorage(USER_KEY)) as User;
 
-  return { user: user, access_token: token } as UserState;
+  // Only return user state if both user and token exist
+  if (user && token) {
+    return { 
+      user: user, 
+      access_token: token, 
+      login: true 
+    } as UserState;
+  }
+
+  return null;
 }
 
 export async function getUserUnitHighlights() {
@@ -96,14 +101,14 @@ export async function registerWithGoogle(email: string, displayName: string) {
   };
 
   if (await checkUserExists(email)) {
-    setChromeLocalStorage({ key: USER_KEY, value: user });
+    await setChromeLocalStorage({ key: USER_KEY, value: user });
   } else {
     const response = await axios.post("api/user/create", user, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-    setChromeLocalStorage({ key: USER_KEY, value: response.data });
+    await setChromeLocalStorage({ key: USER_KEY, value: response.data });
   }
 }
 
