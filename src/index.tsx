@@ -152,11 +152,17 @@ button:hover {
 }
 
 let root: ReactDOM.Root | null = null;
+let isInitialized = false;
+
 function load() {
   // Prevent duplicate loading
-  if (document.getElementById('sidebar-root')) {
+  if (isInitialized || document.getElementById('sidebar-root')) {
+    console.log('Polyfeed: Already initialized, skipping load');
     return;
   }
+
+  isInitialized = true;
+  console.log('Polyfeed: Initializing extension');
 
   const shadowRoot = shadowHostInitailize();
   const reactRootDiv = document.createElement('div');
@@ -178,32 +184,42 @@ function load() {
   );
 }
 
-const allowedDomains = [
-  'https://lms.monash.edu/*',
-  'https://learning.monash.edu/*',
-  'https://docs.google.com/*',
-  'https://www.floraengine.org/*',
-];
-let active = false;
-
-if (allowedDomains.some((domain) => window.location.href.match(domain))) {
-  chrome.runtime.sendMessage({ action: 'contentScriptActive' });
-
-  active = true;
-  load();
+// Prevent multiple initializations across the entire window context
+if ((window as any).__polyfeedInitialized) {
+  console.log('Polyfeed: Already initialized globally, exiting');
 } else {
-  chrome.runtime.sendMessage({ action: 'contentScriptInActive' });
-}
+  (window as any).__polyfeedInitialized = true;
 
-chrome.runtime.onMessage.addListener(function (response, sendResponse) {
-  if (response.action === 'contentScriptOn' && !active) {
+  const allowedDomains = [
+    'https://lms.monash.edu/*',
+    'https://learning.monash.edu/*',
+    'https://docs.google.com/*',
+    'https://www.floraengine.org/*',
+  ];
+  let active = false;
+
+  // Only run in the top-level frame, not in iframes
+  if (window === window.top && allowedDomains.some((domain) => window.location.href.match(domain))) {
+    chrome.runtime.sendMessage({ action: 'contentScriptActive' });
+
     active = true;
     load();
+  } else {
+    chrome.runtime.sendMessage({ action: 'contentScriptInActive' });
   }
-  if (response.action === 'contentScriptOff' && active) {
-    root ? root.unmount() : null;
-    root = null;
-    active = false;
-    restoreHostDom();
-  }
-});
+
+  chrome.runtime.onMessage.addListener(function (response) {
+    if (response.action === 'contentScriptOn' && !active && window === window.top) {
+      active = true;
+      load();
+    }
+    if (response.action === 'contentScriptOff' && active) {
+      root ? root.unmount() : null;
+      root = null;
+      active = false;
+      isInitialized = false;
+      restoreHostDom();
+      console.log('Polyfeed: Extension cleaned up');
+    }
+  });
+}

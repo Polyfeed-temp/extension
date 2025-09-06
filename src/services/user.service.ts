@@ -120,3 +120,15 @@ export async function checkUserExists(email: string) {
     return false;
   }
 }
+
+export async function resetPassword(oldPassword: string, newPassword: string) {
+  const response = await axios.post("/api/user/reset-password", {
+    old_password: oldPassword,
+    new_password: newPassword
+  }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+}

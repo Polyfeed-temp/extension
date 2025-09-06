@@ -18,7 +18,8 @@
       "matches": ["<all_urls>"],
       "excludeMatches": ["http://localhost:3000/"],
       "js": ["js/index.js"],
-      "runAt": "document_end"
+      "runAt": "document_end",
+      "all_frames": false
     }
   ],
   "web_accessible_resources": [
