@@ -3,6 +3,7 @@ import {useUserState, useUserDispatch} from "../../store/UserContext";
 import {xMarkIcon} from "../AnnotationIcons";
 import {toast} from "react-toastify";
 import {login} from "../../services/user.service";
+import ForgotPasswordPopup from "./ForgotPasswordPopUp";
 const LoginPopup = ({
   isOpen,
   onClose,
@@ -18,6 +19,7 @@ const LoginPopup = ({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -82,8 +84,20 @@ const LoginPopup = ({
             </button>
           </div>
         </form>
-        <div className="items-center px-4 py-3"></div>
+        <div className="items-center px-4 py-3 text-center">
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 underline"
+          >
+            Forgot Password?
+          </button>
+        </div>
       </div>
+      <ForgotPasswordPopup
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   );
 };

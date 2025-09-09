@@ -8,6 +8,7 @@ import React, {
 import { User, UserState, Unit } from '../types';
 
 import { login, logout, getUser } from '../services/user.service';
+import { setLogoutCallback } from '../services/api.service';
 import { toast } from 'react-toastify';
 
 interface UserAction {
@@ -87,6 +88,12 @@ function UserProvider({ children }: { children: ReactNode }) {
       }
     };
     fetchUser();
+
+    setLogoutCallback(() => {
+      logout();
+      toast.error('Session expired. Please log in again.');
+      baseDispatch({ type: 'LOGOUT' });
+    });
   }, []);
 
   const serviceDispatch = async (action: actions) => {

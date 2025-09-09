@@ -239,12 +239,13 @@ export const RateFeedbackTab = ({
               />
             </div>
 
+       */}
             <button
               onClick={handleSubmit}
               className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mt-4"
             >
               SAVE
-            </button> */}
+            </button>
 
             <p className="text-sm text-gray-500 italic text-center mt-4">
               Disclaimer: These ratings and comments may be used by teachers to

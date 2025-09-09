@@ -132,3 +132,14 @@ export async function resetPassword(oldPassword: string, newPassword: string) {
   });
   return response.data;
 }
+
+export async function forgotPassword(email: string) {
+  const response = await axios.post("/api/user/forgot-password", {
+    email: email
+  }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.data;
+}

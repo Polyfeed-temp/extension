@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { login } from '../../services/user.service';
 import { toast } from 'react-toastify';
 import { useUserDispatch } from '../../store/UserContext';
+import ForgotPasswordPopup from '../Sidebar/ForgotPasswordPopUp';
 
 const LogoWithName = require('../../assets/logo/PolyFeed_BlackText.png')
   .default as string;
@@ -15,6 +16,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignUp }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const dispatch = useUserDispatch();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -116,6 +118,22 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignUp }) => {
           LOGIN
         </button>
       </form>
+      <div style={{ marginTop: '12px', textAlign: 'center' }}>
+        <button
+          type="button"
+          onClick={() => setShowForgotPassword(true)}
+          style={{
+            color: '#1D4ED8',
+            background: 'none',
+            border: 'none',
+            textDecoration: 'underline',
+            cursor: 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          Forgot Password?
+        </button>
+      </div>
       {onSignUp && (
         <div style={{ marginTop: '16px', textAlign: 'center' }}>
           <span style={{ color: '#9CA3AF' }}>Don't have an account? </span>
@@ -133,6 +151,11 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignUp }) => {
           </button>
         </div>
       )}
+      <ForgotPasswordPopup
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        onGoToSignUp={onSignUp}
+      />
     </div>
   );
 };

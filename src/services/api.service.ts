@@ -2,6 +2,12 @@ import axios from "axios";
 import config from "../config.json";
 import { getChromeLocalStorage, setChromeLocalStorage } from "./localStorage";
 export const TOKEN_KEY = "token";
+
+let logoutCallback: (() => void) | null = null;
+
+export function setLogoutCallback(callback: () => void) {
+  logoutCallback = callback;
+}
 function getToken() {
   return getChromeLocalStorage(TOKEN_KEY);
 }
@@ -23,6 +29,18 @@ commonAxios.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+commonAxios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (logoutCallback) {
+        logoutCallback();
+      }
+    }
     return Promise.reject(error);
   }
 );
