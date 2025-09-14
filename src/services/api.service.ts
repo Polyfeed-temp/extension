@@ -24,7 +24,6 @@ commonAxios.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.warn('Failed to retrieve token from storage:', error);
     }
     return config;
   },
@@ -56,7 +55,6 @@ commonAxios.interceptors.response.use(
 //         const jwtPayload = JSON.parse(payload);
 //         return jwtPayload
 //     } catch (error) {
-//         console.error('Error decoding token:', error);
 //         return null;
 //     }
 // };
@@ -65,7 +63,6 @@ commonAxios.interceptors.response.use(
 
 //     const decoded = decodeJWT(token)
 //     if (decoded) {
-//         console.log(decoded.exp, Date.now() / 1000)
 //         return decoded.exp < Date.now() / 1000
 //     }
 // }

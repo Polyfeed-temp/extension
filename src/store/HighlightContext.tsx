@@ -126,8 +126,6 @@ const highlighterReducer = (
     case "INITIALIZE":
       const root = document.getElementById("docos-stream-view") as HTMLElement;
       root
-        ? console.log("doco streamview")
-        : console.log("not doco streamview");
       const lib = new Highlighter({
         $root: root ? root : document.documentElement,
         // wrapTag: "span",
@@ -147,7 +145,6 @@ const highlighterReducer = (
       if (action.payload) {
         useSidebar().setCollapsed(false);
       }
-      console.log("initialize");
 
       return { ...state, ...initialState };
     case "SET_DRAFTING":
@@ -320,7 +317,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             toast.error("Please select valid assignment");
           }
         } catch (err) {
-          console.log(err);
         }
         break;
       case "DELETE_RECORD":
@@ -344,7 +340,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
           baseDispatch({ type: "DELETE_RECORD", payload: action.payload });
         } catch (err) {
-          console.log(err);
         }
         break;
       case "UPDATE_HIGHLIGHT_NOTES":
@@ -374,7 +369,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             payload: action.payload,
           });
         } catch (err) {
-          console.log(err);
         }
 
         break;
@@ -402,7 +396,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } catch (err) {
-          console.log(err);
         }
         break;
       case "DELETE_FEEDBACK":
@@ -428,11 +421,9 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } catch (err) {
-          console.log(err);
         }
         break;
       case "ADD_ACTION_ITEM":
-        console.log("called");
         try {
           const status = service.addActionItem(
             action.payload.id,
@@ -458,7 +449,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             baseDispatch({ type: "ADD_ACTION_ITEM", payload: action.payload });
           }
         } catch (err) {
-          console.log(err);
         }
         break;
       case "UPDATE_HIGHLIGHT_ACTION_ITEMS":
@@ -495,7 +485,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             baseDispatch({ type: "INITIALIZE", payload: feedback });
           }
         } catch (err) {
-          console.log(err);
         }
         break;
       case "SYNC_WITH_SERVER":
@@ -617,7 +606,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
             'div[class*="summary_assignfeedback_comments_"] p'
           ).length;
 
-          console.log("pElementAmount", pElementAmount);
 
           state.highlighterLib?.fromStore(
             {

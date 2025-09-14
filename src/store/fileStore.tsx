@@ -86,7 +86,6 @@ export const useFileStore = create<FileStore>((set, get) => ({
       set({ fileList: response.data, fetchingListLoading: false });
     } catch (error) {
       set({ fetchingListLoading: false });
-      console.error("Error fetching files:", error);
       throw error;
     }
   },
@@ -109,7 +108,6 @@ export const useFileStore = create<FileStore>((set, get) => ({
       }));
     } catch (error) {
       toast("Error uploading file");
-      console.error("Error creating file:", error);
       throw error;
     }
   },

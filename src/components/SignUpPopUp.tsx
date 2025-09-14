@@ -52,7 +52,6 @@ const SignUpPopup = ({
       }
     }
     
-    console.log(newFormData);
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -99,7 +98,6 @@ const SignUpPopup = ({
       setErrorMessage("");
     } catch (err: any) {
       // Error - keep modal open and preserve form data
-      console.log(err.code);
       if (err.response?.status === 409) {
         setErrorMessage("User already exists");
       } else {

@@ -37,7 +37,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         });
         tellTab(tabId, 'contentScriptOn');
       } catch (error) {
-        console.log('Failed to inject script:', error);
       }
     }
   }

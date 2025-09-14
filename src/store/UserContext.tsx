@@ -83,7 +83,6 @@ function UserProvider({ children }: { children: ReactNode }) {
         const user = await getUser();
         baseDispatch({ type: 'INITIALIZE', payload: user });
       } catch (err) {
-        console.log(err);
         baseDispatch({ type: 'LOADING_COMPLETE' });
       }
     };

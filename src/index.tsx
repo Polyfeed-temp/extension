@@ -157,12 +157,10 @@ let isInitialized = false;
 function load() {
   // Prevent duplicate loading
   if (isInitialized || document.getElementById('sidebar-root')) {
-    console.log('Polyfeed: Already initialized, skipping load');
     return;
   }
 
   isInitialized = true;
-  console.log('Polyfeed: Initializing extension');
 
   const shadowRoot = shadowHostInitailize();
   const reactRootDiv = document.createElement('div');
@@ -186,7 +184,6 @@ function load() {
 
 // Prevent multiple initializations across the entire window context
 if ((window as any).__polyfeedInitialized) {
-  console.log('Polyfeed: Already initialized globally, exiting');
 } else {
   (window as any).__polyfeedInitialized = true;
 
@@ -219,7 +216,6 @@ if ((window as any).__polyfeedInitialized) {
       active = false;
       isInitialized = false;
       restoreHostDom();
-      console.log('Polyfeed: Extension cleaned up');
     }
   });
 }

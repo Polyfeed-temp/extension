@@ -205,7 +205,6 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
 
   // Load existing request if assignmentId is provided
   useEffect(() => {
-    console.log("currentRequest,currentRequest", currentRequest);
     if (currentRequest?.assignmentId) {
       getFeedbackRequestByAssignment(currentRequest.assignmentId);
     }
@@ -285,7 +284,6 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
         rubricItems: feedbackRequest.rubricItems,
       });
     } catch (error) {
-      // console.error("Error submitting feedback request:", error);
     }
   };
 

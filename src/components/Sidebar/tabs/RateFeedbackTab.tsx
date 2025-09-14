@@ -16,7 +16,6 @@ export const RateFeedbackTab = ({
   feedbackId: number;
   rating: FeedbackRating;
 }) => {
-  console.log('rating', rating);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [feedbackPerformance, setFeedbackPerformance] = useState(

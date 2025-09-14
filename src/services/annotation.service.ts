@@ -25,7 +25,6 @@ class AnnotationService {
 
       return highlights as Feedback;
     } catch (error) {
-      console.log(error);
       return null;
     }
   }
@@ -43,7 +42,6 @@ class AnnotationService {
   }
 
   public async createFeedback(feedback: Feedback): Promise<Feedback> {
-    console.log("create feedback", feedback);
     const response = await axios.post("/api/feedback/", feedback);
     return response.data as Feedback;
   }

@@ -189,7 +189,6 @@ const PdfReviewer: React.FC = () => {
   }, [associatedHighlights, documentLoaded, selectedFile?.id]);
 
   if (!selectedFile) return null;
-  console.log("currentPage", currentPage);
   return (
     <div
       style={{

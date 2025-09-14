@@ -77,7 +77,6 @@ export const useFeedbackRequestStore = create<FeedbackRequestStore>((set) => ({
     } catch (error) {
       set({ loading: false });
       toast.error("Error submitting feedback request");
-      console.error("Error submitting feedback request:", error);
       throw error;
     }
   },
@@ -100,7 +99,6 @@ export const useFeedbackRequestStore = create<FeedbackRequestStore>((set) => ({
     } catch (error) {
       set({ loading: false, currentRequest: null });
       // toast.error("Error fetching feedback request");
-      // console.error("Error fetching feedback request:", error);
       // throw error;
     }
   },

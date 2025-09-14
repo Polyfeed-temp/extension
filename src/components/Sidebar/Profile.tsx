@@ -62,7 +62,6 @@ export function ProfileMenu() {
               type="button"
               className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left transition-colors duration-150 cursor-pointer"
               onClick={() => {
-                console.log('Reset Password clicked');
                 setMenuOpen(false);
                 setIsPasswordResetOpen(true);
               }}
@@ -74,7 +73,6 @@ export function ProfileMenu() {
               type="button"
               className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left transition-colors duration-150 cursor-pointer"
               onClick={() => {
-                console.log('Logout clicked');
                 setMenuOpen(false);
                 userDispatch({type: "LOGOUT"});
               }}
