@@ -27,6 +27,7 @@ function App() {
   };
 
   const toggleSidebar = () => {
+    // Just toggle the sidebar visibility, don't affect highlights
     setCollapsed(!collapsed);
   };
 
@@ -37,14 +38,26 @@ function App() {
     highlightStateRef.current = highlightState.highlighterLib;
   }, [highlightState.highlighterLib]);
 
-  //clean up highlight
+  // Listen for messages from background script to toggle sidebar
+  useEffect(() => {
+    const handleMessage = (request: any) => {
+      if (request.action === 'toggleSidebar') {
+        toggleSidebar();
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, [collapsed]);
+
+  // Don't clean up highlight when sidebar toggles
+  // Only clean up when the entire extension unmounts
   useLayoutEffect(() => {
     return () => {
-      const lib = highlightStateRef.current;
-      if (lib) {
-        lib.removeAll();
-        lib.dispose();
-      }
+      // Removed cleanup here - highlights should persist
     };
   }, []);
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SidebarPanel from './SidebarContent';
 
 import { SidebarHeader } from './SidebarHeader';
@@ -34,20 +34,6 @@ export function Sidebar({
 
   return (
     <>
-      {/* Toggle button - always visible */}
-      <div
-        className="fixed top-1/2 transform -translate-y-1/2 flex items-center justify-center p-2 cursor-pointer bg-white border border-gray-300 text-blue-600"
-        style={{
-          right: collapsed ? '0px' : '428px',
-          transition: 'right 0.3s',
-          zIndex: 10000,
-        }}
-        onClick={toggleSidebar}
-      >
-        {collapsed ? leftChevron : rightChevron}
-        <img src={Logo} className="h-8 md:h-12" alt="Logo" />
-      </div>
-
       {/* Sidebar content */}
       {!collapsed && (
         <div

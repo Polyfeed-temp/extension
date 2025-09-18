@@ -1,5 +1,5 @@
 {
-  "version": "1.2.4",
+  "version": "1.2.5",
   "manifest_version": 3,
   "name": "Polyfeed",
   "icons": {
@@ -8,7 +8,8 @@
   "action": {
     "default_icon": {
       "32": "public/Polyfeed_Social_On.png"
-    }
+    },
+    "default_title": "Toggle Polyfeed Sidebar"
   },
   "background": {
     "service_worker": "public/background.js"

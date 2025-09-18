@@ -192,10 +192,10 @@ const PdfReviewer: React.FC = () => {
   return (
     <div
       style={{
-        position: "absolute",
-        top: "8%",
+        position: "fixed",
+        top: "5%",
         zIndex: 9990,
-        height: "88%",
+        height: "90%",
         left: "3%",
         overflow: "auto",
         width: "65%",
@@ -222,11 +222,15 @@ const PdfReviewer: React.FC = () => {
       <button
         style={{
           position: "absolute",
-          bottom: "5%",
-          right: "5%",
+          bottom: "20px",
+          right: "20px",
           border: "1px solid black",
           borderRadius: "10px",
-          padding: "1%",
+          padding: "10px 20px",
+          backgroundColor: "white",
+          cursor: "pointer",
+          fontWeight: "500",
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
         }}
         onClick={handleClose}
       >

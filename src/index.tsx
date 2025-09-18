@@ -187,35 +187,13 @@ if ((window as any).__polyfeedInitialized) {
 } else {
   (window as any).__polyfeedInitialized = true;
 
-  const allowedDomains = [
-    'https://lms.monash.edu/*',
-    'https://learning.monash.edu/*',
-    'https://docs.google.com/*',
-    'https://www.floraengine.org/*',
-  ];
   let active = false;
 
-  // Only run in the top-level frame, not in iframes
-  if (window === window.top && allowedDomains.some((domain) => window.location.href.match(domain))) {
+  // Always load the extension in the top-level frame
+  if (window === window.top) {
     chrome.runtime.sendMessage({ action: 'contentScriptActive' });
-
     active = true;
     load();
-  } else {
-    chrome.runtime.sendMessage({ action: 'contentScriptInActive' });
   }
 
-  chrome.runtime.onMessage.addListener(function (response) {
-    if (response.action === 'contentScriptOn' && !active && window === window.top) {
-      active = true;
-      load();
-    }
-    if (response.action === 'contentScriptOff' && active) {
-      root ? root.unmount() : null;
-      root = null;
-      active = false;
-      isInitialized = false;
-      restoreHostDom();
-    }
-  });
 }

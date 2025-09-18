@@ -124,14 +124,17 @@ const highlighterReducer = (
 ): HighlightState => {
   switch (action.type) {
     case "INITIALIZE":
-      const root = document.getElementById("docos-stream-view") as HTMLElement;
-      root
-      const lib = new Highlighter({
-        $root: root ? root : document.documentElement,
-        // wrapTag: "span",
-        exceptSelectors: ["#react-root", "img", "footer"],
-        // "img", "br",
-      });
+      // Only create a new highlighter if one doesn't exist
+      let lib = state.highlighterLib;
+      if (!lib) {
+        const root = document.getElementById("docos-stream-view") as HTMLElement;
+        lib = new Highlighter({
+          $root: root ? root : document.documentElement,
+          // wrapTag: "span",
+          exceptSelectors: ["#react-root", "img", "footer"],
+          // "img", "br",
+        });
+      }
 
       const initialState: HighlightState = {
         highlighterLib: lib,

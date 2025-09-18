@@ -205,7 +205,10 @@ const SidebarPanel = () => {
     const fetchAnnotations = async () => {
       const feedback = await annotationService.getCurrentPageFeedback();
 
-      highlighterDispatch({ type: 'INITIALIZE', payload: feedback });
+      // Only initialize if highlighter doesn't exist or needs refresh
+      if (!highlighterState.highlighterLib) {
+        highlighterDispatch({ type: 'INITIALIZE', payload: feedback });
+      }
       setLoading(false);
     };
     const fetchFeedbacks = async () => {
@@ -216,7 +219,7 @@ const SidebarPanel = () => {
       fetchAnnotations();
       fetchFeedbacks();
     }
-  }, [userState.login]);
+  }, [userState.login, highlighterState.highlighterLib]);
 
   return (
     <>
