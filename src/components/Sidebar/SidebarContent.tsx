@@ -229,10 +229,10 @@ const SidebarPanel = () => {
             <div className="overflow-x-auto pb-2">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 min-w-[600px]">
                 <Button
-                  className={`${
+                  className={`font-medium transition-all duration-200 ${
                     currentTab === 'Request Feedback'
-                      ? 'bg-black text-white'
-                      : 'bg-gray text-black'
+                      ? 'bg-black text-white border-2 border-black shadow-md'
+                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                   }`}
                   onClick={() => {
                     setCurrentTab('Request Feedback');
@@ -250,10 +250,10 @@ const SidebarPanel = () => {
                 </Button>
 
                 <Button
-                  className={`${
+                  className={`font-medium transition-all duration-200 ${
                     currentTab != 'Summary' && currentTab != 'Request Feedback'
-                      ? 'bg-black text-white'
-                      : 'bg-gray text-black'
+                      ? 'bg-black text-white border-2 border-black shadow-md'
+                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                   }`}
                   onClick={() => {
                     setCurrentTab('My Notes');
@@ -271,10 +271,10 @@ const SidebarPanel = () => {
                 </Button>
 
                 <Button
-                  className={`${
+                  className={`font-medium transition-all duration-200 ${
                     currentTab === 'Summary'
-                      ? 'bg-black text-white'
-                      : 'bg-gray text-black'
+                      ? 'bg-black text-white border-2 border-black shadow-md'
+                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                   }`}
                   onClick={() => {
                     setCurrentTab('Summary');
@@ -296,7 +296,7 @@ const SidebarPanel = () => {
                 </Button>
 
                 <Button
-                  className="bg-gray text-black"
+                  className="font-medium transition-all duration-200 bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
                   onClick={() => {
                     window.open(config.dashboard, '_blank');
                     addLogs({

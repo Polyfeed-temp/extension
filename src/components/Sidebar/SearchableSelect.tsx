@@ -9,6 +9,8 @@ type SearchableSelectProps = {
   displayFunction: (option: OptionType) => string;
   filterFunction: (option: OptionType, searchTerm: string) => boolean;
   onSelectFunction: (selectedUnit: any) => void;
+  selectedValue?: OptionType | null;
+  placeholder?: string;
 };
 
 function SearchableSelect({
@@ -16,9 +18,20 @@ function SearchableSelect({
   displayFunction,
   filterFunction,
   onSelectFunction,
+  selectedValue = null,
+  placeholder = "Search...",
 }: SearchableSelectProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showOptions, setShowOptions] = useState<boolean>(false);
+
+  // Update search term when selectedValue changes
+  React.useEffect(() => {
+    if (selectedValue) {
+      setSearchTerm(displayFunction(selectedValue));
+    } else {
+      setSearchTerm("");
+    }
+  }, [selectedValue, displayFunction]);
 
   const filteredOptions = options.filter((option) =>
     filterFunction(option, searchTerm)
@@ -30,7 +43,8 @@ function SearchableSelect({
   };
 
   const handleOptionClick = (option: OptionType) => {
-    setSearchTerm(() => displayFunction(option));
+    const displayText = displayFunction(option);
+    setSearchTerm(displayText);
     setShowOptions(false);
     onSelectFunction(option);
   };
@@ -40,7 +54,7 @@ function SearchableSelect({
     function handleClickOutside(event: { target: any }) {
       if (
         wrapperRef.current &&
-        !!(wrapperRef.current as HTMLElement).contains(event.target)
+        !(wrapperRef.current as HTMLElement).contains(event.target)
       ) {
         setShowOptions(false);
       }
@@ -53,27 +67,43 @@ function SearchableSelect({
   }, [wrapperRef]);
 
   return (
-    <div className="relative" ref={wrapperRef}>
+    <div className="relative" ref={wrapperRef} style={{ zIndex: 1000 }}>
       <input
         type="text"
         value={searchTerm}
         onChange={handleInputChange}
         onFocus={() => setShowOptions(true)}
-        onBlur={() => setTimeout(() => setShowOptions(false), 10000)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 text-black bg-white"
-        placeholder="Search..."
+        onBlur={() => setTimeout(() => setShowOptions(false), 300)}
+        className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-600 text-black bg-white"
+        placeholder={placeholder}
       />
       {showOptions && (
-        <ul className="absolute z-10 w-full py-1 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          {filteredOptions.map((option, index) => (
-            <li
-              key={index}
-              onClick={() => handleOptionClick(option)}
-              className=" px-3 py-2 cursor-pointer hover:bg-gray-100"
-            >
-              {displayFunction(option)}
-            </li>
-          ))}
+        <ul
+          className="absolute w-full mt-1 bg-white border border-gray-400 rounded-md shadow-xl z-[9999] overflow-auto"
+          style={{
+            maxHeight: '200px',
+            top: '100%',
+            left: 0
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((option, index) => (
+              <li
+                key={index}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOptionClick(option);
+                }}
+                className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm text-gray-800 border-b border-gray-200 last:border-b-0"
+              >
+                {displayFunction(option)}
+              </li>
+            ))
+          ) : (
+            <li className="px-3 py-2 text-gray-500 text-sm">No results found</li>
+          )}
         </ul>
       )}
     </div>

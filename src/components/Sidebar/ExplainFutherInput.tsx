@@ -161,26 +161,123 @@ function GPTQueryTextBox({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    // Adjust height
+    // Adjust height up to max height
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto"; // Reset height to recalculate
-      textarea.style.height = textarea.scrollHeight + "px"; // Set height based on scroll height
+      const maxHeight = 160; // 40 * 4 = 160px (max-h-40 in Tailwind)
+      const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+      textarea.style.height = newHeight + "px"; // Set height based on scroll height but respect max
     }
   }, [highlightedText]);
 
   useEffect(() => {
+    // Listen for text selections from anywhere on the page
+    const handleSelectionChange = () => {
+      const selection = window.getSelection();
+      const selectedText = selection?.toString().trim();
+
+      if (selectedText && selectedText.length > 0) {
+        console.log('🎯 ExplainFutherInput: Text selected:', selectedText.substring(0, 50) + '...');
+
+        // Check if the selection is from within a PDF viewer or any relevant content
+        const range = selection?.getRangeAt(0);
+        const container = range?.commonAncestorContainer;
+
+        // Get path information for debugging
+        const getElementInfo = (node: Node) => {
+          let current = node.nodeType === Node.TEXT_NODE ? node.parentElement : node as Element;
+          const path = [];
+          while (current && current !== document.body && path.length < 5) {
+            path.push({
+              tagName: current.tagName,
+              className: current.className,
+              id: current.id
+            });
+            current = current.parentElement;
+          }
+          return path;
+        };
+
+        const elementPath = container ? getElementInfo(container) : [];
+        console.log('🎯 ExplainFutherInput: Selection path:', elementPath);
+
+        // Check if the selection is from within a PDF viewer or relevant content area
+        let isRelevantSelection = false;
+        let element = container?.nodeType === Node.TEXT_NODE ? container.parentElement : container as Element;
+
+        while (element && element !== document.body) {
+          const className = element.className || '';
+          const tagName = element.tagName || '';
+
+          // Look for PDF viewer specific classes, content areas, or any text that looks like feedback content
+          if (className.includes('rpv-') ||
+              className.includes('pdf') ||
+              className.includes('viewer') ||
+              className.includes('content') ||
+              tagName === 'CANVAS' ||
+              (element as HTMLElement).style?.borderRadius === '20px') {
+            isRelevantSelection = true;
+            console.log('🎯 ExplainFutherInput: Found relevant element:', {
+              tagName: element.tagName,
+              className: element.className
+            });
+            break;
+          }
+          element = element.parentElement;
+        }
+
+        // For now, capture all text selections to make it work, then we can refine
+        console.log('🎯 ExplainFutherInput: Is relevant selection:', isRelevantSelection);
+
+        // Capture text regardless for testing - we can refine this later
+        setHighlightedText((prev) => {
+          const existingText = prev.trim();
+          if (existingText && !existingText.includes(selectedText)) {
+            console.log('🎯 ExplainFutherInput: Appending text to existing');
+            return existingText + "\n" + selectedText;
+          } else if (!existingText) {
+            console.log('🎯 ExplainFutherInput: Setting new text');
+            return selectedText;
+          }
+          console.log('🎯 ExplainFutherInput: Text already exists, not adding');
+          return prev;
+        });
+
+        // Clear the selection after capturing
+        setTimeout(() => {
+          selection?.removeAllRanges();
+        }, 100);
+      }
+    };
+
+    // Add event listener for selection changes
+    document.addEventListener("selectionchange", handleSelectionChange);
+
+    // Also set up the original highlighter for compatibility
     const highlighter = new Highlighter({
       exceptSelectors: ["#react-root"],
     });
 
     highlighter.on("selection:create", ({ sources }) => {
-      setHighlightedText((prev) => prev + "\n" + sources[0].text);
+      setHighlightedText((prev) => {
+        const existingText = prev.trim();
+        const newText = sources[0].text.trim();
+        if (existingText && !existingText.includes(newText)) {
+          return existingText + "\n" + newText;
+        } else if (!existingText) {
+          return newText;
+        }
+        return prev;
+      });
       highlighter.remove(sources[0].id);
     });
+
     highlighter.run();
     highlighterDispatch({ type: "SET_IS_HIGHLIGHTING", payload: false });
+
     return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
       highlighter.stop();
     };
   }, []);
@@ -188,28 +285,54 @@ function GPTQueryTextBox({
   return (
     <>
       {attemptTime === 1 && (
-        <textarea
-          ref={textareaRef}
-          className="w-full p-2 border rounded-[5px] border-black"
-          onChange={(e) => setHighlightedText(e.target.value)}
-          value={highlightedText}
-          placeholder="Highlight the feedback and click on ask chat gpt please enter at least 50 characters"
-        />
+        <div className="p-4">
+          <div className="mb-3">
+            <p className="text-sm text-gray-600 mb-2">
+              <strong>How to use:</strong> Select any text from the page (PDF or webpage content), and it will automatically appear in the text box below. You can also type directly.
+            </p>
+            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+              💡 Tip: You can select multiple pieces of text - they will be added on new lines
+            </div>
+          </div>
+          <textarea
+            ref={textareaRef}
+            className="w-full p-3 border-2 rounded-lg border-gray-400 focus:border-black focus:outline-none resize-none max-h-40 overflow-y-auto"
+            onChange={(e) => setHighlightedText(e.target.value)}
+            value={highlightedText}
+            placeholder="Select text from anywhere on the page or type your question here (minimum 50 characters)"
+            rows={4}
+          />
+          <div className="flex justify-between items-center mt-2">
+            <span className={`text-xs ${highlightedText.length < 50 ? 'text-red-500' : 'text-green-600'}`}>
+              {highlightedText.length}/50 characters minimum
+            </span>
+            {highlightedText.length > 0 && (
+              <button
+                onClick={() => setHighlightedText("")}
+                className="text-xs text-gray-500 hover:text-red-500 underline"
+              >
+                Clear text
+              </button>
+            )}
+          </div>
+        </div>
       )}
-      <Button
-        disabled={attemptTime === 1 ? highlightedText.length < 50 : false}
-        fullWidth
-        className={`${
-          attemptTime === 1
-            ? highlightedText.length < 50
-              ? "bg-gray-500"
-              : "bg-black"
-            : "bg-black"
-        }`}
-        onClick={() => submitFunc(highlightedText)}
-      >
-        Ask ChatGPT{attemptTime === 2 && " AGAIN"}
-      </Button>
+      <div className="px-4 pb-4">
+        <Button
+          disabled={attemptTime === 1 ? highlightedText.length < 50 : false}
+          fullWidth
+          className={`font-medium py-3 rounded-lg transition-all duration-200 ${
+            attemptTime === 1
+              ? highlightedText.length < 50
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl"
+              : "bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl"
+          }`}
+          onClick={() => submitFunc(highlightedText)}
+        >
+          Ask ChatGPT{attemptTime === 2 && " AGAIN"}
+        </Button>
+      </div>
     </>
   );
 }

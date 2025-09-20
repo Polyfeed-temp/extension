@@ -4,6 +4,7 @@ import { getChromeLocalStorage, setChromeLocalStorage } from "./localStorage";
 export const TOKEN_KEY = "token";
 
 let logoutCallback: (() => void) | null = null;
+let isLoggingOut = false;
 
 export function setLogoutCallback(callback: () => void) {
   logoutCallback = callback;
@@ -33,11 +34,23 @@ commonAxios.interceptors.request.use(
 );
 
 commonAxios.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    isLoggingOut = false;
+    return response;
+  },
   (error) => {
-    if (error.response && error.response.status === 401) {
-      if (logoutCallback) {
+    // Don't trigger logout for login endpoints
+    const isLoginEndpoint = error.config?.url?.includes('/login/') ||
+                           error.config?.url?.includes('/signup') ||
+                           error.config?.url?.includes('/forgot-password');
+
+    if (error.response && error.response.status === 401 && !isLoginEndpoint) {
+      if (logoutCallback && !isLoggingOut) {
+        isLoggingOut = true;
         logoutCallback();
+        setTimeout(() => {
+          isLoggingOut = false;
+        }, 1000);
       }
     }
     return Promise.reject(error);

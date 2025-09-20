@@ -166,183 +166,119 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
   };
 
   return (
-    <div
-      style={{
-        border: "1px solid black",
-        padding: "20px",
-        borderRadius: "20px",
-      }}
-    >
-      <p className="text-lg font-bold">Manage PDF Feedback file</p>
-      <div
-        className="flex flex-col overflow-y-hidden  mt-2 justify-center items-center"
-        style={{
-          overflowX: "hidden",
-        }}
-      >
-        <div style={{ width: "100%" }}>
-          <div className="flex items-center gap-2">
-            <p
-              style={{
-                textAlign: "left",
-                fontSize: 14,
-                fontWeight: 800,
-              }}
-            >
-              1.
-            </p>
-            <p
-              style={{
-                textAlign: "left",
-                fontSize: 14,
-                fontWeight: 800,
-              }}
-            >
-              Click to upload the PDF file
-            </p>
+    <div className="border-2 border-gray-300 rounded-xl p-5 bg-white shadow-sm">
+      <h3 className="text-lg font-bold text-gray-900 mb-4">Manage PDF Feedback Files</h3>
+      <div className="space-y-4">
+        {/* Step 1: Upload PDF */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="flex items-center justify-center w-6 h-6 bg-black text-white rounded-full text-sm font-bold">
+              1
+            </span>
+            <h4 className="font-semibold text-gray-900">Upload PDF File</h4>
           </div>
-          <div
-            style={{
-              padding: 5,
-            }}
-          >
+          <p className="text-sm text-gray-600 mb-3">
+            Upload the PDF feedback file you want to analyze and highlight.
+          </p>
+          <div className="flex justify-start">
             {loading ? (
               renderLoading()
             ) : (
-              <Button onClick={() => uploadFile()}>Upload PDF</Button>
+              <Button
+                onClick={() => uploadFile()}
+                className="bg-black hover:bg-gray-800 text-white font-medium px-4 py-2 rounded-lg shadow-sm"
+              >
+                Upload PDF
+              </Button>
             )}
           </div>
         </div>
 
-        <div style={{ width: "100%" }}>
-          <div className="flex items-center gap-2">
-            <p
-              style={{
-                textAlign: "left",
-                fontSize: 14,
-                fontWeight: 800,
-              }}
-            >
-              2.
-            </p>
-            <p
-              style={{
-                textAlign: "left",
-                whiteSpace: "nowrap",
-                fontSize: 14,
-                fontWeight: 800,
-              }}
-            >
-              Click to open the PDF file to be highlighted
-            </p>
+        {/* Step 2: Select PDF */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="flex items-center justify-center w-6 h-6 bg-black text-white rounded-full text-sm font-bold">
+              2
+            </span>
+            <h4 className="font-semibold text-gray-900">Select PDF to View</h4>
           </div>
-          <div
-            className="flex"
-            style={{
-              marginRight: "10%",
-              overflowX: "auto",
-              padding: 10,
-            }}
-          >
-            {fetchingListLoading && renderLoading()}
-            {/* showing file list here */}
+          <p className="text-sm text-gray-600 mb-3">
+            Choose a PDF file to open in the viewer for highlighting and analysis.
+          </p>
 
-            {fileList.length > 0 &&
-              fileList.map((file, index) => (
-                <div
-                  className={`rounded-md mr-2 cursor-pointer ${
-                    selectedFile?.id === file.id
-                      ? "bg-black text-white"
-                      : "bg-gray-200"
-                  }`}
-                  style={{
-                    minWidth: 100,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: 40,
-                  }}
+          {fetchingListLoading ? (
+            <div className="flex justify-center py-4">
+              {renderLoading()}
+            </div>
+          ) : fileList.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {fileList.map((file, index) => (
+                <button
                   key={file.id}
                   onClick={() => handleFileSelection(file)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    selectedFile?.id === file.id
+                      ? "bg-black text-white shadow-md"
+                      : "bg-white border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                  }`}
                 >
-                  {`PDF - ${index + 1}`}
-                </div>
+                  PDF - {index + 1}
+                  {selectedFile?.id === file.id && (
+                    <span className="ml-2 text-xs">✓ Open</span>
+                  )}
+                </button>
               ))}
-          </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-500 text-sm">No PDF files uploaded yet</p>
+            </div>
+          )}
         </div>
       </div>
 
       {selectedText && (
-        <div>
-          <p
-            style={{
-              fontWeight: 800,
-              marginBottom: 10,
-            }}
-          >
-            Selected Text On PDF
-          </p>
-          <p>{selectedText}</p>
-
-          {/* rendering the annotation */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "10px",
-              marginTop: 20,
-            }}
-          >
-            {annotationTags.map((tag) => {
-              return (
-                <div
-                  key={tag}
-                  style={{
-                    border: "1px solid black",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    padding: "1%",
-                    cursor: "pointer",
-                    borderRadius: "20px",
-                    backgroundColor:
-                      selectedTag === tag ? "lightblue" : "white",
-                  }}
-                  onClick={() => {
-                    setSelectedTag(tag);
-                    addLogs({
-                      eventType: eventType[0], // click
-                      content: `Selected annotation tag: ${tag}`,
-                      eventSource: eventSource[12], // pdf
-                    });
-                  }}
-                >
-                  <img
-                    src={annotationTagsIcons[tag]}
-                    style={{ width: 50, height: 25 }}
-                    alt={tag}
-                  />
-                  <p style={{ textAlign: "center" }}>
-                    {tag === "Confused" ? "Confusion" : tag}
-                  </p>
-                </div>
-              );
-            })}
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-5">
+          <h4 className="font-bold text-gray-900 mb-3">Selected Text from PDF</h4>
+          <div className="bg-white p-3 rounded-lg border border-gray-200 mb-4 max-h-32 overflow-y-auto">
+            <p className="text-gray-800 text-sm leading-relaxed">{selectedText}</p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 20,
-            }}
-          >
+          <h5 className="font-semibold text-gray-900 mb-3">Choose Annotation Type</h5>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {annotationTags.map((tag) => (
+              <button
+                key={tag}
+                className={`flex flex-col items-center p-2.5 rounded-lg border-2 transition-all duration-200 cursor-pointer min-h-[72px] ${
+                  selectedTag === tag
+                    ? "border-black bg-black text-white"
+                    : "border-gray-300 bg-white hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                }`}
+                onClick={() => {
+                  setSelectedTag(tag);
+                  addLogs({
+                    eventType: eventType[0], // click
+                    content: `Selected annotation tag: ${tag}`,
+                    eventSource: eventSource[12], // pdf
+                  });
+                }}
+              >
+                <img
+                  src={annotationTagsIcons[tag]}
+                  className="w-10 h-5 mb-1.5"
+                  alt={tag}
+                />
+                <span className="text-xs font-medium text-center leading-tight px-1">
+                  {tag === "Confused" ? "Confusion" : tag}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
             <Button
-              className="bg-black"
-              style={{
-                marginTop: 20,
-              }}
-              disabled={!selectedText && !selectedTag}
+              className="bg-black hover:bg-gray-800 text-white font-medium px-4 py-2 rounded-lg shadow-sm flex-1"
+              disabled={!selectedText || !selectedTag}
               onClick={() => {
                 addLogs({
                   eventType: eventType[2], // create
@@ -356,11 +292,8 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
             </Button>
 
             <Button
-              className="bg-black"
-              style={{
-                marginTop: 20,
-              }}
-              disabled={!selectedText && !selectedTag}
+              className="bg-gray-600 hover:bg-gray-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm"
+              disabled={!selectedText}
               onClick={() => {
                 addLogs({
                   eventType: eventType[8], // delete
@@ -370,7 +303,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
                 setSelectedText("");
               }}
             >
-              Clear Highlight
+              Clear
             </Button>
           </div>
         </div>
