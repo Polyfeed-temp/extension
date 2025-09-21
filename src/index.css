@@ -45,3 +45,36 @@
 .border-Other {
   border-color: #8960aa !important;
 }
+
+/* Smooth text selection for ChatGPT explanation */
+.text-selection-active::selection {
+  background-color: rgba(59, 130, 246, 0.4);
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.text-selection-active::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.4);
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+/* Animation for text capture feedback */
+@keyframes textCapture {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.text-captured-indicator {
+  animation: textCapture 0.6s ease-out;
+}

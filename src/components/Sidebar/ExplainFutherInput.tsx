@@ -1,57 +1,55 @@
-import React, { useState, useEffect, useRef } from "react";
-import { explainFuther } from "../../services/openai.service";
-import { toast } from "react-toastify";
-
-import Highlighter from "web-highlighter";
+import React, { useState, useEffect, useRef } from 'react';
+import { explainFuther } from '../../services/openai.service';
+import { toast } from 'react-toastify';
 import {
   useHighlighterState,
   useHighlighterDispatch,
-} from "../../store/HighlightContext";
-import { Button } from "@material-tailwind/react";
+} from '../../store/HighlightContext';
+import { Button } from '@material-tailwind/react';
 import {
   emoticons,
   emoticonsInversed,
   chevronIconDown,
   chevronIconUp,
-} from "../AnnotationIcons";
-import AnnotationService from "../../services/annotation.service";
-import { addLogs, eventSource, eventType } from "../../services/logs.serivce";
+} from '../AnnotationIcons';
+import AnnotationService from '../../services/annotation.service';
+import { addLogs, eventSource, eventType } from '../../services/logs.serivce';
 
 export function ExplainFutherToggle() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const highlightState: any = useHighlighterState();
 
   const [explanation, setExplanation] = useState(
-    highlightState.feedbackInfo?.gptResponse || ""
+    highlightState.feedbackInfo?.gptResponse || ''
   );
 
   const [explanation_2, setExplanation_2] = useState(
-    highlightState.feedbackInfo?.gptResponse_2 || ""
+    highlightState.feedbackInfo?.gptResponse_2 || ''
   );
 
   const toggleDropdown = () => {
     addLogs({
       eventSource: eventSource[1],
-      content: isDropdownOpen ? "close" : "open",
+      content: isDropdownOpen ? 'close' : 'open',
       eventType: eventType[0],
     });
 
     setIsDropdownOpen(!isDropdownOpen);
   };
   const [query, setQuery] = useState(
-    highlightState.feedbackInfo?.gptQueryText || ""
+    highlightState.feedbackInfo?.gptQueryText || ''
   );
 
   const [query_2, setQuery_2] = useState(
-    highlightState.feedbackInfo?.gptQueryText_2 || ""
+    highlightState.feedbackInfo?.gptQueryText_2 || ''
   );
   const [viewOnly, setViewOnly] = useState<Boolean>(false);
 
   useEffect(() => {
-    setExplanation(highlightState.feedbackInfo?.gptResponse || "");
-    setExplanation_2(highlightState.feedbackInfo?.gptResponse_2 || "");
-    setQuery(highlightState.feedbackInfo?.gptQueryText || "");
-    setQuery_2(highlightState.feedbackInfo?.gptQueryText_2 || "");
+    setExplanation(highlightState.feedbackInfo?.gptResponse || '');
+    setExplanation_2(highlightState.feedbackInfo?.gptResponse_2 || '');
+    setQuery(highlightState.feedbackInfo?.gptQueryText || '');
+    setQuery_2(highlightState.feedbackInfo?.gptQueryText_2 || '');
     setViewOnly(
       highlightState.feedbackInfo?.gptQueryText &&
         highlightState.feedbackInfo?.gptResponse
@@ -72,9 +70,9 @@ export function ExplainFutherToggle() {
       attemptTime
     );
     toast.promise(gptStatus, {
-      pending: "Generating explanation...",
-      success: "Explanation generated!",
-      error: "Failed to generate explanation",
+      pending: 'Generating explanation...',
+      success: 'Explanation generated!',
+      error: 'Failed to generate explanation',
     });
     const gptResponse = await gptStatus;
 
@@ -156,159 +154,107 @@ function GPTQueryTextBox({
   submitFunc: (text: string) => void;
   attemptTime?: number;
 }) {
-  const [highlightedText, setHighlightedText] = useState(prevHighlight || "");
-  const highlighterDispatch = useHighlighterDispatch();
+  const [highlightedText, setHighlightedText] = useState(prevHighlight || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const componentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Adjust height up to max height
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "auto"; // Reset height to recalculate
+      textarea.style.height = 'auto'; // Reset height to recalculate
       const maxHeight = 160; // 40 * 4 = 160px (max-h-40 in Tailwind)
       const newHeight = Math.min(textarea.scrollHeight, maxHeight);
-      textarea.style.height = newHeight + "px"; // Set height based on scroll height but respect max
+      textarea.style.height = newHeight + 'px'; // Set height based on scroll height but respect max
     }
   }, [highlightedText]);
 
   useEffect(() => {
-    // Listen for text selections from anywhere on the page
-    const handleSelectionChange = () => {
+    let isTextareaFocused = false;
+
+    // Track when textarea gets focus/blur
+    const handleTextareaFocus = () => {
+      isTextareaFocused = true;
+    };
+
+    const handleTextareaBlur = () => {
+      isTextareaFocused = false;
+    };
+
+    // Simple capture - only when textarea is not focused
+    const handleMouseUp = () => {
       const selection = window.getSelection();
       const selectedText = selection?.toString().trim();
 
+      // Don't capture if textarea is focused
+      if (isTextareaFocused) {
+        return;
+      }
+
       if (selectedText && selectedText.length > 0) {
-        console.log('🎯 ExplainFutherInput: Text selected:', selectedText.substring(0, 50) + '...');
-
-        // Check if the selection is from within a PDF viewer or any relevant content
-        const range = selection?.getRangeAt(0);
-        const container = range?.commonAncestorContainer;
-
-        // Get path information for debugging
-        const getElementInfo = (node: Node) => {
-          let current = node.nodeType === Node.TEXT_NODE ? node.parentElement : node as Element;
-          const path = [];
-          while (current && current !== document.body && path.length < 5) {
-            path.push({
-              tagName: current.tagName,
-              className: current.className,
-              id: current.id
-            });
-            current = current.parentElement;
-          }
-          return path;
-        };
-
-        const elementPath = container ? getElementInfo(container) : [];
-        console.log('🎯 ExplainFutherInput: Selection path:', elementPath);
-
-        // Check if the selection is from within a PDF viewer or relevant content area
-        let isRelevantSelection = false;
-        let element = container?.nodeType === Node.TEXT_NODE ? container.parentElement : container as Element;
-
-        while (element && element !== document.body) {
-          const className = element.className || '';
-          const tagName = element.tagName || '';
-
-          // Look for PDF viewer specific classes, content areas, or any text that looks like feedback content
-          if (className.includes('rpv-') ||
-              className.includes('pdf') ||
-              className.includes('viewer') ||
-              className.includes('content') ||
-              tagName === 'CANVAS' ||
-              (element as HTMLElement).style?.borderRadius === '20px') {
-            isRelevantSelection = true;
-            console.log('🎯 ExplainFutherInput: Found relevant element:', {
-              tagName: element.tagName,
-              className: element.className
-            });
-            break;
-          }
-          element = element.parentElement;
-        }
-
-        // For now, capture all text selections to make it work, then we can refine
-        console.log('🎯 ExplainFutherInput: Is relevant selection:', isRelevantSelection);
-
-        // Capture text regardless for testing - we can refine this later
+        // Simply add the text to the textarea
         setHighlightedText((prev) => {
           const existingText = prev.trim();
-          if (existingText && !existingText.includes(selectedText)) {
-            console.log('🎯 ExplainFutherInput: Appending text to existing');
-            return existingText + "\n" + selectedText;
-          } else if (!existingText) {
-            console.log('🎯 ExplainFutherInput: Setting new text');
-            return selectedText;
+          if (existingText) {
+            return existingText + '\n' + selectedText;
           }
-          console.log('🎯 ExplainFutherInput: Text already exists, not adding');
-          return prev;
+          return selectedText;
         });
-
-        // Clear the selection after capturing
-        setTimeout(() => {
-          selection?.removeAllRanges();
-        }, 100);
       }
     };
 
-    // Add event listener for selection changes
-    document.addEventListener("selectionchange", handleSelectionChange);
+    // Add textarea listeners
+    if (textareaRef.current) {
+      textareaRef.current.addEventListener('focus', handleTextareaFocus);
+      textareaRef.current.addEventListener('blur', handleTextareaBlur);
+    }
 
-    // Also set up the original highlighter for compatibility
-    const highlighter = new Highlighter({
-      exceptSelectors: ["#react-root"],
-    });
-
-    highlighter.on("selection:create", ({ sources }) => {
-      setHighlightedText((prev) => {
-        const existingText = prev.trim();
-        const newText = sources[0].text.trim();
-        if (existingText && !existingText.includes(newText)) {
-          return existingText + "\n" + newText;
-        } else if (!existingText) {
-          return newText;
-        }
-        return prev;
-      });
-      highlighter.remove(sources[0].id);
-    });
-
-    highlighter.run();
-    highlighterDispatch({ type: "SET_IS_HIGHLIGHTING", payload: false });
+    // Add global mouseup listener
+    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
-      highlighter.stop();
+      if (textareaRef.current) {
+        textareaRef.current.removeEventListener('focus', handleTextareaFocus);
+        textareaRef.current.removeEventListener('blur', handleTextareaBlur);
+      }
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
 
   return (
-    <>
+    <div ref={componentRef}>
       {attemptTime === 1 && (
         <div className="p-4">
           <div className="mb-3">
             <p className="text-sm text-gray-600 mb-2">
-              <strong>How to use:</strong> Select any text from the page (PDF or webpage content), and it will automatically appear in the text box below. You can also type directly.
+              <strong>How to use:</strong> Select any text from the page (PDF or
+              webpage content), and it will automatically appear in the text box
+              below. You can also type directly.
             </p>
             <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-              💡 Tip: You can select multiple pieces of text - they will be added on new lines
+              💡 Tip: Keep selecting text to add multiple pieces - each will be
+              added on a new line. Click anywhere to deselect.
             </div>
           </div>
           <textarea
             ref={textareaRef}
-            className="w-full p-3 border-2 rounded-lg border-gray-400 focus:border-black focus:outline-none resize-none max-h-40 overflow-y-auto"
+            className="w-full p-3 border-2 rounded-lg border-gray-400 focus:border-black focus:outline-none resize-none max-h-40 overflow-y-auto transition-all duration-200 hover:border-gray-600"
             onChange={(e) => setHighlightedText(e.target.value)}
             value={highlightedText}
             placeholder="Select text from anywhere on the page or type your question here (minimum 50 characters)"
             rows={4}
           />
           <div className="flex justify-between items-center mt-2">
-            <span className={`text-xs ${highlightedText.length < 50 ? 'text-red-500' : 'text-green-600'}`}>
+            <span
+              className={`text-xs ${
+                highlightedText.length < 50 ? 'text-red-500' : 'text-green-600'
+              }`}
+            >
               {highlightedText.length}/50 characters minimum
             </span>
             {highlightedText.length > 0 && (
               <button
-                onClick={() => setHighlightedText("")}
+                onClick={() => setHighlightedText('')}
                 className="text-xs text-gray-500 hover:text-red-500 underline"
               >
                 Clear text
@@ -324,16 +270,16 @@ function GPTQueryTextBox({
           className={`font-medium py-3 rounded-lg transition-all duration-200 ${
             attemptTime === 1
               ? highlightedText.length < 50
-                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                : "bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl"
-              : "bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl"
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : 'bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl'
+              : 'bg-black hover:bg-gray-800 text-white shadow-lg hover:shadow-xl'
           }`}
           onClick={() => submitFunc(highlightedText)}
         >
-          Ask ChatGPT{attemptTime === 2 && " AGAIN"}
+          Ask ChatGPT{attemptTime === 2 && ' AGAIN'}
         </Button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -350,7 +296,7 @@ function ViewOnlyGPTResponse({
   feedbackId: number;
   attemptTime?: number;
 }) {
-  const formatted = response.split("\n").map((line, index) => (
+  const formatted = response.split('\n').map((line, index) => (
     <li key={index} className="bg-gray-100 p-4 text-left">
       {line}
     </li>
@@ -365,7 +311,7 @@ function ViewOnlyGPTResponse({
       )}
       <div className="border-2 bg-gray-100 p-4 text-left">
         <p className="font-bold">
-          {"Explanation from Chat GPT"} {attemptTime && " (Second time)"}
+          {'Explanation from Chat GPT'} {attemptTime && ' (Second time)'}
         </p>
 
         <p className="bg-gray-100 p-4 text-left">{formatted}</p>
@@ -395,13 +341,13 @@ function RateGPTResponse({
 
   const colorToRating = (color: string) => {
     switch (color) {
-      case "red":
+      case 'red':
         return 1;
-      case "orange":
+      case 'orange':
         return 2;
-      case "yellow":
+      case 'yellow':
         return 3;
-      case "green":
+      case 'green':
         return 4;
       default:
         return 10;
@@ -424,14 +370,14 @@ function RateGPTResponse({
     });
 
     await toast.promise(status, {
-      pending: "Saving rating...",
-      success: "Rating saved!",
-      error: "Failed to save rating",
+      pending: 'Saving rating...',
+      success: 'Rating saved!',
+      error: 'Failed to save rating',
     });
 
     // update the feedback
     const feedback = await annotationService.getCurrentPageFeedback();
-    highlighterDispatch({ type: "INITIALIZE", payload: feedback });
+    highlighterDispatch({ type: 'INITIALIZE', payload: feedback });
   };
 
   const highlightState: any = useHighlighterState();
