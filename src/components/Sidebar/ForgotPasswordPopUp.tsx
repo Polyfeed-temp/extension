@@ -13,29 +13,11 @@ const ForgotPasswordPopup = ({
   onClose: () => void;
   onGoToSignUp?: () => void;
 }) => {
-  const [email, setEmail] = useState("");
 
   if (!isOpen) {
     return null;
   }
 
-  const handleEmailClick = () => {
-    const subject = "Password Reset Request";
-    const body = `Dear PolyFeed Support,
-
-I would like to request a password reset for my account.
-
-Email: ${email}
-
-Please confirm that you have processed my password reset request so I can proceed with re-registering with the same email address.
-
-Thank you for your assistance.
-
-Best regards`;
-
-    const mailtoLink = `mailto:polyfeed@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink, '_blank');
-  };
 
   return (
     <div
@@ -63,16 +45,6 @@ Best regards`;
             No worries, we'll help you reset it
           </p>
           
-          <div className="mb-6">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <h3 className="text-base font-medium text-gray-900 mb-3">
@@ -81,8 +53,7 @@ Best regards`;
             <div className="text-left text-sm text-gray-700 space-y-3">
               <p>To reset your password, please follow these steps:</p>
               <ol className="list-decimal list-inside space-y-2 ml-2">
-                <li>Enter your email address above</li>
-                <li>Click the button below to send us an email requesting a password reset</li>
+                <li>Send an email to <strong>polyfeed@gmail.com</strong> requesting a password reset for your account</li>
                 <li>Wait for our response confirming your reset request has been processed</li>
                 <li>Use the "Go to Registration" button below to register again with your same email and create a new password</li>
                 <li>Don't worry: Re-registering will not create a new account - your existing account will be updated with your new password</li>
@@ -90,13 +61,11 @@ Best regards`;
             </div>
           </div>
           
-          <button
-            onClick={handleEmailClick}
-            disabled={!email.trim()}
-            className="bg-black text-white px-6 py-3 rounded-md w-full mb-4 hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            ✉️ Email polyfeed@gmail.com
-          </button>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-gray-700 text-center">
+              📧 Please send an email to <strong className="text-gray-900">polyfeed@gmail.com</strong> with your password reset request.
+            </p>
+          </div>
           
           <p className="text-sm text-gray-600 mb-4">
             After receiving confirmation from us:

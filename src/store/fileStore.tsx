@@ -28,6 +28,7 @@ interface FileStore {
 
   fetchingListLoading: boolean;
   selectedText: string;
+  selectedTextIndex: number;
   currentKeyword: FlagKeyword;
 
   associatedHighlights: AnnotationData[];
@@ -41,6 +42,7 @@ interface FileStore {
   setLoading: (loading: boolean) => void;
   setFetchingListLoading: (loading: boolean) => void;
   setSelectedText: (text: string) => void;
+  setSelectedTextIndex: (index: number) => void;
   setCurrentKeyword: (keyword: FlagKeyword) => void;
   setAssociatedHighlights: (associatedHighlights: AnnotationData[]) => void;
 
@@ -59,6 +61,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   loading: false,
   fetchingListLoading: false,
   selectedText: "",
+  selectedTextIndex: 0,
   currentKeyword: { keyword: "", matchCase: false, wholeWords: false },
   associatedHighlights: [],
   documentLoaded: false,
@@ -73,6 +76,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   setFetchingListLoading: (loading: boolean) =>
     set({ fetchingListLoading: loading }),
   setSelectedText: (text: string) => set({ selectedText: text }),
+  setSelectedTextIndex: (index: number) => set({ selectedTextIndex: index }),
   setCurrentKeyword: (keyword: FlagKeyword) => set({ currentKeyword: keyword }),
   setAssociatedHighlights: (associatedHighlights: AnnotationData[]) =>
     set({ associatedHighlights }),
