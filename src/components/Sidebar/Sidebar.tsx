@@ -34,6 +34,39 @@ export function Sidebar({
 
   return (
     <>
+      {/* Collapse button - always visible on the left side of the sidebar */}
+      <div
+        className="fixed top-1/2 transform -translate-y-1/2"
+        style={{
+          right: collapsed ? '20px' : '440px', // Adjust position based on sidebar state
+          zIndex: 10000,
+          transition: 'right 0.3s ease',
+        }}
+      >
+        <button
+          onClick={toggleSidebar}
+          className="p-2 bg-black text-white rounded-full shadow-lg hover:bg-gray-800 transition-colors duration-200"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={`transform transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`}
+          >
+            <path
+              d="M9 18L15 12L9 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
       {/* Sidebar content */}
       {!collapsed && (
         <div
@@ -46,8 +79,8 @@ export function Sidebar({
         >
           {isAuth && (
             <div style={{ overflowY: 'auto', height: '100%' }}>
-              <SidebarHeader></SidebarHeader>
-              <SidebarPanel></SidebarPanel>
+              <SidebarHeader />
+              <SidebarPanel />
             </div>
           )}
 
