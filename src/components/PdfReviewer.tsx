@@ -33,19 +33,40 @@ const PdfReviewer: React.FC = () => {
       return (
         <>
           {props.highlightAreas.map((area, index) => {
-            // Find the corresponding annotation for this highlight area by matching text
+            // Find the corresponding annotation for this highlight area
             const matchingAnnotation = associatedHighlights.find(({ annotation }) => {
-              // Try to match by text content
-              const highlightText = area.keywordStr?.trim();
-              const annotationText = annotation.text?.trim();
-              return highlightText && annotationText && annotationText.includes(highlightText);
+              if (!annotation || !annotation.text) return false;
+
+              // Normalize texts for comparison
+              const highlightText = area.keywordStr?.trim().toLowerCase();
+              const annotationText = annotation.text.trim().toLowerCase();
+
+              // Try exact match first
+              if (highlightText === annotationText) return true;
+
+              // Try substring match (annotation might contain the highlight)
+              if (annotationText.includes(highlightText)) return true;
+
+              // Try reverse substring match (highlight might contain the annotation)
+              if (highlightText && highlightText.includes(annotationText)) return true;
+
+              // Try partial match for longer texts (first 50 chars)
+              if (annotationText.length > 50 && highlightText) {
+                const annotationStart = annotationText.substring(0, 50);
+                if (annotationStart.includes(highlightText.substring(0, Math.min(50, highlightText.length)))) {
+                  return true;
+                }
+              }
+
+              return false;
             });
 
             // Get color based on annotation tag
             let backgroundColor = 'rgba(255, 255, 0, 0.4)'; // Default yellow
 
-            if (matchingAnnotation) {
-              switch (matchingAnnotation.annotation.annotationTag) {
+            if (matchingAnnotation?.annotation?.annotationTag) {
+              const tag = matchingAnnotation.annotation.annotationTag;
+              switch (tag) {
                 case 'Strength':
                   backgroundColor = 'rgba(41, 128, 185, 0.4)'; // Blue
                   break;
@@ -53,6 +74,7 @@ const PdfReviewer: React.FC = () => {
                   backgroundColor = 'rgba(231, 76, 60, 0.4)'; // Red
                   break;
                 case 'Action Item':
+                case 'Suggestions': // Handle both Action Item and Suggestions
                   backgroundColor = 'rgba(26, 188, 156, 0.4)'; // Green
                   break;
                 case 'Confused':
@@ -61,8 +83,8 @@ const PdfReviewer: React.FC = () => {
                 case 'Other':
                   backgroundColor = 'rgba(155, 89, 182, 0.4)'; // Purple
                   break;
-                case 'Suggestions':
-                  backgroundColor = 'rgba(243, 156, 18, 0.4)'; // Orange
+                default:
+                  backgroundColor = 'rgba(255, 255, 0, 0.4)'; // Default yellow
                   break;
               }
             }
@@ -92,7 +114,12 @@ const PdfReviewer: React.FC = () => {
   // Move plugin initialization after renderHighlights
   const pageNavigationPluginInstance = pageNavigationPlugin();
   const { jumpToPage } = pageNavigationPluginInstance;
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const defaultLayoutPluginInstance = defaultLayoutPlugin({
+    sidebarTabs: (defaultTabs) => defaultTabs,
+    toolbarPlugin: {
+      toolbarSlot: (defaultToolbarSlot) => defaultToolbarSlot,
+    },
+  });
   const searchPluginInstance = searchPlugin({
     renderHighlights,
   });
@@ -207,7 +234,6 @@ const PdfReviewer: React.FC = () => {
           }
 
         } catch (error) {
-          console.log('Error calculating occurrence index:', error);
           // Fallback: use timestamp-based index
           textOccurrenceIndex = Date.now() % 1000;
         }
@@ -245,23 +271,23 @@ const PdfReviewer: React.FC = () => {
 
     // Filter to only highlight text with at least 2 words
     const textsToHighlight = associatedHighlights
+      .filter(({ annotation }) => annotation && annotation.text)
       .map(({ annotation }) => annotation.text.trim())
       .filter(text => {
         const wordCount = text.split(/\s+/).length;
         return wordCount >= 2;
       });
 
-    console.log('[HIGHLIGHT_EFFECT] Applying highlights:', textsToHighlight.length, 'texts to highlight');
-
-    setTimeout(() => {
+    // Apply highlights with a slight delay to ensure PDF is ready
+    const timeoutId = setTimeout(() => {
       searchPluginInstance.clearHighlights();
       if (textsToHighlight.length > 0) {
         searchPluginInstance.highlight(textsToHighlight);
-        console.log('[HIGHLIGHT_EFFECT] Applied highlights for texts:', textsToHighlight);
       }
-    }, 100);
+    }, 300); // Increased delay for better stability
 
     return () => {
+      clearTimeout(timeoutId);
       searchPluginInstance.clearHighlights();
     };
   }, [associatedHighlights, documentLoaded, selectedFile]);
@@ -298,6 +324,7 @@ const PdfReviewer: React.FC = () => {
           // Note: onDocumentLoadError is not available in this PDF viewer version
           onPageChange={handlePageChange}
           initialPage={currentPage}
+          defaultScale={1.2}
         />
       ) : (
         <div className="flex items-center justify-center h-full text-gray-500">
