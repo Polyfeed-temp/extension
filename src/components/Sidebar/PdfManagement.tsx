@@ -84,6 +84,13 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     // Ensure coordinates is always an array
     const safeCoordinates = Array.isArray(coordinates) ? coordinates : [];
 
+    console.log('[CREATE] Coordinate data available:', {
+      coordinates,
+      safeCoordinates,
+      selectedText,
+      selectedTextLength: selectedText.length,
+      currentPage
+    });
 
     // Create reasonable highlight areas (percentages for PDF viewer)
     const defaultHighlightAreas = [
@@ -96,10 +103,12 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       },
     ];
 
+    console.log('[CREATE] Default highlight areas:', defaultHighlightAreas);
 
     const finalHighlightAreas =
       safeCoordinates.length > 0 ? safeCoordinates : defaultHighlightAreas;
 
+    console.log('[CREATE] Final highlight areas to use:', finalHighlightAreas);
 
     // Create comprehensive coordinate data with all available metadata
     const comprehensiveData = {
@@ -135,6 +144,14 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       highlightAreas: finalHighlightAreas,
     };
 
+    // Log comprehensive data being saved
+    console.log('[SAVE] Complete annotation data:', {
+      id: annotation.id,
+      tag: annotation.annotationTag,
+      text: annotation.text.substring(0, 50) + '...',
+      comprehensiveData,
+      highlightAreas: annotation.highlightAreas,
+    });
 
     addLogs({
       eventType: eventType[2],
@@ -153,7 +170,14 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
 
       // Update associated highlights after creating new highlight
       if (selectedFile && newFeedback?.highlights) {
+        console.log('[FILTER] All highlights from API:', newFeedback.highlights.map(h => ({
+          id: h.annotation.id,
+          text: h.annotation.text.substring(0, 30) + '...',
+          startMeta: h.annotation.startMeta.parentTagName,
+          endMeta: h.annotation.endMeta.parentTagName
+        })));
 
+        console.log('[FILTER] Current selectedFile.id:', selectedFile.id, 'type:', typeof selectedFile.id);
 
         const newAssociatedHighlights = newFeedback.highlights.filter(
           (highlight) => {
@@ -186,6 +210,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
           }
         );
 
+        console.log('[FILTER] Filtered associated highlights:', newAssociatedHighlights.length);
 
         // Update highlights without clearing the file to preserve visual highlights
         setAssociatedHighlights(newAssociatedHighlights);
@@ -240,7 +265,14 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     });
 
     if (feedback.highlights) {
+      console.log('[FILE_SELECT] All highlights from feedback:', feedback.highlights.map(h => ({
+        id: h.annotation.id,
+        text: h.annotation.text.substring(0, 30) + '...',
+        startMeta: h.annotation.startMeta.parentTagName,
+        endMeta: h.annotation.endMeta.parentTagName
+      })));
 
+      console.log('[FILE_SELECT] Selected file.id:', file.id, 'type:', typeof file.id);
 
       const associatedHighlights = feedback.highlights.filter(
         (highlight) => {
@@ -277,6 +309,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
         }
       );
 
+      console.log('[FILE_SELECT] Final associated highlights:', associatedHighlights.length);
       setAssociatedHighlights(associatedHighlights);
     }
 

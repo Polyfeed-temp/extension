@@ -316,6 +316,12 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
               };
             }
 
+            if (hasComprehensiveData) {
+              console.log('[PRESERVE] Comprehensive coordinate data already in startMeta');
+            }
+
+            // Log comprehensive data transmission
+            console.log('[API] Sending comprehensive annotation data to backend');
 
             addLogs({
               eventType: eventType[2],
