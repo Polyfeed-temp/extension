@@ -207,7 +207,6 @@ const PdfReviewer: React.FC = () => {
           }
 
         } catch (error) {
-          console.log('Error calculating occurrence index:', error);
           // Fallback: use timestamp-based index
           textOccurrenceIndex = Date.now() % 1000;
         }
@@ -251,13 +250,10 @@ const PdfReviewer: React.FC = () => {
         return wordCount >= 2;
       });
 
-    console.log('[HIGHLIGHT_EFFECT] Applying highlights:', textsToHighlight.length, 'texts to highlight');
-
     setTimeout(() => {
       searchPluginInstance.clearHighlights();
       if (textsToHighlight.length > 0) {
         searchPluginInstance.highlight(textsToHighlight);
-        console.log('[HIGHLIGHT_EFFECT] Applied highlights for texts:', textsToHighlight);
       }
     }, 100);
 
