@@ -15,11 +15,13 @@ export function Sidebar({
   toggleSidebar,
   onLogin,
   isAuth,
+  isActivated,
 }: {
   collapsed: boolean;
   toggleSidebar: () => void;
   onLogin: () => void;
   isAuth: boolean;
+  isActivated: boolean;
 }) {
   const { accept, handleDisagree, handleAgree } = useConsent();
   const [showSignUp, setShowSignUp] = useState(false);
@@ -34,15 +36,16 @@ export function Sidebar({
 
   return (
     <>
-      {/* Collapse button - always visible on the left side of the sidebar */}
-      <div
-        className="fixed top-1/2 transform -translate-y-1/2"
-        style={{
-          right: collapsed ? '20px' : '440px', // Adjust position based on sidebar state
-          zIndex: 10000,
-          transition: 'right 0.3s ease',
-        }}
-      >
+      {/* Collapse button - only visible after extension is activated */}
+      {isActivated && (
+        <div
+          className="fixed top-1/2 transform -translate-y-1/2"
+          style={{
+            right: collapsed ? '20px' : '440px', // Adjust position based on sidebar state
+            zIndex: 10000,
+            transition: 'right 0.3s ease',
+          }}
+        >
         <button
           onClick={toggleSidebar}
           className="p-2 bg-black text-white rounded-full shadow-lg hover:bg-gray-800 transition-colors duration-200"
@@ -65,16 +68,18 @@ export function Sidebar({
             />
           </svg>
         </button>
-      </div>
+        </div>
+      )}
 
-      {/* Sidebar content */}
-      {!collapsed && (
+      {/* Sidebar content - only show when activated */}
+      {isActivated && !collapsed && (
         <div
           className="fixed top-0 right-0 h-full border-solid border-4 border-sky-500"
           style={{
             width: '428px',
             zIndex: 9999,
             backgroundColor: 'white',
+            transition: 'right 0.3s ease',
           }}
         >
           {isAuth && (
@@ -98,8 +103,8 @@ export function Sidebar({
         </div>
       )}
 
-      {/* SignUp popup - always available */}
-      <SignUpPopup isOpen={showSignUp} setIsOpen={setShowSignUp} />
+      {/* SignUp popup - only available when activated */}
+      {isActivated && <SignUpPopup isOpen={showSignUp} setIsOpen={setShowSignUp} />}
     </>
   );
 }
