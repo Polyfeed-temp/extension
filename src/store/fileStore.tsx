@@ -118,27 +118,13 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   // Add a new method to remove highlight and update viewer
   removeHighlightAndUpdate: (highlightId: string) => {
-    const { selectedFile, associatedHighlights } = get();
+    const { associatedHighlights } = get();
 
-    if (selectedFile) {
-      // First filter out the deleted highlight
-      const updatedHighlights = associatedHighlights.filter(
-        (highlight) => highlight.annotation.id !== highlightId
-      );
+    // Filter out the deleted highlight and update directly to preserve visual highlights
+    const updatedHighlights = associatedHighlights.filter(
+      (highlight) => highlight.annotation.id !== highlightId
+    );
 
-      // Store current file
-      const currentFile = selectedFile;
-
-      // Temporarily clear selected file
-      set({ selectedFile: null });
-
-      // Reset selected file after a brief delay to trigger reload
-      setTimeout(() => {
-        set({
-          selectedFile: currentFile,
-          associatedHighlights: updatedHighlights,
-        });
-      }, 100);
-    }
+    set({ associatedHighlights: updatedHighlights });
   },
 }));

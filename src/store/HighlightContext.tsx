@@ -282,22 +282,46 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
         try {
           let sources = action.payload;
           if (state.feedbackInfo) {
+            // Store original comprehensive data - now in startMeta
+            const originalStartMeta = sources.annotation.startMeta;
+            const hasComprehensiveData = (() => {
+              try {
+                const parsed = JSON.parse(originalStartMeta.parentTagName);
+                const isComprehensive = !!(parsed.highlightAreas || parsed.source);
+                return isComprehensive;
+              } catch {
+                return false;
+              }
+            })();
+
             if (
               doubleClick ||
-              sources.annotation.endMeta.parentTagName != "P"
+              (sources.annotation.endMeta.parentTagName != "P" && !hasComprehensiveData)
             ) {
+              // Only overwrite if we don't have comprehensive data
+              const fileId = hasComprehensiveData
+                ? JSON.parse(originalStartMeta.parentTagName).fileId
+                : sources.annotation.endMeta.parentTagName;
+
               sources = {
                 ...sources,
                 annotation: {
                   ...sources.annotation,
                   endMeta: {
                     parentIndex: sources.annotation.startMeta.parentIndex,
-                    parentTagName: sources.annotation.startMeta.parentTagName,
+                    parentTagName: fileId, // Use file ID from comprehensive data or fallback
                     textOffset: sources.annotation.text.length,
                   },
                 },
               };
             }
+
+            if (hasComprehensiveData) {
+              console.log('[PRESERVE] Comprehensive coordinate data already in startMeta');
+            }
+
+            // Log comprehensive data transmission
+            console.log('[API] Sending comprehensive annotation data to backend');
 
             addLogs({
               eventType: eventType[2],

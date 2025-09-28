@@ -1,5 +1,13 @@
 import HighlightSource from "web-highlighter/dist/model/source";
 import { DomMeta } from "../node_modules/web-highlighter/dist/types";
+export interface HighlightArea {
+  pageIndex: number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 export interface Annotation {
   feedbackId: number;
   startMeta: DomMeta;
@@ -8,6 +16,7 @@ export interface Annotation {
   id: string;
   annotationTag: AnnotationTag;
   notes?: string;
+  highlightAreas?: HighlightArea[];
 }
 
 export type SideBarAction = "To-Dos" | "Notes";

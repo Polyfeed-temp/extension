@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useSidebar } from './hooks/useSidebar';
 
 import { useHighlighterState } from './store/HighlightContext';
-import { PdfReviewer } from './components/PdfReviewer';
+import PdfReviewer from './components/PdfReviewer';
 import { Worker } from '@react-pdf-viewer/core';
 import { useUserState } from './store/UserContext';
 
@@ -18,7 +18,6 @@ export function restoreHostDom() {
 function App() {
   const { collapsed, setCollapsed } = useSidebar();
   const userState = useUserState();
-
   // Use UserContext login state instead of local state
   const isAuth = userState.login && !userState.loading;
 

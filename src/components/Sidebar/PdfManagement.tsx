@@ -55,12 +55,16 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
 
   // Check if selected text has at least 2 words
   const hasMinimumWords = (text: string): boolean => {
-    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const words = text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
     return words.length >= 2;
   };
 
   // Calculate button disabled state
-  const isButtonDisabled = !selectedText || !selectedTag || !hasMinimumWords(selectedText);
+  const isButtonDisabled =
+    !selectedText || !selectedTag || !hasMinimumWords(selectedText);
 
   const createHighLight = async () => {
     // Validate minimum word count
@@ -77,23 +81,77 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     const coordinates = (state as any).selectedTextCoordinates;
     const uniqueKey = (state as any).selectedTextUniqueKey;
 
+    // Ensure coordinates is always an array
+    const safeCoordinates = Array.isArray(coordinates) ? coordinates : [];
+
+    console.log('[CREATE] Coordinate data available:', {
+      coordinates,
+      safeCoordinates,
+      selectedText,
+      selectedTextLength: selectedText.length,
+      currentPage
+    });
+
+    // Create reasonable highlight areas (percentages for PDF viewer)
+    const defaultHighlightAreas = [
+      {
+        pageIndex: Math.max(0, currentPage),
+        left: 5, // 5% from left edge
+        top: 10 + (selectedTextIndex % 20) * 2, // Vary position to avoid overlaps
+        width: Math.min(Math.max(selectedText.length * 0.3, 8), 40), // Reasonable width: 8-40%
+        height: 2, // 2% height for text line
+      },
+    ];
+
+    console.log('[CREATE] Default highlight areas:', defaultHighlightAreas);
+
+    const finalHighlightAreas =
+      safeCoordinates.length > 0 ? safeCoordinates : defaultHighlightAreas;
+
+    console.log('[CREATE] Final highlight areas to use:', finalHighlightAreas);
+
+    // Create comprehensive coordinate data with all available metadata
+    const comprehensiveData = {
+      fileId: selectedFile?.id?.toString() || '', // Convert file ID to string for API compatibility
+      highlightAreas: finalHighlightAreas,
+      originalCoordinates: coordinates, // Raw coordinates from selection
+      pageNumber: currentPage,
+      textIndex: selectedTextIndex,
+      textLength: selectedText.length,
+      timestamp: Date.now(),
+      source: 'sidebar-selection', // Identify source
+      selectionBounds: {
+        startOffset: selectedTextIndex,
+        endOffset: selectedTextIndex + selectedText.length,
+      },
+    };
+
     const annotation: Annotation = {
       feedbackId: feedback.id,
       id: uuidv4(),
       annotationTag: tag,
       startMeta: {
-        parentTagName: `${selectedFile?.id || ''}`, // File ID (unchanged)
-        parentIndex: currentPage,                    // Page number
-        textOffset: selectedTextIndex,              // Position index
+        parentTagName: JSON.stringify(comprehensiveData), // Store ALL data in startMeta
+        parentIndex: currentPage,
+        textOffset: selectedTextIndex,
       },
       endMeta: {
-        parentTagName: coordinates ? JSON.stringify(coordinates) : '', // Store coordinates as JSON string
-        parentIndex: 0,
-        textOffset: selectedText.length, // Store text length for validation
+        parentTagName: `${selectedFile?.id || ''}`, // Keep simple file ID for legacy compatibility
+        parentIndex: finalHighlightAreas.length,
+        textOffset: selectedText.length,
       },
       text: selectedText,
+      highlightAreas: finalHighlightAreas,
     };
 
+    // Log comprehensive data being saved
+    console.log('[SAVE] Complete annotation data:', {
+      id: annotation.id,
+      tag: annotation.annotationTag,
+      text: annotation.text.substring(0, 50) + '...',
+      comprehensiveData,
+      highlightAreas: annotation.highlightAreas,
+    });
 
     addLogs({
       eventType: eventType[2],
@@ -108,40 +166,54 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
 
     setTimeout(async () => {
       const newFeedback = await annotationService.getCurrentPageFeedback();
-      console.log('🔄 Got new feedback:', newFeedback);
       annotationDispatch({ type: 'INITIALIZE', payload: newFeedback });
 
       // Update associated highlights after creating new highlight
       if (selectedFile && newFeedback?.highlights) {
+        console.log('[FILTER] All highlights from API:', newFeedback.highlights.map(h => ({
+          id: h.annotation.id,
+          text: h.annotation.text.substring(0, 30) + '...',
+          startMeta: h.annotation.startMeta.parentTagName,
+          endMeta: h.annotation.endMeta.parentTagName
+        })));
+
+        console.log('[FILTER] Current selectedFile.id:', selectedFile.id, 'type:', typeof selectedFile.id);
+
         const newAssociatedHighlights = newFeedback.highlights.filter(
-          (highlight) =>
-            highlight?.annotation?.startMeta?.parentTagName ===
-            selectedFile.id.toString()
+          (highlight) => {
+            const annotation = highlight?.annotation;
+            if (!annotation) return false;
+
+            // Method 1: Check comprehensive data in startMeta
+            try {
+              const parsed = JSON.parse(annotation.startMeta?.parentTagName || '');
+              if (parsed.fileId == selectedFile.id) return true;
+            } catch {}
+
+            // Method 2: Check comprehensive data in endMeta (legacy location)
+            try {
+              const parsed = JSON.parse(annotation.endMeta?.parentTagName || '');
+              if (parsed.fileId == selectedFile.id) return true;
+            } catch {}
+
+            // Method 3: Check if endMeta.parentTagName is the file ID directly
+            if (annotation.endMeta?.parentTagName === selectedFile.id.toString()) {
+              return true;
+            }
+
+            // Method 4: Check if startMeta.parentTagName is the file ID directly
+            if (annotation.startMeta?.parentTagName === selectedFile.id.toString()) {
+              return true;
+            }
+
+            return false;
+          }
         );
 
-        console.log('📋 Associated highlights for file:', {
-          fileId: selectedFile.id,
-          totalHighlights: newFeedback.highlights.length,
-          associatedCount: newAssociatedHighlights.length,
-          associated: newAssociatedHighlights.map(h => ({
-            text: h.annotation.text,
-            tag: h.annotation.annotationTag,
-            page: h.annotation.startMeta.parentIndex
-          }))
-        });
+        console.log('[FILTER] Filtered associated highlights:', newAssociatedHighlights.length);
 
-        // Store current file
-        const currentFile = selectedFile;
-
-        // Temporarily clear selected file
-        setSelectedFile(null);
-
-        // Reset selected file after a brief delay to trigger reload
-        setTimeout(() => {
-          setSelectedFile(currentFile);
-          setAssociatedHighlights(newAssociatedHighlights);
-          console.log('✅ Updated file and highlights');
-        }, 100);
+        // Update highlights without clearing the file to preserve visual highlights
+        setAssociatedHighlights(newAssociatedHighlights);
       }
       setSelectedText('');
       const { setSelectedTextIndex } = useFileStore.getState();
@@ -193,12 +265,58 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     });
 
     if (feedback.highlights) {
+      console.log('[FILE_SELECT] All highlights from feedback:', feedback.highlights.map(h => ({
+        id: h.annotation.id,
+        text: h.annotation.text.substring(0, 30) + '...',
+        startMeta: h.annotation.startMeta.parentTagName,
+        endMeta: h.annotation.endMeta.parentTagName
+      })));
+
+      console.log('[FILE_SELECT] Selected file.id:', file.id, 'type:', typeof file.id);
+
       const associatedHighlights = feedback.highlights.filter(
-        (highlight) =>
-          highlight?.annotation?.startMeta?.parentTagName === file.id.toString()
+        (highlight) => {
+          const annotation = highlight?.annotation;
+          if (!annotation) return false;
+
+          // Method 1: Check comprehensive data in startMeta
+          try {
+            const parsed = JSON.parse(annotation.startMeta?.parentTagName || '');
+            if (parsed.fileId == file.id) {
+              return true;
+            }
+          } catch {}
+
+          // Method 2: Check comprehensive data in endMeta (legacy location)
+          try {
+            const parsed = JSON.parse(annotation.endMeta?.parentTagName || '');
+            if (parsed.fileId == file.id) {
+              return true;
+            }
+          } catch {}
+
+          // Method 3: Check if endMeta.parentTagName is the file ID directly
+          if (annotation.endMeta?.parentTagName === file.id.toString()) {
+            return true;
+          }
+
+          // Method 4: Check if startMeta.parentTagName is the file ID directly
+          if (annotation.startMeta?.parentTagName === file.id.toString()) {
+            return true;
+          }
+
+          return false;
+        }
       );
+
+      console.log('[FILE_SELECT] Final associated highlights:', associatedHighlights.length);
       setAssociatedHighlights(associatedHighlights);
     }
+
+    // Reset document loaded state to ensure highlights are reapplied when new PDF loads
+    const { setDocumentLoaded } = useFileStore.getState();
+    setDocumentLoaded(false);
+
     setSelectedFile(file);
   };
 
