@@ -135,6 +135,14 @@ function RenderTabs({
                   : 'Stop Highlighting'}
               </Button>
 
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start">
+                  <span className="text-blue-700 text-sm">
+                    ℹ️ <strong>Note:</strong> Please note the highlights you made are visible only on Monash Moodle assessment page.
+                  </span>
+                </div>
+              </div>
+
               <PdfManagement feedback={feedback} />
             </>
           )}
