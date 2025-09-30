@@ -244,7 +244,20 @@ const PdfReviewer: React.FC = () => {
 
     // Filter to only highlight text with at least 2 words
     const textsToHighlight = associatedHighlights
-      .map(({ annotation }) => annotation.text.trim())
+      .flatMap(({ annotation }) => {
+        const originalText = annotation.text.trim();
+
+        // If text contains newlines, split by newlines and treat each line as separate highlight
+        if (originalText.includes('\n')) {
+          const lines = originalText.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+          return lines;
+        }
+
+        // Otherwise, return as single text
+        return [originalText];
+      })
       .filter(text => {
         const wordCount = text.split(/\s+/).length;
         return wordCount >= 2;
