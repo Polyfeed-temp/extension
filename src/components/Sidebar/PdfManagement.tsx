@@ -142,8 +142,9 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       eventSource: eventSource[0],
     });
 
+    // Use ADD_RECORD_PDF for PDF highlights to keep them separate from web highlights
     annotationDispatch({
-      type: 'ADD_RECORD',
+      type: 'ADD_RECORD_PDF',
       payload: { annotation: annotation },
     });
 

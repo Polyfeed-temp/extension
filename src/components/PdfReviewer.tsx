@@ -242,6 +242,12 @@ const PdfReviewer: React.FC = () => {
   useEffect(() => {
     if (!documentLoaded) return;
 
+    // ============================================
+    // PDF HIGHLIGHT RENDERING
+    // Note: Web page highlights are handled separately in HighlightContext.tsx
+    // This section only processes and renders PDF highlights
+    // ============================================
+
     // Filter to only highlight text with at least 2 words
     const textsToHighlight = associatedHighlights
       .flatMap(({ annotation }) => {
@@ -263,15 +269,18 @@ const PdfReviewer: React.FC = () => {
         return wordCount >= 2;
       });
 
-    setTimeout(() => {
-      searchPluginInstance.clearHighlights();
+    // Clear and re-render highlights
+    searchPluginInstance.clearHighlights();
+
+    const timeoutId = setTimeout(() => {
       if (textsToHighlight.length > 0) {
         searchPluginInstance.highlight(textsToHighlight);
       }
     }, 100);
 
     return () => {
-      searchPluginInstance.clearHighlights();
+      clearTimeout(timeoutId);
+      // Don't clear highlights in cleanup - let the next render handle it
     };
   }, [associatedHighlights, documentLoaded, selectedFile]);
 

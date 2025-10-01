@@ -22,6 +22,12 @@ import { toast } from 'react-toastify';
 // Removed useSidebar import - sidebar control now handled by user via toolbar/toggle
 import { addLogs, eventSource, eventType } from '../services/logs.serivce';
 import { useFileStore } from './fileStore';
+import {
+  findAndHighlightText,
+  removeHighlight,
+  removeAllHighlights,
+  highlightExists
+} from '../utils/textHighlighter';
 
 interface HighlightState {
   highlighterLib: Highlighter | null;
@@ -46,6 +52,11 @@ interface AddFeedbackAction {
 }
 interface AddRecordAction {
   type: 'ADD_RECORD';
+  payload: AnnotationData;
+}
+
+interface AddRecordPdfAction {
+  type: 'ADD_RECORD_PDF';
   payload: AnnotationData;
 }
 
@@ -95,6 +106,7 @@ interface SyncWithServerAction {
 }
 type Action =
   | AddRecordAction
+  | AddRecordPdfAction
   | SetEditingAction
   | SetIsHighlightingAction
   | DeleteRecordAction
@@ -164,6 +176,15 @@ const highlighterReducer = (
         drafting: null,
         records: [...state.records, action.payload],
       };
+    case 'ADD_RECORD_PDF':
+      //after adding PDF record to db, add to state but DON'T trigger web highlight rendering
+      console.log('[PDF] ADD_RECORD_PDF - Adding PDF highlight only');
+      return {
+        ...state,
+        editing: null,
+        drafting: null,
+        records: [...state.records, action.payload],
+      };
     case 'SET_EDITING':
       return { ...state, editing: action.payload };
     case 'SET_IS_HIGHLIGHTING':
@@ -183,31 +204,46 @@ const highlighterReducer = (
       state.highlighterLib?.remove(action.payload);
 
       // Update PDF viewer
-      const { selectedFile, setSelectedFile, setAssociatedHighlights } =
-        useFileStore.getState();
+      const { selectedFile, setAssociatedHighlights } = useFileStore.getState();
       if (selectedFile) {
-        // Store current file
-        const currentFile = selectedFile;
-
         // Get the updated feedback to ensure we have the latest highlights
         const annotationService = new AnnotationService();
         annotationService.getCurrentPageFeedback().then((newFeedback) => {
           if (newFeedback?.highlights) {
-            // Filter highlights for current file
+            // Filter highlights for current file using all methods
             const newAssociatedHighlights = newFeedback.highlights.filter(
-              (highlight) =>
-                highlight?.annotation?.startMeta?.parentTagName ===
-                currentFile.id.toString()
+              (highlight) => {
+                const annotation = highlight?.annotation;
+                if (!annotation) return false;
+
+                // Method 1: Check comprehensive data in startMeta
+                try {
+                  const parsed = JSON.parse(annotation.startMeta?.parentTagName || '');
+                  if (parsed.fileId == selectedFile.id) return true;
+                } catch {}
+
+                // Method 2: Check comprehensive data in endMeta (legacy location)
+                try {
+                  const parsed = JSON.parse(annotation.endMeta?.parentTagName || '');
+                  if (parsed.fileId == selectedFile.id) return true;
+                } catch {}
+
+                // Method 3: Check if endMeta.parentTagName is the file ID directly
+                if (annotation.endMeta?.parentTagName === selectedFile.id.toString()) {
+                  return true;
+                }
+
+                // Method 4: Check if startMeta.parentTagName is the file ID directly
+                if (annotation.startMeta?.parentTagName === selectedFile.id.toString()) {
+                  return true;
+                }
+
+                return false;
+              }
             );
 
-            // Temporarily clear selected file and update highlights
+            // Update highlights without clearing the file
             setAssociatedHighlights(newAssociatedHighlights);
-            setSelectedFile(null);
-
-            // Reset selected file after a brief delay to trigger reload
-            setTimeout(() => {
-              setSelectedFile(currentFile);
-            }, 100);
           }
         });
       }
@@ -283,6 +319,37 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
   const dispatch = async (action: Action) => {
     switch (action.type) {
+      case 'ADD_RECORD_PDF':
+        // Handle PDF highlights separately - same API call but different action type
+        console.log('[PDF] Handling ADD_RECORD_PDF dispatch');
+        try {
+          let sources = action.payload;
+          if (state.feedbackInfo) {
+            // PDF highlights already have comprehensive data in startMeta
+            addLogs({
+              eventType: eventType[2],
+              content: JSON.stringify(sources),
+              eventSource: eventSource[0],
+            });
+
+            const creationStatus = service.addAnnotations(sources);
+            toast.promise(creationStatus, {
+              pending: 'Saving PDF highlight...',
+              success: 'PDF highlight saved',
+              error: 'Error saving PDF highlight',
+            });
+            const res = await creationStatus;
+            if (res.status !== 200) {
+              return;
+            }
+            baseDispatch({ type: 'ADD_RECORD_PDF', payload: action.payload });
+          } else {
+            toast.error('Please select valid assignment');
+          }
+        } catch (err) {
+          console.error('[PDF] Error in ADD_RECORD_PDF:', err);
+        }
+        break;
       case 'ADD_RECORD':
         try {
           let sources = action.payload;
@@ -594,9 +661,6 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
     state.highlighterLib?.on(Highlighter.event.HOVER, handleHover);
 
     // Only render web highlights, not PDF highlights
-    console.log('[Highlight Debug] useEffect triggered. Total records:', state.records.length);
-    console.log('[Highlight Debug] Full records data:', JSON.stringify(state.records, null, 2));
-
     // Filter for web highlights only
     const webHighlights = state.records.filter((highlight) => {
       // Check if this is a PDF highlight
@@ -604,31 +668,21 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       const startMetaTag = highlight.annotation.startMeta?.parentTagName || '';
       const endMetaTag = highlight.annotation.endMeta?.parentTagName || '';
 
-      console.log('[Highlight Debug] Checking highlight:', {
-        id: highlight.annotation.id,
-        text: highlight.annotation.text.substring(0, 30) + '...',
-        startMetaTag: typeof startMetaTag === 'string' ? startMetaTag.substring(0, 50) : startMetaTag,
-        endMetaTag: typeof endMetaTag === 'string' ? endMetaTag.substring(0, 50) : endMetaTag
-      });
-
       // PDF highlights have JSON data in startMetaTag or numeric IDs in endMetaTag
       const isPdfHighlight = (() => {
         // Check if startMetaTag contains JSON with fileId
         try {
           const parsed = JSON.parse(startMetaTag);
           if (parsed.fileId || parsed.highlightAreas) {
-            console.log('[Highlight Debug] Identified as PDF highlight (JSON in startMetaTag)');
             return true;
           }
         } catch {}
 
         // Check if endMetaTag is a numeric file ID
         if (!isNaN(Number(endMetaTag)) && endMetaTag !== 'P' && endMetaTag !== '') {
-          console.log('[Highlight Debug] Identified as PDF highlight (numeric endMetaTag):', endMetaTag);
           return true;
         }
 
-        console.log('[Highlight Debug] Identified as WEB highlight');
         return false;
       })();
 
@@ -636,106 +690,30 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
       return !isPdfHighlight;
     });
 
-    console.log('[Highlight Debug] Filtered web highlights count:', webHighlights.length);
-    console.log('[Highlight Debug] Web highlights to render:', webHighlights.map(h => ({
-      id: h.annotation.id,
-      text: h.annotation.text.substring(0, 50) + '...'
-    })));
+    // ============================================
+    // USE CUSTOM TEXT-BASED HIGHLIGHTER
+    // Replaces web-highlighter library
+    // ============================================
 
-    // Clear existing web highlights before re-rendering
-    // This prevents duplicates when state updates
-    console.log('[Highlight Debug] Removing existing highlights...');
+    // Clear existing highlights first
     webHighlights.forEach((highlight) => {
-      try {
-        state.highlighterLib?.remove(highlight.annotation.id);
-        console.log('[Highlight Debug] Removed highlight:', highlight.annotation.id);
-      } catch (e) {
-        console.log('[Highlight Debug] Could not remove highlight:', highlight.annotation.id, e);
-      }
+      removeHighlight(highlight.annotation.id);
     });
 
-    // Now re-add the web highlights
-    console.log('[Highlight Debug] Re-adding web highlights...');
+    // Render each web highlight using custom text search
     webHighlights.forEach((highlight) => {
-      console.log('[Highlight Debug] Adding highlight:', {
-        id: highlight.annotation.id,
-        text: highlight.annotation.text.substring(0, 30) + '...',
-        startMeta: highlight.annotation.startMeta,
-        endMeta: highlight.annotation.endMeta
+      const highlightId = highlight.annotation.id;
+      const text = highlight.annotation.text.trim();
+      const tag = highlight.annotation.annotationTag;
+
+      // Use custom text-based highlighter
+      findAndHighlightText({
+        text: text,
+        id: highlightId,
+        className: getClassForTag(tag),
+        containerSelector: 'body' // Search in the whole page
       });
-
-      // Check if metadata has proper position information
-      // Note: parentIndex: 0 is problematic as it highlights ALL elements at index 0
-      if (highlight.annotation.startMeta.parentIndex === 0) {
-        console.warn('[Highlight Debug] WARNING: parentIndex is 0, may highlight multiple elements:', highlight.annotation.startMeta);
-
-        // Try to make the highlight more specific by using text content to find the exact element
-        try {
-          const targetText = highlight.annotation.text.trim();
-          const parentTag = highlight.annotation.startMeta.parentTagName;
-
-          // Find all elements of the same tag type
-          const allElements = document.querySelectorAll(parentTag);
-          console.log(`[Highlight Debug] Found ${allElements.length} ${parentTag} elements on page`);
-
-          // Find the element that contains our target text
-          let targetElement = null;
-          let targetIndex = -1;
-
-          for (let i = 0; i < allElements.length; i++) {
-            const element = allElements[i];
-            if (element.textContent && element.textContent.includes(targetText)) {
-              targetElement = element;
-              targetIndex = i;
-              console.log(`[Highlight Debug] Found matching ${parentTag} at index ${i}:`, element.textContent.substring(0, 50));
-              break;
-            }
-          }
-
-          if (targetElement && targetIndex >= 0) {
-            // Use the actual index of the element that contains our text
-            const improvedStartMeta = {
-              ...highlight.annotation.startMeta,
-              parentIndex: targetIndex
-            };
-            const improvedEndMeta = {
-              ...highlight.annotation.endMeta,
-              parentIndex: targetIndex
-            };
-
-            console.log(`[Highlight Debug] Using improved parentIndex: ${targetIndex} instead of 0`);
-
-            state.highlighterLib?.fromStore(
-              improvedStartMeta,
-              improvedEndMeta,
-              highlight.annotation.text,
-              highlight.annotation.id
-            );
-          } else {
-            console.warn('[Highlight Debug] Could not find specific element for text, skipping highlight');
-            return;
-          }
-        } catch (error) {
-          console.error('[Highlight Debug] Error improving highlight specificity:', error);
-          return;
-        }
-      } else {
-        // Normal highlight with specific parentIndex
-        state.highlighterLib?.fromStore(
-          highlight.annotation.startMeta,
-          highlight.annotation.endMeta,
-          highlight.annotation.text,
-          highlight.annotation.id
-        );
-      }
-
-      state.highlighterLib?.addClass(
-        getClassForTag(highlight.annotation.annotationTag),
-        highlight.annotation.id
-      );
     });
-
-    console.log('[Highlight Debug] Finished rendering highlights');
 
     // Cleanup function to remove the listeners
     return () => {
@@ -747,86 +725,91 @@ export const HighlighterProvider = ({ children }: { children: ReactNode }) => {
 
   // monitor the expand icon onclick
   useEffect(() => {
-    const handleIconClick = (event: any) => {
-      // Only render web highlights, not PDF highlights
-      state.records
-        .filter((highlight) => {
-          // Check if this is a PDF highlight
-          const startMetaTag = highlight.annotation.startMeta?.parentTagName || '';
-          const endMetaTag = highlight.annotation.endMeta?.parentTagName || '';
+    const handleIconClick = () => {
+      // Get web highlights to re-render
+      const webHighlights = state.records.filter((highlight) => {
+        const startMetaTag = highlight.annotation.startMeta?.parentTagName || '';
+        const endMetaTag = highlight.annotation.endMeta?.parentTagName || '';
 
-          // PDF highlights have JSON data in startMetaTag or numeric IDs in endMetaTag
-          const isPdfHighlight = (() => {
-            // Check if startMetaTag contains JSON with fileId
-            try {
-              const parsed = JSON.parse(startMetaTag);
-              if (parsed.fileId || parsed.highlightAreas) return true;
-            } catch {}
+        const isPdfHighlight = (() => {
+          try {
+            const parsed = JSON.parse(startMetaTag);
+            if (parsed.fileId || parsed.highlightAreas) return true;
+          } catch {}
 
-            // Check if endMetaTag is a numeric file ID
-            if (!isNaN(Number(endMetaTag)) && endMetaTag !== 'P' && endMetaTag !== '') {
-              return true;
-            }
-
-            return false;
-          })();
-
-          // Only include web highlights
-          return !isPdfHighlight;
-        })
-        .map((highlight) => {
-          if (highlight.annotation.startMeta.parentIndex < 11) {
-            const pElementAmount = document.querySelectorAll(
-              'div[class*="summary_assignfeedback_comments_"] p'
-            ).length;
-
-            state.highlighterLib?.fromStore(
-              {
-                ...highlight.annotation.startMeta,
-                parentIndex:
-                  highlight.annotation.startMeta.parentIndex + pElementAmount,
-              },
-              {
-                ...highlight.annotation.endMeta,
-                parentIndex:
-                  highlight.annotation.endMeta.parentIndex + pElementAmount,
-              },
-              highlight.annotation.text,
-              highlight.annotation.id
-            );
+          if (!isNaN(Number(endMetaTag)) && endMetaTag !== 'P' && endMetaTag !== '') {
+            return true;
           }
 
-          state.highlighterLib?.addClass(
-            getClassForTag(highlight.annotation.annotationTag),
-            highlight.annotation.id
-          );
+          return false;
+        })();
+
+        return !isPdfHighlight;
+      });
+
+      const reHighlightAll = () => {
+        webHighlights.forEach((highlight) => {
+          const highlightId = highlight.annotation.id;
+          const text = highlight.annotation.text.trim();
+          const tag = highlight.annotation.annotationTag;
+
+          // Remove existing highlight first
+          removeHighlight(highlightId);
+
+          // Re-apply highlight using custom text search
+          findAndHighlightText({
+            text: text,
+            id: highlightId,
+            className: getClassForTag(tag),
+            containerSelector: 'body'
+          });
         });
+      };
+
+      // Use multiple delays to ensure we catch the DOM update
+      // This handles both fast and slow DOM updates
+      // Collapse needs longer delays because Moodle animation is slow
+      setTimeout(reHighlightAll, 100);
+      setTimeout(reHighlightAll, 400);
+      setTimeout(reHighlightAll, 700);
+      setTimeout(reHighlightAll, 1000);
+      setTimeout(reHighlightAll, 1500);
     };
 
-    // Polling function to wait for elements to be available
+    // Polling function to wait for expand/collapse buttons
     const waitForIcons = setInterval(() => {
-      const icons = document.querySelectorAll('i[title][title="View full"]');
+      const expandIcons = document.querySelectorAll('i[title][title="View full"]');
+      const collapseIcons = document.querySelectorAll('i[title][title="View summary"]');
 
-      if (icons.length > 0) {
-        clearInterval(waitForIcons); // Stop polling once elements are found
-        if (icons.length > 1)
-          icons[1].addEventListener('click', handleIconClick);
-        else icons[0].addEventListener('click', handleIconClick);
+      if (expandIcons.length > 0 || collapseIcons.length > 0) {
+        clearInterval(waitForIcons);
+
+        // Add listeners to expand buttons
+        expandIcons.forEach(icon => {
+          icon.addEventListener('click', handleIconClick);
+        });
+
+        // Add listeners to collapse buttons
+        collapseIcons.forEach(icon => {
+          icon.addEventListener('click', handleIconClick);
+        });
       }
-    }, 500); // Check every 500ms
+    }, 500);
 
     // Cleanup
     return () => {
-      clearInterval(waitForIcons); // Ensure to clear the interval on component unmount
-      // Remove event listeners if necessary
-      const icons = document.querySelectorAll('i[title][title="View full"]');
+      clearInterval(waitForIcons);
 
-      if (icons.length > 0) {
-        clearInterval(waitForIcons); // Stop polling once elements are found
-        if (icons.length > 1)
-          icons[1].addEventListener('click', handleIconClick);
-        else icons[0].addEventListener('click', handleIconClick);
-      }
+      const expandIcons = document.querySelectorAll('i[title][title="View full"]');
+      const collapseIcons = document.querySelectorAll('i[title][title="View summary"]');
+
+      expandIcons.forEach(icon => {
+        icon.removeEventListener('click', handleIconClick);
+      });
+
+      collapseIcons.forEach(icon => {
+        icon.removeEventListener('click', handleIconClick);
+      });
     };
   }, [state]);
 
