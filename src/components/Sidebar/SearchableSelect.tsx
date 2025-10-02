@@ -40,6 +40,10 @@ function SearchableSelect({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setShowOptions(true);
+    // If user clears the input, reset the selection
+    if (e.target.value === "") {
+      onSelectFunction(null);
+    }
   };
 
   const handleOptionClick = (option: OptionType) => {

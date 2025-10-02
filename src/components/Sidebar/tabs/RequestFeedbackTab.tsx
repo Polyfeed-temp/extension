@@ -217,7 +217,10 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
       const unit = units.find((u) =>
         u.assessments?.some((a) => a.id === currentRequest.assignmentId)
       );
-      setSelectedUnit(unit || null);
+      // Only update selectedUnit if a unit is found, preserve current selection otherwise
+      if (unit) {
+        setSelectedUnit(unit);
+      }
 
       // Update feedback request state
       setFeedbackRequest({
@@ -236,6 +239,17 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
       }));
     }
   }, [currentRequest, units]);
+
+  // Reset assignment when unit is cleared
+  useEffect(() => {
+    if (!selectedUnit) {
+      setFeedbackRequest((prev) => ({
+        ...prev,
+        assignmentId: 0,
+        rubricItems: [],
+      }));
+    }
+  }, [selectedUnit]);
 
   const addRubricItem = () => {
     setFeedbackRequest((prev) => ({
@@ -321,7 +335,14 @@ export const RequestFeedbackTab: React.FC<RequestFeedbackTabProps> = ({
               }
               onSelectFunction={(selectedUnit: Unit) => {
                 setSelectedUnit(selectedUnit);
+                // Reset assignment when unit changes
+                setFeedbackRequest((prev) => ({
+                  ...prev,
+                  assignmentId: 0,
+                  rubricItems: [],
+                }));
               }}
+              selectedValue={selectedUnit}
             />
           </div>
 

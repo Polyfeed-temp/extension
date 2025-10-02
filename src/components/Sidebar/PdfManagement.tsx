@@ -53,13 +53,13 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
   const annotationDispatch = useHighlighterDispatch();
   const annotationService = new AnnotationService();
 
-  // Check if selected text has at least 2 words
+  // Check if selected text has at least 3 words
   const hasMinimumWords = (text: string): boolean => {
     const words = text
       .trim()
       .split(/\s+/)
       .filter((word) => word.length > 0);
-    return words.length >= 2;
+    return words.length >= 3;
   };
 
   // Calculate button disabled state
@@ -69,7 +69,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
   const createHighLight = async () => {
     // Validate minimum word count
     if (!hasMinimumWords(selectedText)) {
-      toast.error('Please select at least 2 words to highlight');
+      toast.error('Please select at least 3 words to highlight');
       return;
     }
 
@@ -84,7 +84,6 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     // Ensure coordinates is always an array
     const safeCoordinates = Array.isArray(coordinates) ? coordinates : [];
 
-
     // Create reasonable highlight areas (percentages for PDF viewer)
     const defaultHighlightAreas = [
       {
@@ -96,10 +95,8 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       },
     ];
 
-
     const finalHighlightAreas =
       safeCoordinates.length > 0 ? safeCoordinates : defaultHighlightAreas;
-
 
     // Create comprehensive coordinate data with all available metadata
     const comprehensiveData = {
@@ -135,7 +132,6 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
       highlightAreas: finalHighlightAreas,
     };
 
-
     addLogs({
       eventType: eventType[2],
       content: JSON.stringify(annotation),
@@ -154,8 +150,6 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
 
       // Update associated highlights after creating new highlight
       if (selectedFile && newFeedback?.highlights) {
-
-
         const newAssociatedHighlights = newFeedback.highlights.filter(
           (highlight) => {
             const annotation = highlight?.annotation;
@@ -163,30 +157,37 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
 
             // Method 1: Check comprehensive data in startMeta
             try {
-              const parsed = JSON.parse(annotation.startMeta?.parentTagName || '');
+              const parsed = JSON.parse(
+                annotation.startMeta?.parentTagName || ''
+              );
               if (parsed.fileId == selectedFile.id) return true;
             } catch {}
 
             // Method 2: Check comprehensive data in endMeta (legacy location)
             try {
-              const parsed = JSON.parse(annotation.endMeta?.parentTagName || '');
+              const parsed = JSON.parse(
+                annotation.endMeta?.parentTagName || ''
+              );
               if (parsed.fileId == selectedFile.id) return true;
             } catch {}
 
             // Method 3: Check if endMeta.parentTagName is the file ID directly
-            if (annotation.endMeta?.parentTagName === selectedFile.id.toString()) {
+            if (
+              annotation.endMeta?.parentTagName === selectedFile.id.toString()
+            ) {
               return true;
             }
 
             // Method 4: Check if startMeta.parentTagName is the file ID directly
-            if (annotation.startMeta?.parentTagName === selectedFile.id.toString()) {
+            if (
+              annotation.startMeta?.parentTagName === selectedFile.id.toString()
+            ) {
               return true;
             }
 
             return false;
           }
         );
-
 
         // Update highlights without clearing the file to preserve visual highlights
         setAssociatedHighlights(newAssociatedHighlights);
@@ -241,42 +242,38 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
     });
 
     if (feedback.highlights) {
+      const associatedHighlights = feedback.highlights.filter((highlight) => {
+        const annotation = highlight?.annotation;
+        if (!annotation) return false;
 
-
-      const associatedHighlights = feedback.highlights.filter(
-        (highlight) => {
-          const annotation = highlight?.annotation;
-          if (!annotation) return false;
-
-          // Method 1: Check comprehensive data in startMeta
-          try {
-            const parsed = JSON.parse(annotation.startMeta?.parentTagName || '');
-            if (parsed.fileId == file.id) {
-              return true;
-            }
-          } catch {}
-
-          // Method 2: Check comprehensive data in endMeta (legacy location)
-          try {
-            const parsed = JSON.parse(annotation.endMeta?.parentTagName || '');
-            if (parsed.fileId == file.id) {
-              return true;
-            }
-          } catch {}
-
-          // Method 3: Check if endMeta.parentTagName is the file ID directly
-          if (annotation.endMeta?.parentTagName === file.id.toString()) {
+        // Method 1: Check comprehensive data in startMeta
+        try {
+          const parsed = JSON.parse(annotation.startMeta?.parentTagName || '');
+          if (parsed.fileId == file.id) {
             return true;
           }
+        } catch {}
 
-          // Method 4: Check if startMeta.parentTagName is the file ID directly
-          if (annotation.startMeta?.parentTagName === file.id.toString()) {
+        // Method 2: Check comprehensive data in endMeta (legacy location)
+        try {
+          const parsed = JSON.parse(annotation.endMeta?.parentTagName || '');
+          if (parsed.fileId == file.id) {
             return true;
           }
+        } catch {}
 
-          return false;
+        // Method 3: Check if endMeta.parentTagName is the file ID directly
+        if (annotation.endMeta?.parentTagName === file.id.toString()) {
+          return true;
         }
-      );
+
+        // Method 4: Check if startMeta.parentTagName is the file ID directly
+        if (annotation.startMeta?.parentTagName === file.id.toString()) {
+          return true;
+        }
+
+        return false;
+      });
 
       setAssociatedHighlights(associatedHighlights);
     }
@@ -409,7 +406,7 @@ const PdfManagement = ({ feedback }: { feedback: Feedback }) => {
             <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="flex items-center">
                 <span className="text-yellow-700 text-sm">
-                  ⚠️ Please select at least 2 words to create a highlight
+                  ⚠️ Please select at least 3 words to create a highlight
                 </span>
               </div>
             </div>
